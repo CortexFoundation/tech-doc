@@ -19,16 +19,33 @@ In term of edge computing, unlike GPU, float point unit is less effective on edg
 
 for proof of concept, we leverage the following techniques:
 
-* fusing batchnorm and dropout, rewriting average pooling
-* simulated quantization: using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
-* estimating requantization bits for activation layer
+### Fusion
+batchnorm and dropout, rewriting average pooling
+
+### Simulated quantization
+
+using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
+
+### Calibrating Requantization Parameter
+
+estimating requantization bits for activation layer
+
 1. Trivial approach: projecting $[a_{min}, a_{max}]$ to $[-127, 127]$
 2. MXNet approach: entropy based requantization
+
+### OPs rewriting for numerical-bound
+
 * rewrite computation graph to avoid nondeterministic behaviors in parallel computations, which is common in ML accelerators.
 
 ## Experiment
 
+#### 1. Reduce OPs
 
+a **table** showing comparasion of OPs between cvm(int8) and mxnet(float), ususally int8 can run 4x faster than float.
+
+#### 2. model size reduction
+
+commonly, 4x model reize reduction can be achieved
 
 ## Conclusion
 
