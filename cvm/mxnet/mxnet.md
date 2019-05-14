@@ -135,7 +135,7 @@ let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \m
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar, which can be calibrated offline. We will discuss more about the calibration in following section.  
 
-In ususal, $s_q$ is determined in adavance. With calibrated requantization scalar $s_q$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definiton. Thus, we can rewrite the original graph to a annotated graph as figure showing befow:
+In ususal, $s_y $ is determined in adavance. With calibrated requantization scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definiton. Thus, we can rewrite the original graph to a annotated graph as figure showing befow:
 
 ![img]() 
 
