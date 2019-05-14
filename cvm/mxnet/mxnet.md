@@ -23,7 +23,7 @@ The current implmentation in MXNet's contrib libaray follows fake quantization r
 
 ## Implementation
 
-We implemented a converter, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) represenation using MXNet's nnvm module.
+According to above disscusion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) represenation.
 
 ### Fusion
 batchnorm and dropout, rewriting average pooling
@@ -31,6 +31,26 @@ batchnorm and dropout, rewriting average pooling
 ### Simulated quantization
 
 using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
+
+We adpot symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifally 
+
+​                                                                                      $$\begin{align}x=sx^{Q} \end{align}$$                                                  
+
+ where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in \text{int8}^{n}$
+
+As `matmul` is the core of NN's workflows, we take it as a example to illustrate how to transform float-point operator to integer operator. 
+
+
+
+let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = s_w s_x * W^QX $ , and rewrite it into
+
+​                                                                    $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+
+where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar, which can be calibrated offline. We will discuss more about the calibration in following section.  
+
+In ususal, $s_q$ is determined in adavance. With calibrated requantization scalar $s_q$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definiton. Thus, we can rewrite the original graph to a annotated graph as figure showing befow:
+
+![img]() 
 
 ### Calibrating Requantization Parameter
 
