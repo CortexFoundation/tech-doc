@@ -28,6 +28,93 @@ According to above disscusion, we implemented a converter using MXNet's nnvm mod
 ### Fusion
 batchnorm and dropout, rewriting average pooling
 
+##### Fuse Constant
+
+After all the fusion process as belows, we do constant-fuse process for reducing graph complexity and better quantization performance.
+
+##### Matrix Decomposition
+
+Big matrix process may exceed the max-length : `range(INT32) / range(8 + 8)` in computation, which result may be out of range INT32. Matrix decomposition is to do for matrix computation scale reduction.
+$$
+A * W = \sum_{start, stop} A[:,start:stop] * W[:, start:stop]
+$$
+
+#### Pooling
+
+*pool_type*: indicates pooling type, only supported `avg` and `max`.
+*is_global*: indicates is global average pooling.
+*pooling_convention*: must be `valid` for equivalent transformation with depthwise *Convolution*.
+*count_include_pad*: must be `true` for equivalent transformation with depthwise *Convolution*.
+*kernel, stride, pad*: pooling kernel, stride and pad attributes.
+
+##### GlobalAvgPooling
+
+```python
+GlobalAvgPooling(data) =
+```
+
+$$
+\sum_{k_i, k_j}^{kernel}data[:,:,k_i,k_j] / (size_{kernel})
+$$
+
+```python
+= broadcast_mul(sum(data, axis=(2, 3)), scale), which scale equals 1 / K / K
+```
+
+##### AvgPooling
+
+```python
+AvgPooling(data) = Convolution(data,
+            kernel=kernel, stride=stride, pad=pad, # depthwise conv2d
+            no_bias=True, dilate=(1, 1), layout='NCHW',
+            num_filter=in_channel, num_group=in_channel)
+```
+
+#### LeakyReLU
+
+*act_type*: action type, only supported `leaky`.
+*slope*: attribute.
+
+```python
+LeakyReLU(data) = relu(data) - slope * relu(-data)
+```
+
+#### BatchNorm
+
+*gamma, beta, data_mean, data_var*: attributes.
+
+```python
+BatchNorm(data) =
+```
+
+$$
+out[:,i,:...] 
+= {data[:,i,:...] - data\_mean[i] \over data\_var[i]} * gamma[i] + beta[i]
+= data[:,i:...] * \alpha + \beta
+$$
+
+, where $\alpha$ is gamma / data_var and $\beta$ is beta - data_mean * gamma / data_var.
+
+while data is *Convolution*(x), we can get equation as belows:
+$$
+out[:,i,:...] 
+= (X * W + B) * \alpha + \beta 
+= X * (W * \alpha) + (B * \alpha + \beta) \\
+= Convolution(X, weight=W_{new}, bias=B_{new})
+$$
+
+#### Dropout
+
+do nothing in inference.
+
+#### _div_scalar, _mul_scalar
+
+To aviod division in INT8 graph, we use operator `broadcast_mul` to fuse scalar operator above.
+
+#### slice_like
+
+We can infer shapes within internal symbols in graph, and the output shape of *slice_like* operator can be inferred. To reduce dependence between symbols, operator *slice* is enough for specific output shape.
+
 ### Simulated quantization
 
 using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
