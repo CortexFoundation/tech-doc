@@ -14,25 +14,23 @@ There are emerging interests on delpoying deep learning models on various platfo
 
 In the post, we propose a metholody to both accelate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of  implementation, we first go through the oberservation and intuition befind this metholody.
 
-In term of edge computing, unlike GPU, float point unit is less effective on edge device in usual. Thus, researchers propsed serveral approaches to tackle this problem:
+In term of edge computing, unlike GPU, float point unit is less effective on edge device in usual. Thus, researchers have propsed serveral approaches to tackle this problem:
 
 1. **Fake Quantization**: quantizing float-point number into 8-bit interger and transfer data to accelator, which takes linear time to apply this operation. The most costly part of calculation, e.g. conv,  only happens in accelator that dedicated in 8-bit arithmetic. Afterward, results is transformed back to float-point.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune proceduce is usally utilized to preserve model accuracy after post quantization
 
+The current implmentation in MXNet's contrib libaray follows fake quantization routine and redirect the compuation to MKLDNN math libaray. However, in blockchain's determinstic sensitive scenario, float-point number is not unacceptable. Therefore, we adopt integer-only inference as our methodology. In addition, numerical bound is checked to avoid integer overflow by ultizing operation level rewriting. 
+
 ## Implementation
 
-for proof of concept, we leverage the following techniques:
+We implemented a converter, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) represenation using MXNet's nnvm module.
 
 ### Fusion
 batchnorm and dropout, rewriting average pooling
 
-![graph_trans](/Users/ml_pm/Code/tech-doc/cvm/mxnet/graph_trans.png)
-
 ### Simulated quantization
 
 using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
-
-
 
 ### Calibrating Requantization Parameter
 
@@ -53,14 +51,14 @@ a **table** showing comparasion of OPs between cvm(int8) and mxnet(float), ususa
 
 #### 2. model size reduction
 
-commonly, 4x model reize reduction can be achieved
+commonly, 4x model reize reduction can be achieved. 
 
 
-| MODEL       | GluonModelZoo | CVM  |
-| ----------- | ------------- | ---- |
-| ResNetV1_50 |               |      |
-| InceptionV2 |               |      |
-| LeNet       |               |      |
+| MODEL       | Gluon Model Zoo | CVM  |
+| ----------- | :-------------: | ---- |
+| ResNetV1_50 |                 |      |
+| InceptionV2 |                 |      |
+| LeNet       |                 |      |
 
 
 ## Conclusion
