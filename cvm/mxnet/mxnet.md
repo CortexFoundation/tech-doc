@@ -1,3 +1,7 @@
+---
+typora-copy-images-to: ../mxnet
+---
+
 ### Quantizing NN models for deployment on blockchain
 
 ##  
@@ -22,9 +26,13 @@ for proof of concept, we leverage the following techniques:
 ### Fusion
 batchnorm and dropout, rewriting average pooling
 
+![graph_trans](/Users/ml_pm/Code/tech-doc/cvm/mxnet/graph_trans.png)
+
 ### Simulated quantization
 
 using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
+
+
 
 ### Calibrating Requantization Parameter
 
@@ -46,6 +54,14 @@ a **table** showing comparasion of OPs between cvm(int8) and mxnet(float), ususa
 #### 2. model size reduction
 
 commonly, 4x model reize reduction can be achieved
+
+
+| MODEL       | GluonModelZoo | CVM  |
+| ----------- | ------------- | ---- |
+| ResNetV1_50 |               |      |
+| InceptionV2 |               |      |
+| LeNet       |               |      |
+
 
 ## Conclusion
 
