@@ -147,7 +147,7 @@ Supposed that our purpose is quantizing layer into `bit` of INT, then the range 
 
    The result is represented as $[a_{min}, a_{max}]$. And there are two calibration approaches in mainly:
 
-   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[-127,  127]$.
+   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[min(out), max(out)]$.
    - MXNet approach: entropy based calibration.
 
 2. Calculate the scale of activation layer to target INT bit, equation is as belows:
@@ -168,7 +168,7 @@ Supposed that our purpose is quantizing layer into `bit` of INT, then the range 
      target_range = alpha / (2 ** sb) > alpha / (scale * 2) = clip / 2 
    ```
 
-   So the target range is not full of INT `bit`, it's max value is between $[clip/2, clip]$. Usually, the target range is decreased a lot, and accuracy after quantization is a bit lower due to this. But it do reduce the work of realizing requantization operator for the scale in the next steps.
+   So the target range is not full of INT `bit`, it's max value is between $(clip/2, clip]$. Usually, the target range is decreased a lot, and accuracy after quantization is a bit lower due to this. But it do reduce the work of realizing requantization operator for the scale in the next steps.
 
    More details please infer to section [Realize](#calibrating-requantization-parameter).
 
