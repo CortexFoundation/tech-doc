@@ -4,8 +4,6 @@ typora-copy-images-to: ../mxnet
 
 ### Quantizing NN models for deployment on blockchain
 
-##  
-
 Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 ## Introduction
@@ -19,25 +17,22 @@ In term of edge computing, unlike GPU, float point unit is less effective and de
 1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g. conv,  only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
 
-The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing operation level rewriting. 
+The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. 
 
 ## Implementation
 
 According to the above discussion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) representation.
 
-### Fusion
-batchnorm and dropout, rewriting average pooling
-
+### Fusion and Opeartor Rewriting
 ##### Fuse Constant
 
 After all the fusion process as below, we do constant-fuse process for reducing graph complexity and better quantization performance.
 
-##### Matrix Decomposition
+##### MAC Decomposition
 
-Big matrix process may exceed the max-length : `range(INT32) / range(8 + 8)` in computation, which result may be out of range INT32. Matrix decomposition is to do for matrix computation scale reduction.
-$$
-A * W = \sum_{start, stop} A[:,start:stop] * W[:, start:stop]
-$$
+suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only hold when $n$ is less $2^{16}$. In another word, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we can decomposite the computation into small peices in graph level and aggreate the results, mathmatically $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$. Each parts of vector has length small than $2^{16}$.
+
+Matrix multiplication operator `matmul` can also rewrite in this fashion, which results in a series of `elemwise_add` operator that sum over several intermediate matries. Although, this rewriting will introduce additional opeators in computation graph, semantic will remain unchanged.
 
 #### Pooling
 
@@ -47,7 +42,7 @@ $$
 *count_include_pad*: must be `true` for equivalent transformation with depthwise *Convolution*.
 *kernel, stride, pad*: pooling kernel, stride and pad attributes.
 
-##### GlobalAvgPooling
+##### Rewrite GlobalAvgPooling 
 
 ```python
 GlobalAvgPooling(data) =
@@ -61,7 +56,7 @@ $$
 = broadcast_mul(sum(data, axis=(2, 3)), scale), which scale equals 1 / K / K
 ```
 
-##### AvgPooling
+##### Rewrite AvgPooling
 
 ```python
 AvgPooling(data) = Convolution(data,
@@ -70,7 +65,7 @@ AvgPooling(data) = Convolution(data,
             num_filter=in_channel, num_group=in_channel)
 ```
 
-#### LeakyReLU
+#### Rewrite LeakyReLU
 
 *act_type*: action type, only supported `leaky`.
 *slope*: attribute.
@@ -79,7 +74,7 @@ AvgPooling(data) = Convolution(data,
 LeakyReLU(data) = relu(data) - slope * relu(-data)
 ```
 
-#### BatchNorm
+#### Fuse BatchNorm
 
 *gamma, beta, data_mean, data_var*: attributes.
 
@@ -100,42 +95,36 @@ $$
 out[:,i,:...] 
 = (X * W + B) * \alpha + \beta 
 = X * (W * \alpha) + (B * \alpha + \beta) \\
-= Convolution(X, weight=W_{new}, bias=B_{new})
+= \text{Convolution}(X, \text{weight}=W_{new}, \text{bias}=B_{new})
 $$
 
-#### Dropout
+#### Rewrite Dropout
 
 do nothing in inference and strip it.
 
-#### _div_scalar, _mul_scalar
+#### Rewrite _div_scalar, _mul_scalar
 
-To avoid division in INT8 graph, we use the operator `broadcast_mul` to fuse scalar operator above.
-
-#### slice_like
-
-We can infer shapes within internal symbols in a graph, and the output shape of *slice_like* operator can be inferred. To reduce dependence between symbols, operator *slice* is enough for specific output shape.
+To avoid division in INT8 graph, we use the operator `broadcast_mul` to rewrite scalar operator above.
 
 ### Simulated quantization
 
-We adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
+Before we can make whole computational graph integer-only, we should firstly rewrite float-point number into simulated quantization representation. In current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
 ​                                                                                      $$\begin{align}x=sx^{Q} \end{align}$$                                                  
 
- where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in \text{int8}^{n}$
+ where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
-As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
-
-
+After quantization pass applied, we can reorder the operators in graph in order to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  s_x  X^Q $ , and rewrite it into
 
 ​                                                                    $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
 
-where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar, which can be calibrated offline. We will discuss more about the calibration in following section.  
+where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
-In usual, $s_y $ is determined in advance. With calibrated requantization scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure showing below:
+In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure showing below:
 
-![img](/Users/oscarwei/Dropbox/markdown/tech-doc/cvm/mxnet/graph_trans.png) 
+![img]()
 
 ### Calibrating Requantization Parameter
 
@@ -147,7 +136,7 @@ Supposed that our purpose is quantizing layer into `bit` of INT, then the range 
 
    The result is represented as $[a_{min}, a_{max}]$. And there are two calibration approaches in mainly:
 
-   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[min(out), max(out)]$.
+   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[\min(out), \max(out)]$.
    - MXNet approach: entropy based calibration.
 
 2. Calculate the scale of activation layer to target INT bit, equation is as belows:
