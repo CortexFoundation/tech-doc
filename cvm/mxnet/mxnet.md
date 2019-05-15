@@ -10,27 +10,27 @@ Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 ## Introduction
 
-There are emerging interests on delpoying deep learning models on various platforsm and devices. Especially, deep networks are increasingly used for applications at the edge. Devices at the edge typically have lower compute capabilities and are constrained in memory and power consumption.  This situation is more critial on deploying DNN models on blockchain, which **much more poor**. In addition to limited computation resource, determinstic is another issue, e.g. each running of single model on different device must produce bit-level identical result. One of the nondeterministic comes from the float-point number arithmetic, e.g. summation over a series of float-point number. 
+There are emerging interests in deploying deep learning models on various platforms and devices. Especially, deep networks are seeing increasingly used for applications at the edge devices which typically have lower compute capabilities and are constrained in memory and power consumption. Due to limited-resource and strict environment, the situation is more critical to deploy DNN models on the blockchain. In addition to limited computation resource, being deterministic is another issue, e.g. each running of a single model on the different device must produce a bit-level identical result. Nondeterministic occurs from the float-point number arithmetic, e.g. summation over a series of float-point number. 
 
-In the post, we propose a metholody to both accelate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of  implementation, we first go through the oberservation and intuition befind this metholody.
+In this post, we propose a methodology to both accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
-In term of edge computing, unlike GPU, float point unit is less effective on edge device in usual. Thus, researchers have propsed serveral approaches to tackle this problem:
+In term of edge computing, unlike GPU, float point unit is less effective and desirable on edge device. Thus, researchers have proposed several approaches to tackle this problem:
 
-1. **Fake Quantization**: quantizing float-point number into 8-bit interger and transfer data to accelator, which takes linear time to apply this operation. The most costly part of calculation, e.g. conv,  only happens in accelator that dedicated in 8-bit arithmetic. Afterward, results is transformed back to float-point.
-2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune proceduce is usally utilized to preserve model accuracy after post quantization
+1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g. conv,  only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
+2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
 
-The current implmentation in MXNet's contrib libaray follows fake quantization routine and redirect the compuation to MKLDNN math libaray. However, in blockchain's determinstic sensitive scenario, float-point number is not unacceptable. Therefore, we adopt integer-only inference as our methodology. In addition, numerical bound is checked to avoid integer overflow by ultizing operation level rewriting. 
+The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing operation level rewriting. 
 
 ## Implementation
 
-According to above disscusion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) represenation.
+According to the above discussion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) representation.
 
 ### Fusion
 batchnorm and dropout, rewriting average pooling
 
 ##### Fuse Constant
 
-After all the fusion process as belows, we do constant-fuse process for reducing graph complexity and better quantization performance.
+After all the fusion process as below, we do constant-fuse process for reducing graph complexity and better quantization performance.
 
 ##### Matrix Decomposition
 
@@ -109,21 +109,21 @@ do nothing in inference.
 
 #### _div_scalar, _mul_scalar
 
-To aviod division in INT8 graph, we use operator `broadcast_mul` to fuse scalar operator above.
+To avoid division in INT8 graph, we use the operator `broadcast_mul` to fuse scalar operator above.
 
 #### slice_like
 
-We can infer shapes within internal symbols in graph, and the output shape of *slice_like* operator can be inferred. To reduce dependence between symbols, operator *slice* is enough for specific output shape.
+We can infer shapes within internal symbols in a graph, and the output shape of *slice_like* operator can be inferred. To reduce dependence between symbols, operator *slice* is enough for specific output shape.
 
 ### Simulated quantization
 
-We adpot symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
+We adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
 ​                                                                                      $$\begin{align}x=sx^{Q} \end{align}$$                                                  
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in \text{int8}^{n}$
 
-As `matmul` is the core of NN's workflows, we take it as a example to illustrate how to transform float-point operator to integer operator. 
+As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
 
 
 
@@ -133,13 +133,13 @@ let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \m
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar, which can be calibrated offline. We will discuss more about the calibration in following section.  
 
-In ususal, $s_y $ is determined in adavance. With calibrated requantization scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definiton. Thus, we can rewrite the original graph to a annotated graph as figure showing befow:
+In usual, $s_y $ is determined in advance. With calibrated requantization scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine $s_y$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure showing below:
 
-![img]() 
+![img](/Users/oscarwei/Dropbox/markdown/tech-doc/cvm/mxnet/graph_trans.png) 
 
 ### Calibrating Requantization Parameter
 
-estimating requantization bits for activation layer
+estimating requantization bits for the activation layer
 
 1. Trivial approach: projecting $[a_{min}, a_{max}]$ to $[-127, 127]$
 2. MXNet approach: entropy based requantization
@@ -152,11 +152,11 @@ estimating requantization bits for activation layer
 
 #### 1. Reduce OPs
 
-a **table** showing comparasion of OPs between cvm(int8) and mxnet(float), ususally int8 can run 4x faster than float.
+a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), usually, int8 can run 4x faster than float.
 
 #### 2. model size reduction
 
-commonly, 4x model reize reduction can be achieved. 
+commonly, 4x model size reduction can be achieved. 
 
 
 | MODEL       | Gluon Model Zoo | CVM  |
@@ -172,4 +172,4 @@ Using MXNet’s quantization technology, model inference can be enabled on the l
 
 ## Future work
 
-enhancing privacy, accuracy, and efficency. Mobile/edge computing realization is also one of our goals.
+Enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
