@@ -7,9 +7,11 @@ Before we begin installing Cortex, we need to get some dependencies for your sys
 
 Remove old driver
 
-    sudo apt-get remove --purge nvidia*
-    sudo apt-get install build-essential freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev
-    sudo nano /etc/modprobe.d/blacklist-nouveau.conf
+```bash
+sudo apt-get remove --purge nvidia*
+sudo apt-get install build-essential freeglut3-dev libx11-dev libxmu-dev libxi-dev libgl1-mesa-glx libglu1-mesa libglu1-mesa-dev
+sudo nano /etc/modprobe.d/blacklist-nouveau.conf
+```
 
 Paste the following content into the text editor and save `blacklist-nouveau.conf`,
 
@@ -18,8 +20,10 @@ Paste the following content into the text editor and save `blacklist-nouveau.con
 
 Download the driver - Option 1 - via Nvidia.com
 
-    wget http://us.download.nvidia.com/XFree86/Linux-x86_64/410.93/NVIDIA-Linux-x86_64-410.93.run
-    chmod +x NVIDIA-Linux-x86_64-410.93.run
+```bash
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/410.93/NVIDIA-Linux-x86_64-410.93.run
+chmod +x NVIDIA-Linux-x86_64-410.93.run
+```
 
 Download the driver - Option 2 - via PPA repository
 
