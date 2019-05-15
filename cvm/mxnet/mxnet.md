@@ -105,7 +105,7 @@ $$
 
 #### Dropout
 
-do nothing in inference.
+do nothing in inference and strip it.
 
 #### _div_scalar, _mul_scalar
 
@@ -139,10 +139,38 @@ In ususal, $s_y $ is determined in adavance. With calibrated requantization scal
 
 ### Calibrating Requantization Parameter
 
-estimating requantization bits for activation layer
+Estimating requantization scale for activation layer.
 
-1. Trivial approach: projecting $[a_{min}, a_{max}]$ to $[-127, 127]$
-2. MXNet approach: entropy based requantization
+Supposed that our purpose is quantizing layer into `bit` of INT, then the range of output for each layer is between $[-clip, clip], clip=2^{bit-1}-1$. Note that we strip the `MIN` value of INT which is $-2^{bit-1}$ for processing symmetric range in simplify quantization, and it shouldn't lead to a lot of acccuracy loss. The process steps is as belows:
+
+1. Calibrate the output for each internal layer with calibration data. 
+
+   The result is represented as $[a_{min}, a_{max}]$. And there are two calibration approaches in mainly:
+
+   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[-127,  127]$.
+   - MXNet approach: entropy based calibration.
+
+2. Calculate the scale of activation layer to target INT bit, equation is as belows:
+
+   ```python
+   alpha = absmax(amin, amax)
+   scale = alpha / clip
+   ```
+
+   Note: we have tried a simple method in real-environment quantization, which use shift bit instead of floating scale for requantization that will reduce work in symbol realizing. In this case, scale is int times of power 2 specifically. And the relative inference is:
+
+   ```python
+   scale = alpha / clip ie. target_range = alpha / scale = clip
+   we calculate shift_bit with sb = ceil(log2(scale)) 
+   ie. scale <= 2 ** (sb) < scale * 2
+   so that we can get target range: 
+   	target_range = alpha / (2 ** sb) <= alpha / scale = clip
+     target_range = alpha / (2 ** sb) > alpha / (scale * 2) = clip / 2 
+   ```
+
+   So the target range is not full of INT `bit`, it's max value is between $[clip/2, clip]$. Usually, the target range is decreased a lot, and accuracy after quantization is a bit lower due to this. But it do reduce the work of realizing requantization operator for the scale in the next steps.
+
+   More details please infer to section [Realize](#calibrating-requantization-parameter).
 
 ### OPs rewriting for numerical-bound
 
