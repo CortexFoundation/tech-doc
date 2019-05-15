@@ -117,9 +117,7 @@ We can infer shapes within internal symbols in graph, and the output shape of *s
 
 ### Simulated quantization
 
-using float to simulate quantization. Given all weights and inputs, $$w_i = w’_i * s_w$$, $$s_w$$ is a float number defined as $$s_w=a * 2^b$$, where $a$ and $b$ are both integers. 
-
-We adpot symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifally 
+We adpot symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
 ​                                                                                      $$\begin{align}x=sx^{Q} \end{align}$$                                                  
 
@@ -129,7 +127,7 @@ As `matmul` is the core of NN's workflows, we take it as a example to illustrate
 
 
 
-let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = s_w s_x * W^QX $ , and rewrite it into
+let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  s_x  X^Q $ , and rewrite it into
 
 ​                                                                    $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
 
