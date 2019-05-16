@@ -1,7 +1,3 @@
----
-typora-copy-images-to: ../mxnet
----
-
 ### Quantizing NN models for deployment on blockchain
 
 Towards A Novel Deterministic Inference Infrastructure on Blockchain
@@ -23,16 +19,17 @@ The current implementation in MXNet's Contrib library follows fake quantization 
 
 According to the above discussion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) representation.
 
-### Fusion and Opeartor Rewriting
+### Fusion and Operator Rewriting
+
 ##### Fuse Constant
 
 After all the fusion process as below, we do constant-fuse process for reducing graph complexity and better quantization performance.
 
 ##### MAC Decomposition
 
-suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only hold when $n$ is less $2^{16}$. In another word, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we can decomposite the computation into small peices in graph level and aggreate the results, mathmatically $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$. Each parts of vector has length small than $2^{16}$.
+Supposed we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only hold when $n$ is less than $2^{16}$. In other words, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we can decomposite the computation into small peices in graph level and aggreate the results, mathmatically $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$. Each parts of vector has length smaller than $2^{16}$.
 
-Matrix multiplication operator `matmul` can also rewrite in this fashion, which results in a series of `elemwise_add` operator that sum over several intermediate matries. Although, this rewriting will introduce additional opeators in computation graph, semantic will remain unchanged.
+Matrix multiplication operator `matmul` can also be rewritten in this fashion, which results in a series of `elemwise_add` operator that sum over several intermediate matrices. Although this rewriting will introduce additional operators in the computation graph, semantic will remain unchanged.
 
 #### Pooling
 
@@ -104,21 +101,25 @@ do nothing in inference and strip it.
 
 #### Rewrite _div_scalar, _mul_scalar
 
-To avoid division in INT8 graph, we use the operator `broadcast_mul` to rewrite scalar operator above.
+To avoid division in INT8 graph, we use the operator `broadcast_mul` to rewrite the scalar operator above.
 
 ### Simulated quantization
 
-Before we can make whole computational graph integer-only, we should firstly rewrite float-point number into simulated quantization representation. In current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
+Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantization representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
-​                                                                                      $$\begin{align}x=sx^{Q} \end{align}$$                                                  
+```
+                                                                                  $$\begin{align}x=sx^{Q} \end{align}$$                                                  
+```
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
-After quantization pass applied, we can reorder the operators in graph in order to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
+After quantization has been applied, we can reorder the operators in the graph in order to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  s_x  X^Q $ , and rewrite it into
 
-​                                                                    $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+```
+                                                                $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+```
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
@@ -128,9 +129,9 @@ In our approach, scalar $s_y $ is determined in advance by calibration. With cal
 
 ### Calibrating Requantization Parameter
 
-Estimating requantization scale for activation layer.
+Estimating the requantization scale for the activation layer.
 
-Supposed that our purpose is quantizing layer into `bit` of INT, then the range of output for each layer is between $[-clip, clip], clip=2^{bit-1}-1$. Note that we strip the `MIN` value of INT which is $-2^{bit-1}$ for processing symmetric range in simplify quantization, and it shouldn't lead to a lot of acccuracy loss. The process steps is as belows:
+Supposed that our purpose is to quantize layer into `bit` of INT, then the range of output for each layer is between $[-clip, clip], clip=2^{bit-1}-1$. Note that we strip the `MIN` value of INT which is $-2^{bit-1}$ for processing symmetric range in simplifying quantization which shouldn't lead to a lot of accuracy loss. The process steps are as below:
 
 1. Calibrate the output for each internal layer with calibration data. 
 
@@ -153,17 +154,17 @@ Supposed that our purpose is quantizing layer into `bit` of INT, then the range 
    we calculate shift_bit with sb = ceil(log2(scale)) 
    ie. scale <= 2 ** (sb) < scale * 2
    so that we can get target range: 
-   	target_range = alpha / (2 ** sb) <= alpha / scale = clip
+       target_range = alpha / (2 ** sb) <= alpha / scale = clip
      target_range = alpha / (2 ** sb) > alpha / (scale * 2) = clip / 2 
    ```
 
-   So the target range is not full of INT `bit`, it's max value is between $(clip/2, clip]$. Usually, the target range is decreased a lot, and accuracy after quantization is a bit lower due to this. But it do reduce the work of realizing requantization operator for the scale in the next steps.
+   So the target range is not full of INT `bit`, its max value is between $(clip/2, clip]$. Usually, the target range decreases and causes accuracy after quantization to be lower. But it does reduce the work of realizing the requantization operator for the scale in the next steps.
 
    More details please infer to section [Realize](#calibrating-requantization-parameter).
 
 ### OPs rewriting for numerical-bound
 
-* rewrite computation graph to avoid nondeterministic behaviors in parallel computations, which is common in ML accelerators.
+- rewrite the computation graph to avoid nondeterministic behaviors in parallel computations, which is common in ML accelerators.
 
 ## Experiment
 
@@ -175,13 +176,11 @@ a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), us
 
 commonly, 4x model size reduction can be achieved. 
 
-
 | MODEL       | Gluon Model Zoo | CVM  |
 | ----------- | :-------------: | ---- |
 | ResNetV1_50 |                 |      |
 | InceptionV2 |                 |      |
 | LeNet       |                 |      |
-
 
 ## Conclusion
 
