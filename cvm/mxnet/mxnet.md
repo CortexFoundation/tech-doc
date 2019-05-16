@@ -114,9 +114,9 @@ Before we can make whole computational graph integer-only, we should firstly rew
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
-After quantization pass applied, we can reorder the operators in graph in order to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
+After quantization pass applied, we can reorder the operators in graph for further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
 
-let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  s_x  X^Q $ , and rewrite it into
+let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
 ​                                                                    $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
 
@@ -124,19 +124,21 @@ where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
 In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$ for output $y$ of each operator and weight scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure showing below:
 
-![img]()
+![img](dense_rewrite.png)
 
 ### Calibrating Requantization Parameter
 
 Estimating requantization scale for activation layer.
 
-Supposed that our purpose is quantizing layer into `bit` of INT, then the range of output for each layer is between $[-clip, clip], clip=2^{bit-1}-1$. Note that we strip the `MIN` value of INT which is $-2^{bit-1}$ for processing symmetric range in simplify quantization, and it shouldn't lead to a lot of acccuracy loss. The process steps is as belows:
+Supposed that our purpose is quantizing weight and activation into $[-2^7+1, 2^7+1 ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map it to $[-2^7+1, 2^7+1 ]$. 
+
+Formally, we have $s_x = h/127, x^q = \text{round}(\text{clip}(x; -h, h) / s_x)$
 
 1. Calibrate the output for each internal layer with calibration data. 
 
    The result is represented as $[a_{min}, a_{max}]$. And there are two calibration approaches in mainly:
 
-   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[\min(out), \max(out)]$.
+   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[\min(out), \max(out)]$. 
    - MXNet approach: entropy based calibration.
 
 2. Calculate the scale of activation layer to target INT bit, equation is as belows:
@@ -160,10 +162,6 @@ Supposed that our purpose is quantizing layer into `bit` of INT, then the range 
    So the target range is not full of INT `bit`, it's max value is between $(clip/2, clip]$. Usually, the target range is decreased a lot, and accuracy after quantization is a bit lower due to this. But it do reduce the work of realizing requantization operator for the scale in the next steps.
 
    More details please infer to section [Realize](#calibrating-requantization-parameter).
-
-### OPs rewriting for numerical-bound
-
-* rewrite computation graph to avoid nondeterministic behaviors in parallel computations, which is common in ML accelerators.
 
 ## Experiment
 
