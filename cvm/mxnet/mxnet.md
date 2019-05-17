@@ -31,46 +31,6 @@ Supposed we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{
 
 Matrix multiplication operator `matmul` can also be rewritten in this fashion, which results in a series of `elemwise_add` operator that sum over several intermediate matrices. Although this rewriting will introduce additional operators in the computation graph, semantic will remain unchanged.
 
-#### Pooling
-
-*pool_type*: indicates pooling type, only supported `avg` and `max`.
-*is_global*: indicates is global average pooling.
-*pooling_convention*: must be `valid` for equivalent transformation with depthwise *Convolution*.
-*count_include_pad*: must be `true` for equivalent transformation with depthwise *Convolution*.
-*kernel, stride, pad*: pooling kernel, stride and pad attributes.
-
-##### Rewrite GlobalAvgPooling 
-
-```python
-GlobalAvgPooling(data) =
-```
-
-$$
-\sum_{k_i, k_j}^{kernel}data[:,:,k_i,k_j] / (size_{kernel})
-$$
-
-```python
-= broadcast_mul(sum(data, axis=(2, 3)), scale), which scale equals 1 / K / K
-```
-
-##### Rewrite AvgPooling
-
-```python
-AvgPooling(data) = Convolution(data,
-            kernel=kernel, stride=stride, pad=pad, # depthwise conv2d
-            no_bias=True, dilate=(1, 1), layout='NCHW',
-            num_filter=in_channel, num_group=in_channel)
-```
-
-#### Rewrite LeakyReLU
-
-*act_type*: action type, only supported `leaky`.
-*slope*: attribute.
-
-```python
-LeakyReLU(data) = relu(data) - slope * relu(-data)
-```
-
 #### Fuse BatchNorm
 
 *gamma, beta, data_mean, data_var*: attributes.
@@ -95,21 +55,11 @@ out[:,i,:...]
 = \text{Convolution}(X, \text{weight}=W_{new}, \text{bias}=B_{new})
 $$
 
-#### Rewrite Dropout
-
-do nothing in inference and strip it.
-
-#### Rewrite _div_scalar, _mul_scalar
-
-To avoid division in INT8 graph, we use the operator `broadcast_mul` to rewrite the scalar operator above.
-
 ### Simulated quantization
 
 Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantization representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
-```
-                                                                                  $$\begin{align}x=sx^{Q} \end{align}$$                                                  
-```
+​                                                                 $$\begin{align}x=sx^{Q} \end{align}$$                             
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
@@ -117,9 +67,9 @@ After quantization has been applied, we can reorder the operators in the graph i
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
-```
-                                                                $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
-```
+
+​                            $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
@@ -129,9 +79,7 @@ In our approach, scalar $s_y $ is determined in advance by calibration. With cal
 
 ### Calibrating Requantization Parameter
 
-Estimating the requantization scale for the activation layer.
-
-Supposed that our purpose is quantizing weight and activation into $[-2^7+1, 2^7+1 ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map it to $[-2^7+1, 2^7+1 ]$. 
+Supposed that our purpose is quantizing weight and activation into $[-127, 127  ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. 
 
 Formally, we have $s_x = h/127, x^q = \text{round}(\text{clip}(x; -h, h) / s_x)$
 
