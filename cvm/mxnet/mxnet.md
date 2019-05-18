@@ -57,7 +57,7 @@ $$
 
 ### Simulated quantization
 
-Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantization representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
+Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantization representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically
 
 ​                                                                                       $$\begin{align}x=sx^{Q} \end{align}$$                             
 
