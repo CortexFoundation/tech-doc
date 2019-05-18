@@ -97,16 +97,16 @@ a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), us
 
 #### 2. model size reduction
 
-commonly, 4x model size reduction can be achieved. 
+commonly, 4x model size reduction can be achieved, while accuracy not will be harmed significantly. We utlize proposed   
 
-| MODEL       | Gluon  |  CVM   |
-| ----------- | :----: | :----: |
-| ResNetV1_50 | 77.37% | 76.16% |
-| InceptionV3 | 78.78% | 78.31% |
-| LeNet       |        |        |
-| AlexNet     | 55.92% | 55.19% |
-| SqueeseNet  | 57.20% | 55.62% |
-| Mnist       | 99.18% | 99.18% |
+| MODEL                  | MXNet  |  CVM   |
+| ---------------------- | :----: | :----: |
+| ResNetV1_50(imagenet)  | 77.37% | 76.16% |
+| InceptionV3(imagenet)  | 78.78% | 78.31% |
+| LeNet(imagenet)        |        |        |
+| AlexNet(imagenet)      | 55.92% | 55.19% |
+| SqueeseNet(imagenet)   | 57.20% | 55.62% |
+| DigitalClashNet(Mnist) | 99.18% | 99.18% |
 
 ## Conclusion
 
