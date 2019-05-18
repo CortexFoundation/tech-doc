@@ -11,13 +11,13 @@ In this post, we propose a methodology to both accelerate DNN models' inference 
 In term of edge computing, unlike GPU, float point unit is less effective and desirable on edge device. Thus, researchers have proposed several approaches to tackle this problem:
 
 1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g. conv,  only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
-2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
+2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization.
 
-The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. 
+The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library in runtime. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose to adopt integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. 
 
 ## Implementation
 
-According to the above discussion, we implemented a converter using MXNet's nnvm module, named MRT,  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) representation.
+According to the above discussion, we implemented a converter using MXNet's nnvm module, **MRT**(Model Representation Tool),  that transform a plain MXNet model into our Cortex Virtual Machine(CVM) representation.
 
 ### Fusion and Operator Rewriting
 
@@ -87,30 +87,24 @@ We adopt a simple method in our implemenation, which use shift bit instead of fl
 
 ###Realize Integer-only Inference
 
-$y^Q$
+After rewriting graph according the methods mentioned above, the float operation only occurs on `broadcast` operator, e.g. `broadcast_multiply`.  Let's take it as a example, this operator is mainly introduced by requantizaiton procedure. We can also rerwrite is as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for best performance. The first two `shift` operators is used to avoid overflow during computation, last `shift` is used for requantization. Noted that $y$ and $y^Q$ both are tensors.
 
 ## Experiment
 
-#### 1. Reduce OPs
+commonly, 4x model size reduction can be achieved, while accuracy not will be harmed significantly. We apply proposed converter on pretrained models(imagenet) data from MXNet's model zoo. Result is showing as below. 
 
-a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), usually, int8 can run 4x faster than float.
-
-#### 2. model size reduction
-
-commonly, 4x model size reduction can be achieved, while accuracy not will be harmed significantly. We utlize proposed   
-
-| MODEL                  | MXNet  |  CVM   |
+| Imagenet MODEL         | MXNet  |  CVM   |
 | ---------------------- | :----: | :----: |
-| ResNetV1_50(imagenet)  | 77.37% | 76.16% |
-| InceptionV3(imagenet)  | 78.78% | 78.31% |
-| LeNet(imagenet)        |        |        |
-| AlexNet(imagenet)      | 55.92% | 55.19% |
-| SqueeseNet(imagenet)   | 57.20% | 55.62% |
+| ResNetV1_50            | 77.37% | 76.16% |
+| ResNet18_v1b_0.89      | 67.21% | 63.65% |
+| InceptionV3            | 78.78% | 78.31% |
+| AlexNet                | 55.92% | 55.19% |
+| SqueeseNet             | 57.20% | 55.62% |
 | DigitalClashNet(Mnist) | 99.18% | 99.18% |
 
 ## Conclusion
 
-Using MXNet’s quantization technology, model inference can be enabled on the limited-resource and strict environment of blockchain, unlocking a novel domain of smart contracts with ml models. The use case could be DeFi, Entertainment, Information service, BaaS, etc.
+Using MXNet’s quantization technology, model inference can be enabled on the limited-resource and strict environment of blockchain, unlocking a novel domain of smart contracts with machine learning models. The use case could be DeFi, Entertainment, Information service, BaaS, etc.
 
 ## Future work
 
