@@ -99,11 +99,14 @@ a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), us
 
 commonly, 4x model size reduction can be achieved. 
 
-| MODEL       | Gluon | CVM  |
-| ----------- | :---: | :--: |
-| ResNetV1_50 |       |      |
-| InceptionV2 |       |      |
-| LeNet       |       |      |
+| MODEL       | Gluon  |  CVM   |
+| ----------- | :----: | :----: |
+| ResNetV1_50 | 77.37% | 76.16% |
+| InceptionV3 | 78.78% | 78.31% |
+| LeNet       |        |        |
+| AlexNet     | 55.92% | 55.19% |
+| SqueeseNet  | 57.20% | 55.62% |
+| Mnist       | 99.18% | 99.18% |
 
 ## Conclusion
 
