@@ -106,10 +106,8 @@ We apply proposed converter on pretrained models(imagenet) data from MXNet's mod
 | Mnist MODEL     | MXNet  |  CVM   |
 | --------------- | :----: | :----: |
 | DigitalClashNet | 99.18% | 99.18% |
-
-
-
-
+| LeNet           | 99.18% | 99.16% |
+| MLP             | 97.68% | 97.69% |
 
 We can observe that our quantization scheme retain the accuracy of ResNetV1 and InceptionV3 on imagenet dataset. 
 
