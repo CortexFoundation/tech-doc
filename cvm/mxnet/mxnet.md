@@ -59,7 +59,7 @@ $$
 
 Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantization representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed int8 type $x^Q$, specifically
 
-                                                                 $$\begin{align}x=sx^{Q} \end{align}$$                             
+​                                                                                       $$\begin{align}x=sx^{Q} \end{align}$$                             
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
@@ -67,7 +67,9 @@ After quantization has been applied, we can reorder the operators in the graph t
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
-                            $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+
+​                                                                 $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
+
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
@@ -77,38 +79,15 @@ In our approach, scalar $s_y $ is determined in advance by calibration. With cal
 
 ### Calibrating Requantization Parameter
 
-Supposed that our purpose is quantizing weight and activation into $[-127, 127  ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. 
+Supposed that our purpose is quantizing weight and activation into $[-127, 127  ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that for certain large value may be cliped in order to obtain better quantization precision. 
 
-Formally, we have $s_x = h/127, x^q = \text{round}(\text{clip}(x; -h, h) / s_x)$
+Here, we only discuss layer-wise quantization for simplicity. For quantizing weight $w$, we can just simply set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collects the intermediate result $y$. Afterward,  we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ best approximate $y$. For example, in MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-1. Calibrate the output for each internal layer with calibration data. 
+We adopt a simple method in our implementation, which use shift bit instead of a floating scale for requantization that will reduce work in symbol realizing. For a positive float-point scale $s$,  we can rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
-   The result is represented as $[a_{min}, a_{max}]$. And there are two calibration approaches in mainly:
+###Realize Integer-only Inference
 
-   - Trivial approach: naive calibration, projecting $[a_{min}, a_{max}]$ to $[\min(out), \max(out)]$. 
-   - MXNet approach: entropy based calibration.
-
-2. Calculate the scale of activation layer to target INT bit, equation is as belows:
-
-   ```python
-   alpha = absmax(amin, amax)
-   scale = alpha / clip
-   ```
-
-   Note: we have tried a simple method in real-environment quantization, which use shift bit instead of floating scale for requantization that will reduce work in symbol realizing. In this case, scale is int times of power 2 specifically. And the relative inference is:
-
-   ```python
-   scale = alpha / clip ie. target_range = alpha / scale = clip
-   we calculate shift_bit with sb = ceil(log2(scale)) 
-   ie. scale <= 2 ** (sb) < scale * 2
-   so that we can get target range: 
-       target_range = alpha / (2 ** sb) <= alpha / scale = clip
-     target_range = alpha / (2 ** sb) > alpha / (scale * 2) = clip / 2 
-   ```
-
-   So the target range is not full of INT `bit`, its max value is between $(clip/2, clip]$. Usually, the target range decreases and causes accuracy after quantization to be lower. But it does reduce the work of realizing the requantization operator for the scale in the next steps.
-
-   More details please infer to section [Realize](#calibrating-requantization-parameter).
+$y^Q$
 
 ## Experiment
 
@@ -120,11 +99,11 @@ a **table** showing the comparison of OPs between cvm(int8) and mxnet(float), us
 
 commonly, 4x model size reduction can be achieved. 
 
-| MODEL       | Gluon Model Zoo | CVM  |
-| ----------- | :-------------: | ---- |
-| ResNetV1_50 |                 |      |
-| InceptionV2 |                 |      |
-| LeNet       |                 |      |
+| MODEL       | Gluon | CVM  |
+| ----------- | :---: | :--: |
+| ResNetV1_50 |       |      |
+| InceptionV2 |       |      |
+| LeNet       |       |      |
 
 ## Conclusion
 
@@ -133,3 +112,4 @@ Using MXNet’s quantization technology, model inference can be enabled on the l
 ## Future work
 
 Enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
+
