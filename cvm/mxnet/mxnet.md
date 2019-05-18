@@ -92,16 +92,17 @@ After we convert original float-point model to our CVM reprenstation, approximat
 
 We apply proposed converter on pretrained models(imagenet) data from MXNet's model zoo. Result is showing as below. 
 
-| Imagenet MODEL     | MXNet  |  CVM   |
-| :----------------- | :----: | :----: |
-| ResNetV1_50        | 77.37% | 76.16% |
-| ResNetV1_18        | 70.96% | 69.94% |
-| ResNet18_v1b_0.89  | 67.21% | 63.65% |
-| InceptionV3        | 78.78% | 78.31% |
-| AlexNet            | 55.92% | 55.19% |
-| SqueeseNet         | 57.20% | 55.62% |
-| DenseNet           | 77.62% | 73.97% |
-| VGG19              | 74.11% | 73.87% |
+| Imagenet MODEL    | MXNet  |  CVM   |
+| :---------------- | :----: | :----: |
+| ResNetV1_50       | 77.37% | 76.16% |
+| ResNetV1_18       | 70.96% | 69.94% |
+| ResNet18_v1b_0.89 | 67.21% | 63.65% |
+| InceptionV3       | 78.78% | 78.31% |
+| AlexNet           | 55.92% | 55.19% |
+| SqueeseNet        | 57.20% | 55.62% |
+| DenseNet          | 77.62% | 73.97% |
+| VGG19             | 74.11% | 73.87% |
+| MobileNet         | 70.77% | 63.43% |
 
 | Mnist MODEL     | MXNet  |  CVM   |
 | --------------- | :----: | :----: |
