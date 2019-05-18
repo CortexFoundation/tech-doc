@@ -82,7 +82,7 @@ Here, we only discuss layer-wise quantization for simplicity. For quantizing wei
 
 We adopt a simple method in our implementation, which use shift bit instead of a floating scale for requantization that will reduce work in symbol realizing. For a positive float-point scale $s$,  we can rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
-###Realize Integer-only Inference
+### Realize Integer-only Inference
 
 After rewriting graph according the methods mentioned above, the float operation only occurs on `broadcast` operator, e.g. `broadcast_multiply`.  Let's take it as a example, this operator is mainly introduced by requantizaiton procedure. We can also rerwrite is as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for best performance. The first two `shift` operators is used to avoid overflow during computation, last `shift` is used for requantization. Noted that $y$ and $y^Q$ both are tensors.
 
