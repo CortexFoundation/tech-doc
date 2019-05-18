@@ -4,13 +4,13 @@ Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 ## Introduction
 
-There are emerging interests in deploying deep learning models on various platforms and devices. Especially, deep networks are seeing increasingly used for applications at the edge devices which typically have lower compute capabilities and are constrained in memory and power consumption. Due to limited-resource and strict environment, the situation is more critical to deploy DNN models on the blockchain. In addition to limited computation resource, being deterministic is another issue, e.g. each running of a single model on the different device must produce a bit-level identical result. Nondeterministic occurs from the float-point number arithmetic, e.g. summation over a series of float-point number. 
+There are emerging interests in deploying deep learning models on various platforms and devices. Especially, deep networks are seeing increasingly used for applications at the edge devices, which typically have lower compute capabilities and are constrained in memory and power consumption. Due to limited-resource and strict environment, the situation is more critical to deploy DNN models on the blockchain. In addition to limited computation resource, being deterministic is another issue, e.g., each running of a single model on the different device must produce a bit-level identical result. Nondeterministic occurs from the float-point number arithmetic, e.g., summation over a series of float-point number. 
 
 In this post, we propose a methodology to both accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
 In term of edge computing, unlike GPU, float point unit is less effective and desirable on edge device. Thus, researchers have proposed several approaches to tackle this problem:
 
-1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g. conv,  only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
+1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g., conv,  only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
 
 The current implementation in MXNet's Contrib library follows fake quantization routine and redirect the computation to MKLDNN math library. However, in blockchain's deterministic sensitive scenario, the float-point number is unacceptable. Therefore, we propose integer-only inference as our methodology. In addition, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. 
@@ -63,7 +63,7 @@ Before we can make the whole computational graph integer-only, we should first r
 
  where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
-After quantization has been applied, we can reorder the operators in the graph in order to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
+After quantization has been applied, we can reorder the operators in the graph to further processing.  As `matmul` is the core of NN's workflows, we take it as an example to illustrate how to transform float-point operator to an integer operator. 
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
@@ -81,9 +81,9 @@ In our approach, scalar $s_y $ is determined in advance by calibration. With cal
 
 Supposed that our purpose is quantizing weight and activation into $[-127, 127  ]$, which can be placed in a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that for certain large value may be cliped in order to obtain better quantization precision. 
 
-Here, we only disscus layer-wise quantization for simplicity. For quantizing weight $w$, we can just simply set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collects the intermediate result $y$. Afterward,  we can use a heursitc approach to calibrate a threshold $h$ to get $y^Q$ best approximiate $y$. For example, in MXNet's quantization package, we can ultilize entropy-based calibration method to find a best fit. 
+Here, we only discuss layer-wise quantization for simplicity. For quantizing weight $w$, we can just simply set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collects the intermediate result $y$. Afterward,  we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ best approximate $y$. For example, in MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-We adopt a simple method in our implemenation, which use shift bit instead of floating scale for requantization that will reduce work in symbol realizing. For a postive float-point scale $s$,  we can rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are postive integer. 
+We adopt a simple method in our implementation, which use shift bit instead of a floating scale for requantization that will reduce work in symbol realizing. For a positive float-point scale $s$,  we can rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ###Realize Integer-only Inference
 
@@ -112,3 +112,4 @@ Using MXNet’s quantization technology, model inference can be enabled on the l
 ## Future work
 
 Enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
+
