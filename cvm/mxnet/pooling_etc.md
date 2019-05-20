@@ -60,4 +60,3 @@ so that we can get target range:
 ```
 
 So the target range does not span full space of INT `bit`, its max value is between $(clip/2, clip]$. Usually, the target range decreases and causes accuracy after quantization to be lower. But it does reduce the work of realizing the requantization operator for the scale in the next steps.
-
