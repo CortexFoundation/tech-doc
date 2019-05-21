@@ -4,13 +4,11 @@ Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 ## Introduction
 
-There are emerging interests in deploying deep learning models on various platforms and devices. Deep networks are not just being used on sumpercomputers or GPU cloud computing that have high performance, but are also seeing increasingly used in the edge devices that have lower computing capabilities with constrains in memoery and power comsumption. The situation is even more critical to deploy DNN models on the blockchain that has even more crucial environment. Not to mention that being deterministic in the blockchain environment is another issue that needs to be solved, e.g., each running of a single model on the different devices must produce a bit-level identical result.
-
-Nondeterministic occurs from the float-point number arithmetic, . 
+There are emerging interests in deploying deep learning models on various platforms and devices. Deep networks are not just being used on supercomputers or GPU cloud computing that have high performance but are also seeing increasingly used in the edge devices that have lower computing capabilities with constraints in memory and power consumption. The situation is even more critical to deploy DNN models on the blockchain that has even more crucial environment. Not to mention that being deterministic in the blockchain environment is another issue that needs to be solved, e.g., each running of a single model on the different devices must produce a bit-level identical result.
 
 In this post, we propose a methodology to accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
-Unlike GPU, the float-point number arithmetic causes nondeterministic results, e.g. summation over a series of float-point number, which is undesirable on the edge devices and blockchain. In a public blockchain, transactions need to be verified and reached consensus by the nodes before being written on the blockchain. Each node has its own hardware specification running different version of operating systems. As a result, being deterministic is crucial on constrained environment.
+Unlike GPU, the float-point number arithmetic causes nondeterministic results, e.g. summation over a series of float-point number, which is undesirable on the edge devices and blockchain. In a public blockchain, transactions need to be verified and reached consensus by the nodes before being written on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial on a constrained environment.
 
 Thus, researchers have proposed several approaches to tackle this problem:
 
