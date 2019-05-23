@@ -73,7 +73,7 @@ where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
 In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weighted scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure shown below:
 
-![img](simulated_quant.png)
+![img](simulated_quantv2.png)
 
 ### Calibrating Requantization Parameter
 
@@ -104,6 +104,8 @@ We apply the proposed converter on pre-trained models with ImageNet dataset from
 | DenseNet          | 77.62% | 73.97% |
 | VGG19             | 74.11% | 73.87% |
 | MobileNet         | 70.77% | 63.43% |
+
+![img](mxnetvscvm.png)
 
 We can observe that the accuracy for ResNetV1 and InceptionV3 on ImageNet dataset retains after our quantization scheme.
 
