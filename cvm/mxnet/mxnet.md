@@ -8,9 +8,9 @@ There are emerging interests in deploying deep learning models on various platfo
 
 In this post, we propose a methodology to accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
-Unlike GPU, the float-point number arithmetic causes nondeterministic results, e.g. summation over a series of float-point number, which is undesirable on the edge devices and blockchain. In a public blockchain, transactions need to be verified and reached consensus by the nodes before being written on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial on a constrained environment.
+For supercomputers or GPU cloud computing, the float-point number arithmetic that causes nondeterministic results, e.g. summation over a series of float-point number, may not pose any problem. However, the nondeterministic result is undesirable on the edge devices and blockchain. In a public blockchain, transactions need to be verified and reached consensus by the nodes before being written on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial in a constrained environment.
 
-Thus, researchers have proposed several approaches to tackle this problem:
+Thus, researchers have proposed several approaches to tackle the problem:
 
 1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating-point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
@@ -19,7 +19,7 @@ The current implementation in MXNet's Contrib library follows the fake quantizat
 
 ## Implementation
 
-We implement a converter using MXNet's nnvm module called **MRT** (Model Representation Tool) that transforms a plain MXNet model that can be inferred on the **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) that transforms MXNet Model Zoo that can be inferred on the **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
 
 ### Fusion and Operator Rewriting
 
@@ -71,7 +71,7 @@ $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
-In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weighted scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure shown below:
+In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure shown below:
 
 ![img](simulatedquantv2.png)
 
@@ -81,11 +81,11 @@ Suppose our purpose is to quantize weight and activation into $[-127, 127  ]$ th
 
 To keep it simple, we are only touching layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collect the intermediate result of $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ best approximate $y$. In MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-We adopt a simple method in our implementation, which uses shift bit instead of a floating scale for requantization that will reduce work in symbol realization. For a positive float-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
+We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that will reduce work in symbol realization. For a positive float-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ### Realizing Integer-only Inference
 
-After rewriting the graph, the float operation only occurs on `broadcast` operator, e.g., `broadcast_multiply.` Taking it as an example, this operator is mainly introduced by the requantization procedure. We rewrite it as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for the best performance. The first two `shift` operators are used to avoid overflow during computation and the last `shift` is used for requantization. Note that both $y$ and $y^Q$  are tensors.
+After rewriting the graph, the float operation only occurs on `broadcast` operator, e.g., `broadcast_multiply.` Taking it as an example, this operator is mainly introduced by the requantization procedure. We rewrite it as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for the best performance. The first two `shift` operators are used to avoid overflow during computation, and the last `shift` is used for requantization. Note that both $y$ and $y^Q$  are tensors.
 
 ## Experiment
 
@@ -100,7 +100,7 @@ We apply the proposed converter on pre-trained models with ImageNet dataset from
 | ResNet18_v1b_0.89 | 67.21% | 63.65% |
 | InceptionV3       | 78.78% | 78.31% |
 | AlexNet           | 55.92% | 55.19% |
-| SqueeseNet        | 57.20% | 55.62% |
+| SqueezeNet        | 57.20% | 55.62% |
 | DenseNet          | 77.62% | 73.97% |
 | VGG19             | 74.11% | 73.87% |
 | MobileNet         | 70.77% | 63.43% |
