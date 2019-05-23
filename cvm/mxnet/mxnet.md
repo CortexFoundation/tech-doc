@@ -73,7 +73,7 @@ where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
 In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weighted scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure shown below:
 
-![img](simulated_quantv2.png)
+![img](simulatedquantv2.png)
 
 ### Calibrating Requantization Parameter
 
