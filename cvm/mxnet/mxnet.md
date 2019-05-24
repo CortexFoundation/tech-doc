@@ -1,4 +1,4 @@
-### Quantizing Ｎeural Ｎetwork Ｍodels in MXNet for Strict Consistency on Blockchain
+### Quantizing Neural Network Models in MXNet for Strict Consistency on Blockchain
 
 
 
