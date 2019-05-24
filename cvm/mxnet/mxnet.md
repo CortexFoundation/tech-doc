@@ -21,7 +21,9 @@ The current implementation in MXNet's Contrib library follows the fake quantizat
 
 Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's NNVM module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
 
-### Fusion and Operator Rewriting
+#### Fusion and Operator Rewriting
+
+Here, we only take few example for illustration of our approach.  
 
 #### Fuse Constant
 
@@ -54,6 +56,14 @@ z &=\text{BatchNorm}(\text{Convolution}(x)) \\
 \end{align}
 $$
 
+##### Rewrite GlobalAvgPooling 
+
+$$
+\text{GlobalAvgPooling}(x) =\frac{1} { K * K } \sum_{k_i} \sum_{k_j} x_{\sdot\sdot k_ik_j} \\
+= \text{broadcast_mul(sum(data, axis=(2, 3)), scale)}
+$$
+
+ where scale equals $1 / (K * K)$. Follow this routine, we are able to rewrite complex operators into simpler ones, which can be quantized better. 
 ### Simulated quantization
 
 Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
