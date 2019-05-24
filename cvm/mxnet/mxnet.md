@@ -6,28 +6,24 @@ Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 There are emerging interests in deploying deep learning models on various platforms and devices. Deep neural networks are not just being used in supercomputers or GPU clouds but are also experiencing increasingly widespread adoption in edge devices that have low computing power with memory and energy consumption constraints. In the emerging field of blockchain, where it demands every step of computation to be strictly deterministic and have minimal resource consumption, the situation is even harder for a DNN model to deploy.
 
-As the technology of distributed ledger develop, needs for more complex computations emerge. The nondeterministic nature of floating-point arithmetic and parallel computation, e.g., summation over a series of float-point number, should not be a problem for DNN models in a cloud computing environment, since the purpose of DNN model inference is often for better precision, not for future auditing or bit-level comparison. However, the nondeterministic result is undesirable in the occasion of blockchain, where different nodes need to verify the transactions to reach consensus before finalizing on the blockchain. Each node has its own hardware specification running different versions of operating systems, making it harder to standarize the computation. In other words, each single run of a single model, with the same input, in heterogeneous computing systems must yield bit-level identical results.
+As the technology of distributed ledger develop, needs for more complex computations emerge. The nondeterministic nature of floating-point arithmetic and parallel computation, e.g., summation over a series of floating-point number, should not be a problem for DNN models in a cloud computing environment, since the purpose of DNN model inference is often for better precision, not for future auditing or bit-level comparison. However, the nondeterministic result is undesirable in the occasion of blockchain, where different nodes need to verify the transactions to reach consensus before finalizing on the blockchain. Each node has its own hardware specification running different versions of operating systems, making it harder to standarize the computation. In other words, each single run of a single model, with the same input, in heterogeneous computing systems must yield bit-level identical results.
 
 In this post, we propose a framework to accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain systems. Before we dive into implementation details, let's go through a few key observations and intuitions that leads to the discovery of our framework first.
 
 Researchers have proposed several approaches to run DNN models in limited-resource environments:
 
-1. **Fake Quantization**: quantizing float-point numbers into 8-bit integers and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in the 8-bit arithmetic. Afterward, results are transformed back to float-point numbers.
-2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating-point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
+1. **Fake Quantization**: quantizing floating-point numbers into 8-bit integers and transfering data to the accelerator, which takes linear time. The most costly part of the calculation, e.g., conv, only happens in the accelerator which is dedicated in the 8-bit arithmetic. Afterwards, results are transformed back to floating-point numbers.
+2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating-point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy.
 
-The current implementation in MXNet's Contrib library follows the fake quantization routine and redirect the computation to MKLDNN math library in runtime. However, in blockchain's deterministic-sensitive scenario, float-point numbers are unacceptable. Integer-only inference, on the other hand, suits blockchain's heterogeneous environments. Besides, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. Therefore, we propose to adopt integer-only inference as our methodology.
+We apply integer-only inference in our approach. The current implementation in MXNet's Contrib library follows the fake quantization routine and redirects the computation to MKLDNN math library in runtime. However, in blockchain's deterministic scenario, floating-point numbers will introduce undesired behaviors. Integer-only inference, on the other hand, fits blockchain's heterogeneous environments perfectly. Moreover, we put a strict numerical bound to avoid integer overflow by rewriting computation graph.
 
 ## Implementation
 
-Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's NNVM module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+Cortex is a ethereum-based blockchain platform where we practice our approach. The framework includes two major components: MRT for quantization and CVM for inference. First, We implement a converter using MXNet's NNVM module **Model Representation Tool** (MRT) to convert MXNet Model Zoo to be migrated to the Cortex blockchain's virtual machine **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts equipped with machine learning models.
 
 #### Fusion and Operator Rewriting
 
 Here, we only take few example for illustration of our approach.  
-
-#### Fuse Constant
-
-After the fusion processes listed below, we conduct constant-fuse process to reduce graph complexity for better quantization performance.
 
 ##### MAC Decomposition
 
@@ -35,7 +31,7 @@ Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n
 
 Matrix multiplication operator `matmul` can also be rewritten in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
 
-##### Fuse BatchNorm
+##### Fusing BatchNorm
 
 $$
 \begin{align}
@@ -62,17 +58,21 @@ $$
 \text{GlobalAvgPooling}(x) =\frac{1} { K * K } \sum_{k_i} \sum_{k_j} x_{\sdot\sdot k_ik_j} \\
 = \text{broadcast_mul(sum(data, axis=(2, 3)), scale)}
 $$
+where scale equals $1 / (K * K)$. Follow this routine, we are able to rewrite complex operators into simpler ones, which can be quantized better. 
 
- where scale equals $1 / (K * K)$. Follow this routine, we are able to rewrite complex operators into simpler ones, which can be quantized better. 
+##### Fusing Constant
+
+After the fusion processes described above, we run a constant-fusing procedure to reduce graph complexity for better quantization performance.
+
 ### Simulated quantization
 
 Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
-As `matmul` is the core of NN's workflows, we use it as an example to illustrate how to transform a float-point operator to an integer operator. 
+As `matmul` is the core of NN's workflows, we use it as an example to illustrate how to transform a floating-point operator to an integer operator. 
 
-let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
+let's define floating-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
 $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
 
@@ -88,7 +88,7 @@ Suppose our purpose is to quantize weight and activation into $[-127, 127  ]$ th
 
 To keep it simple, we are only touching layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collect the intermediate result of $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. In MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive float-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
+We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive floating-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ### Realizing Integer-only Inference
 
@@ -96,7 +96,7 @@ After rewriting the graph, the float operation only occurs on `broadcast` operat
 
 ## Experiment
 
-Converting the original float-point model to our CVM representation results in approximately 4x model size reduction while the model accuracy does not decrease significantly. Besides, we only introduce minor additional computation overheads, e.g. requantization, leading to the operators (OPs) to be in the same order of magnitudes. All operators in the model can be optimized using vectorization techniques, which will reduce the time of computation intensively, e.g., avx512-vnni instruction set.
+Converting the original floating-point model to our CVM representation results in approximately 4x model size reduction while the model accuracy does not decrease significantly. Besides, we only introduce minor additional computation overheads, e.g. requantization, leading to the operators (OPs) to be in the same order of magnitudes. All operators in the model can be optimized using vectorization techniques, which will reduce the time of computation intensively, e.g., avx512-vnni instruction set.
 
 We apply the proposed converter on pre-trained models with ImageNet dataset from MXNet Model Zoo. The result is shown as below: 
 
