@@ -66,7 +66,7 @@ After the fusion processes described above, we run a constant-fusing procedure t
 
 ### Simulated quantization
 
-Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
+Before we can make the whole computation graph integer-only, we should first rewrite floating-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize floating-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
@@ -78,25 +78,25 @@ $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
-In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph into an annotated graph as the figure shown below:
+In our approach, scalar $s_y$ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph into an annotated graph as the figure shown below:
 
 ![img](simulatedquantv2.png)
 
 ### Calibrating Requantization Parameter
 
-Suppose our purpose is to quantize weight and activation into $[-127, 127  ]$ that can be placed into a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that large values may need to be cliped in order to obtain better quantization precision. 
+Assume our purpose is to quantize weight and activation into $[-127, 127]$ that can be placed into a signed 8-bit integer. We need to determine a bounding range $[-h, h]$, so that we can map data into $[-127,127]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that large values may need to be clipped for better quantization precision. 
 
-To keep it simple, we are only touching layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collect the intermediate result of $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. In MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
+To simplify things, we do only layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some realworld data to collect the intermediate result $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. If using MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive floating-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
+We take an approach of using shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive floating-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ### Realizing Integer-only Inference
 
-After rewriting the graph, the float operation only occurs on `broadcast` operator, e.g., `broadcast_multiply.` Taking it as an example, this operator is mainly introduced by the requantization procedure. We rewrite it as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for the best performance. The first two `shift` operators are used to avoid overflow during computation, and the last `shift` is used for requantization. Note that both $y$ and $y^Q$  are tensors.
+After rewriting the graph, the float operation only occurs on `broadcast` operator, e.g., `broadcast_multiply.` Taking it as an example, this operator is mainly introduced by the requantization procedure. We rewrite it as $y=s_02^{-b}y^Q_{\text{int32}}=((s_0>>p)(y^Q>>q))>>(r+b)$, where $p, q$ and $r$ can be calibrated for the best performance. The first two `shift` operators are used to avoid overflow during computation, and the last `shift` is used for requantization. Note that both $y$ and $y^Q$ are tensors.
 
 ## Experiment
 
-Converting the original floating-point model to our CVM representation results in approximately 4x model size reduction while the model accuracy does not decrease significantly. Besides, we only introduce minor additional computation overheads, e.g. requantization, leading to the operators (OPs) to be in the same order of magnitudes. All operators in the model can be optimized using vectorization techniques, which will reduce the time of computation intensively, e.g., avx512-vnni instruction set.
+Converting the original floating-point model to our CVM representation results in approximately 4x model size reduction while the model accuracy does not decrease significantly. Besides, we only introduce minor additional computation overheads, e.g. requantization, leading to the operations (OPs) to remain in the same order of magnitudes. All operators in the model can be further optimized using vectorization techniques, which will reduce the computation time dramatically, e.g., avx512-vnni instruction set.
 
 We apply the proposed converter on pre-trained models with ImageNet dataset from MXNet Model Zoo. The result is shown as below: 
 
@@ -114,7 +114,7 @@ We apply the proposed converter on pre-trained models with ImageNet dataset from
 
 ![img](mxnetvscvm.png)
 
-We can observe that the accuracies for ResNetV1 and InceptionV3 on ImageNet dataset are retained after our quantization scheme.
+We can see that the accuracies for ResNetV1 and InceptionV3 on ImageNet dataset are retained after our quantization scheme.
 
 We also apply the proposed converter on pre-trained models with MNIST dataset. The result is shown as below: 
 
@@ -124,12 +124,12 @@ We also apply the proposed converter on pre-trained models with MNIST dataset. T
 | LeNet           | 99.18% | 99.16% |
 | MLP             | 97.68% | 97.69% |
 
-We can observe that our quantization scheme does not lose accuracy. DigitalClashNet, which has been deployed in Cortex Testnet and used in a DApp, retains the accuracy.
+We can also see that our quantization scheme does not lose accuracy. DigitalClashNet, which has been deployed in Cortex Testnet and used in a DApp, retains the accuracy.
 
 ## Conclusion
 
-Using MXNet's quantization technology, model inference can be enabled on the limited-resource and strict environment of blockchain, unlocking a novel domain of smart contracts with machine learning models. The use case could be DeFi, Entertainment, Information service, BaaS, etc.
+Based on MXNet, we have built a deterministic quantization framework, where model inference can be enabled on the limited-resource and strictly deterministic environment of blockchain, enabling a new domain of smart contracts with machine learning models. This framework can be found useful in a variety of applications: Decentralized Finance, Entertainment, Information service, Blockchain as a Service, etc.
 
 ## Future work
 
-Possible directions include but not limited to, enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
+Quantization is a relatively new field that has more to study, like federated training, assymetric quantization, channel/group-wise quantization, privacy, etc. We will continue to explore possible applications and implementations of quantization in MXNet.
