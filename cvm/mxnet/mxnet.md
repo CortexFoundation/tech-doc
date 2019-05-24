@@ -1,25 +1,25 @@
-### Ｑuantizing Ｎeural Ｎetwork Ｍodels in MXNet for Strict Consistency on Blockchain
+### Quantizing Ｎeural Ｎetwork Ｍodels in MXNet for Strict Consistency on Blockchain
 
 Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
 ## Introduction
 
-There are emerging interests in deploying deep learning models on various platforms and devices. Deep networks are not just being used on supercomputers or GPU cloud computing that have high performance but are also seeing increasingly used in the edge devices that have lower computing capabilities with constraints in memory and power consumption. The situation is even more critical to deploy DNN models on the blockchain that has even more crucial environment. Not to mention that being deterministic in the blockchain environment is another issue that needs to be solved, e.g., each running of a single model on the different devices must produce a bit-level identical result.
+There are emerging interests in deploying deep learning models on various platforms and devices. Deep networks are not just being used on supercomputers or GPU cloud computing that have high performance but are also seeing increasingly used in the edge devices that have lower computing capabilities with constraints in memory and power consumption. The situation is even more critical to deploy DNN models on the blockchain that has even more crucial environment. 
+
+For supercomputers or GPU cloud computing, the float-point number arithmetic that causes nondeterministic results, e.g., summation over a series of float-point number, may not pose any problem. However, the nondeterministic result is undesirable on the edge devices and blockchain. In a public blockchain, different nodes need to verify the transactions to reach consensus before writing on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial in a constrained environment like blockchain, e.g., each running of a single model on the different devices must produce a bit-level identical result.
 
 In this post, we propose a methodology to accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
-For supercomputers or GPU cloud computing, the float-point number arithmetic that causes nondeterministic results, e.g. summation over a series of float-point number, may not pose any problem. However, the nondeterministic result is undesirable on the edge devices and blockchain. In a public blockchain, different nodes need to verified the transactions to reach consensus before writting on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial in a constrained environment like blockchain.
+Researchers have proposed several approaches to run DNN models in limited-resource environments:
 
-Thus, researchers have proposed several approaches to tackle the problem:
-
-1. **Fake Quantization**: quantizing float-point numbers into 8-bit integers and transfer data to the accelerator, which takes a linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in the 8-bit arithmetic. Afterward, results are transformed back to float-point numbers.
+1. **Fake Quantization**: quantizing float-point numbers into 8-bit integers and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in the 8-bit arithmetic. Afterward, results are transformed back to float-point numbers.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating-point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
 
 The current implementation in MXNet's Contrib library follows the fake quantization routine and redirect the computation to MKLDNN math library in runtime. However, in blockchain's deterministic-sensitive scenario, float-point numbers are unacceptable. Integer-only inference, on the other hand, suits blockchain's heterogeneous environments. Besides, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. Therefore, we propose to adopt integer-only inference as our methodology.
 
 ## Implementation
 
-We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
 
 ### Fusion and Operator Rewriting
 
@@ -31,7 +31,7 @@ After the fusion processes listed below, we conduct constant-fuse process to red
 
 Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only held when $n$ is less than $2^{16}$. In other words, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into small peices in graph level and aggreate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each part of vector that has length smaller than $2^{16}$.
 
-Matrix multiplication operator `matmul` can also be rewrote in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
+Matrix multiplication operator `matmul` can also be rewritten in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
 
 ##### Fuse BatchNorm
 
@@ -63,7 +63,7 @@ where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
-As `matmul` is the core of NN's workflows, we use it as an example to illustrate on how to transform a float-point operator to an integer operator. 
+As `matmul` is the core of NN's workflows, we use it as an example to illustrate how to transform a float-point operator to an integer operator. 
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
@@ -107,7 +107,7 @@ We apply the proposed converter on pre-trained models with ImageNet dataset from
 
 ![img](mxnetvscvm.png)
 
-We can observe that the accuracies for ResNetV1 and InceptionV3 on ImageNet dataset  are retained after our quantization scheme.
+We can observe that the accuracies for ResNetV1 and InceptionV3 on ImageNet dataset are retained after our quantization scheme.
 
 We also apply the proposed converter on pre-trained models with MNIST dataset. The result is shown as below: 
 
@@ -125,4 +125,4 @@ Using MXNet's quantization technology, model inference can be enabled on the lim
 
 ## Future work
 
-Enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
+Possible directions include but not limited to, enhancing privacy, accuracy, and efficiency. Mobile/edge computing realization is also one of our goals.
