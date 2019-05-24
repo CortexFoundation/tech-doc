@@ -19,7 +19,7 @@ The current implementation in MXNet's Contrib library follows the fake quantizat
 
 ## Implementation
 
-Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's NNVM module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
 
 ### Fusion and Operator Rewriting
 
@@ -35,31 +35,28 @@ Matrix multiplication operator `matmul` can also be rewritten in the same fashio
 
 ##### Fuse BatchNorm
 
-*gamma, beta, data_mean, data_var*: attributes.
 $$
 \begin{align}
-\text{BatchNorm(x)} &= y_{\sdot i\sdot\sdot} \\
+y_{\sdot i\sdot\sdot}&= \text{BatchNorm}(x_{\sdot i\sdot\sdot})  \\
 &= {x_{\sdot i\sdot\sdot} - \mu^X_i \over \sigma^X_i} * \gamma_i + \lambda_i \\
 &= x_{\sdot i\sdot\sdot} * \alpha_i + \beta_i \\
 \end{align}
 $$
-, where $\alpha$ is $\gamma \over \sigma $ and $\beta$ is $\lambda -\mu * \gamma / \sigma$.
+where $\alpha_i$ is $\gamma_i \over \sigma^X_i $ and $\beta_i$ is $\lambda_i -\mu_i * \gamma_i / \sigma_i^X$.
 
-when $y=\text{Convolution}(x)$, we can get equation as belows:
+Thus, we can fuse BatchNorm into Convolution's weight. As a result, we can get equation as belows:
 $$
-z
-= (y \circledast W + b) * \alpha + \beta 
-= y \circledast (W * \alpha) + (b * \alpha + \beta) \\
-= \text{Convolution}(y, \text{weight}=W * \alpha, \text{bias}=b * \alpha + \beta)
+\begin{align}
+\\
+z &=\text{BatchNorm}(\text{Convolution}(x)) \\
+& = (x \circledast W + b) * \alpha + \beta = x \circledast (W * \alpha) + (b * \alpha + \beta) \\
+&= \text{Convolution}(x, \text{weight}=W * \alpha, \text{bias}=b * \alpha + \beta)
+\end{align}
 $$
 
 ### Simulated quantization
 
-Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,
-
-$$\begin{align}x=sx^{Q} \end{align}$$                             
-
-where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
+Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
