@@ -1,4 +1,4 @@
-### Quantizing NN models for deployment on blockchain
+### Ｑuantizing Ｎeural Ｎetwork Ｍodels in MXNet for Strict Consistency on Blockchain
 
 Towards A Novel Deterministic Inference Infrastructure on Blockchain
 
@@ -8,30 +8,30 @@ There are emerging interests in deploying deep learning models on various platfo
 
 In this post, we propose a methodology to accelerate DNN models' inference and eliminate nondeterministic behavior in model inference for blockchain adoption. Before we go into the detail of implementation, we first go through the observation and intuition behind this methodology.
 
-For supercomputers or GPU cloud computing, the float-point number arithmetic that causes nondeterministic results, e.g. summation over a series of float-point number, may not pose any problem. However, the nondeterministic result is undesirable on the edge devices and blockchain. In a public blockchain, transactions need to be verified and reached consensus by the nodes before being written on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial in a constrained environment.
+For supercomputers or GPU cloud computing, the float-point number arithmetic that causes nondeterministic results, e.g. summation over a series of float-point number, may not pose any problem. However, the nondeterministic result is undesirable on the edge devices and blockchain. In a public blockchain, different nodes need to verified the transactions to reach consensus before writting on the blockchain. Each node has its own hardware specification running a different version of operating systems. As a result, being deterministic is crucial in a constrained environment like blockchain.
 
 Thus, researchers have proposed several approaches to tackle the problem:
 
-1. **Fake Quantization**: quantizing float-point number into 8-bit integer and transfer data to the accelerator, which takes linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in 8-bit arithmetic. Afterward, results are transformed back to float-point.
+1. **Fake Quantization**: quantizing float-point numbers into 8-bit integers and transfer data to the accelerator, which takes a linear time to apply this operation. The most costly part of the calculation, e.g., conv, only happens in the accelerator that dedicated in the 8-bit arithmetic. Afterward, results are transformed back to float-point numbers.
 2. **Integer-Only Inference**: quantization scheme that allows inference to be carried out using integer-only arithmetic, which can be implemented more efficiently than floating-point inference on commonly available integer-only hardware. Fine-tune procedure is usually utilized to preserve model accuracy post-quantization
 
-The current implementation in MXNet's Contrib library follows the fake quantization routine and redirect the computation to MKLDNN math library in runtime. However, in blockchain's deterministic-sensitive scenario, the float-point number is unacceptable. Integer-only inference, on the other hand, suits blockchain's heterogeneous environments. Besides, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. Therefore, we propose to adopt integer-only inference as our methodology.
+The current implementation in MXNet's Contrib library follows the fake quantization routine and redirect the computation to MKLDNN math library in runtime. However, in blockchain's deterministic-sensitive scenario, float-point numbers are unacceptable. Integer-only inference, on the other hand, suits blockchain's heterogeneous environments. Besides, the numerical bound is checked to avoid integer overflow by utilizing graph level rewriting. Therefore, we propose to adopt integer-only inference as our methodology.
 
 ## Implementation
 
-We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) that transforms MXNet Model Zoo that can be inferred on the **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
 
 ### Fusion and Operator Rewriting
 
 #### Fuse Constant
 
-After the fusion processes listed below, we do constant-fuse process to reduce graph complexity for better quantization performance.
+After the fusion processes listed below, we conduct constant-fuse process to reduce graph complexity for better quantization performance.
 
 ##### MAC Decomposition
 
-Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only held when $n$ is less than $2^{16}$. In other words, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into small peices in graph level and aggreate the results. Mathmatically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each part of vector has length smaller than $2^{16}$.
+Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only held when $n$ is less than $2^{16}$. In other words, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into small peices in graph level and aggreate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each part of vector that has length smaller than $2^{16}$.
 
-Matrix multiplication operator `matmul` can also be rewritten in the same fashion, which results in a series of `elemwise_add` operator that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
+Matrix multiplication operator `matmul` can also be rewrote in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
 
 ##### Fuse BatchNorm
 
@@ -55,7 +55,7 @@ $$
 
 ### Simulated quantization
 
-Before we can make the whole computational graph integer-only, we should first rewrite float-point number into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,
+Before we can make the whole computational graph integer-only, we should first rewrite float-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize float-point vector $x$ to signed 8-bit type $x^Q$, specifically,
 
 $$\begin{align}x=sx^{Q} \end{align}$$                             
 
@@ -63,7 +63,7 @@ where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
-As `matmul` is the core of NN's workflows, we use it as an example to illustrate on how to transform float-point operator to an integer operator. 
+As `matmul` is the core of NN's workflows, we use it as an example to illustrate on how to transform a float-point operator to an integer operator. 
 
 let's define float-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
@@ -71,17 +71,17 @@ $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}
 
 where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
 
-In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph to an annotated graph as the figure shown below:
+In our approach, scalar $s_y $ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $ s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph into an annotated graph as the figure shown below:
 
 ![img](simulatedquantv2.png)
 
 ### Calibrating Requantization Parameter
 
-Suppose our purpose is to quantize weight and activation into $[-127, 127  ]$ that can be placed into a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that large value may need to be cliped in order to obtain better quantization precision. 
+Suppose our purpose is to quantize weight and activation into $[-127, 127  ]$ that can be placed into a signed 8-bit integer. We need to determinate a range $[-h, h] $, so that we can map data into $[-127,127 ]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that large values may need to be cliped in order to obtain better quantization precision. 
 
-To keep it simple, we are only touching layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collect the intermediate result of $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ best approximate $y$. In MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
+To keep it simple, we are only touching layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some data to collect the intermediate result of $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. In MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
 
-We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that will reduce work in symbol realization. For a positive float-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
+We adopt a simple method in our implementation, which uses shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive float-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ### Realizing Integer-only Inference
 
@@ -107,7 +107,7 @@ We apply the proposed converter on pre-trained models with ImageNet dataset from
 
 ![img](mxnetvscvm.png)
 
-We can observe that the accuracy for ResNetV1 and InceptionV3 on ImageNet dataset retains after our quantization scheme.
+We can observe that the accuracies for ResNetV1 and InceptionV3 on ImageNet dataset  are retained after our quantization scheme.
 
 We also apply the proposed converter on pre-trained models with MNIST dataset. The result is shown as below: 
 
