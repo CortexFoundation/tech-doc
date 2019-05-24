@@ -23,13 +23,13 @@ Cortex is a ethereum-based blockchain platform where we practice our approach. T
 
 #### Fusion and Operator Rewriting
 
-Here, we only take few example for illustration of our approach.  
+We illustrate our approach by following examples.  
 
 ##### MAC Decomposition
 
-Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound is only held when $n$ is less than $2^{16}$. In other words, we cannot assume abense of overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into small peices in graph level and aggreate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each part of vector that has length smaller than $2^{16}$.
+Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound holds only when $n$ is less than $2^{16}$. In other words, we cannot assume that there is no overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into smaller sub-problems in graph level and aggregate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each partition's length smaller than $2^{16}$.
 
-Matrix multiplication operator `matmul` can also be rewritten in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
+Matrix multiplication operator `matmul` can also be rewritten in the same fashion, generating a series of `elemwise_add` operators that sum over several intermediate matrices. The semantics is unchanged although this step introduces additional operators in the computation graph.
 
 ##### Fusing BatchNorm
 
@@ -42,7 +42,7 @@ y_{\sdot i\sdot\sdot}&= \text{BatchNorm}(x_{\sdot i\sdot\sdot})  \\
 $$
 where $\alpha_i$ is $\gamma_i \over \sigma^X_i $ and $\beta_i$ is $\lambda_i -\mu_i * \gamma_i / \sigma_i^X$.
 
-Thus, we can fuse BatchNorm into Convolution's weight. As a result, we can get equation as belows:
+We can see that BatchNorm can be fused into Convolution's weight. As a result, we have:
 $$
 \begin{align}
 \\
@@ -58,7 +58,7 @@ $$
 \text{GlobalAvgPooling}(x) =\frac{1} { K * K } \sum_{k_i} \sum_{k_j} x_{\sdot\sdot k_ik_j} \\
 = \text{broadcast_mul(sum(data, axis=(2, 3)), scale)}
 $$
-where scale equals $1 / (K * K)$. Follow this routine, we are able to rewrite complex operators into simpler ones, which can be quantized better. 
+where scale equals $1 / (K * K)$. Following this routine, we are able to rewrite complex operators into simpler ones, which can be further safely quantized. 
 
 ##### Fusing Constant
 
