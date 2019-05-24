@@ -19,13 +19,9 @@ We apply integer-only inference in our approach. The current implementation in M
 
 ## Implementation
 
-Cortex is an open-source, peer-to-peer, decentralized blockchain platform that supports ml models upload and inference on the distributed network. We implement a converter using MXNet's nnvm module called **Model Representation Tool** (MRT) on MXNet Model Zoo that can be inferred on the Cortex blockchain's virtual machine called **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts with machine learning models on the blockchain.
+Cortex is a ethereum-based blockchain platform where we practice our approach. The framework includes two major components: MRT for quantization and CVM for inference. First, We implement a converter using MXNet's NNVM module **Model Representation Tool** (MRT) to convert MXNet Model Zoo to be migrated to the Cortex blockchain's virtual machine **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts equipped with machine learning models.
 
-### Fusion and Operator Rewriting
-
-#### Fuse Constant
-
-After the fusion processes listed below, we conduct constant-fuse process to reduce graph complexity for better quantization performance.
+### Operator Fusion and Rewriting
 
 ##### MAC Decomposition
 
@@ -33,7 +29,7 @@ Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n
 
 Matrix multiplication operator `matmul` can also be rewritten in the same fashion, resulting in a series of `elemwise_add` operators that sum over several intermediate matrices. Although this rewriting introduces additional operators in the computation graph, semantic remains unchanged.
 
-##### Fuse BatchNorm
+##### Fusing BatchNorm
 
 *gamma, beta, data_mean, data_var*: attributes.
 $$
@@ -52,6 +48,11 @@ z
 = y \circledast (W * \alpha) + (b * \alpha + \beta) \\
 = \text{Convolution}(y, \text{weight}=W * \alpha, \text{bias}=b * \alpha + \beta)
 $$
+
+#### Fusing Constant
+
+After the fusion processes described above, we run a constant-fusing procedure to reduce graph complexity for better quantization performance.
+
 
 ### Simulated quantization
 
