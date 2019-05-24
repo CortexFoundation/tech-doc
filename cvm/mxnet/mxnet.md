@@ -1,6 +1,6 @@
 ### Quantizing Ｎeural Ｎetwork Ｍodels in MXNet for Strict Consistency on Blockchain
 
-Towards A Novel Deterministic Inference Infrastructure on Blockchain
+
 
 ## Introduction
 
