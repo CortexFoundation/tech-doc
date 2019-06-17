@@ -1,0 +1,2 @@
+mrt全名model representation tool，是cortex的模型定点化转换工具。mrt用于对接cortex虚拟机cvm提供的AI框架API，旨在将nnvm支持的浮点模型转换为cvm可执行的全整形定点化模型，并保证足够少的精度损失。量化方法主要是将模型所有layer的输出数域放缩到INT8或者INT32范围，来模拟浮点网络，通过fuse和rewrite等方法，将涉及到浮点操作的算子转换为全整形算子；另一方面，量化网络确保整形范围操作的非溢出，保证模型执行的确定性。
+

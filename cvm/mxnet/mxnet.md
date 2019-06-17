@@ -27,7 +27,17 @@ We illustrate our approach by following examples.
 
 ##### MAC Decomposition
 
-Suppose we are calculating the inner dot of two vector $x \in Z_{\text{int8}}^{n}$ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically, $s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}$ . However, this condition of numerical bound holds only when $n$ is less than $2^{16}$. In other words, we cannot assume that there is no overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into smaller sub-problems in graph level and aggregate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each partition's length smaller than $2^{16}$.
+Suppose we are calculating the inner dot of two vector 
+$$
+x \in Z_{\text{int8}}^{n}
+$$
+ and $y \in Z_{\text{int8}}^{n}$, which may results in a 32-bit integer, sepecifically,
+
+$$
+s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}
+$$
+
+ . However, this condition of numerical bound holds only when $n$ is less than $2^{16}$. In other words, we cannot assume that there is no overflow when $n$ is large, which may introduce nondeterministic behavior during parallel computing. To resolve this problem, we decomposite the computation into smaller sub-problems in graph level and aggregate the results. Mathematically, $s=<x^{(1)}, y^{(1)}>+<x^{(2)}, y^{(2)}> + … + <x^{(K)}, y^{(K)}>$, $x^{(k)}$ is the $k$-th part of vector $x$ with each partition's length smaller than $2^{16}$.
 
 Matrix multiplication operator `matmul` can also be rewritten in the same fashion, generating a series of `elemwise_add` operators that sum over several intermediate matrices. The semantics is unchanged although this step introduces additional operators in the computation graph.
 
@@ -66,29 +76,49 @@ After the fusion processes described above, we run a constant-fusing procedure t
 
 ### Simulated quantization
 
-Before we can make the whole computation graph integer-only, we should first rewrite floating-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize floating-point vector $x$ to signed 8-bit type $x^Q$, specifically,$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
+Before we can make the whole computation graph integer-only, we should first rewrite floating-point numbers into simulated quantized representation. In the current implementation, we adopt a symmetric quantization approach to quantize floating-point vector $x$ to signed 8-bit type $x^Q$, specifically,
+
+$$\begin{align}x=sx^{Q} \end{align}$$                             where $x\in \mathbf{R}^{n}, s \in \mathbf{R}, x^Q \in Z_{\text{int8}}^n$
 
 After applying quantization, we reorder the operators in the graph for further processing. 
 
 As `matmul` is the core of NN's workflows, we use it as an example to illustrate how to transform a floating-point operator to an integer operator. 
 
-let's define floating-point `matmul` as $y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$. First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
+let's define floating-point `matmul` as 
+
+$y = Wx$, where $y\in \mathbf{R}^m, x\in \mathbf{R}^n, W\in \mathbf{R}^{m\times n}$
+
+First we rewrite $x$, $y$  and $W$ into quantized representation $s_y * y^Q   = (s_wW^Q)  (s_x  X^Q) $ , and rewrite it into
 
 $$ \begin{align}\\ y^Q &=(\frac{s_w s_x}  {s_y}) W^QX^Q = s_q W^QX^Q \end{align}$$
 
-where $s_q =\frac{s_w s_x}  {s_y} $ is the requantization scalar.
+where
 
-In our approach, scalar $s_y$ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $s_w$, we can further determine requantization scalar $s_q$ by definition. Thus, we can rewrite the original graph into an annotated graph as the figure shown below:
+ $s_q =\frac{s_w s_x}  {s_y} $ 
+
+is the requantization scalar.
+
+In our approach, scalar $s_y$ is determined in advance by calibration. With calibrated scalar $s_y$, for output $y$ of each operator and weights scalar $s_w$, we can further determine requantization scalar $s_q$ by definition. 
+
+Thus, we can rewrite the original graph into an annotated graph as the figure shown below:
 
 ![img](simulatedquantv2.png)
 
 ### Calibrating Requantization Parameter
 
-Assume our purpose is to quantize weight and activation into $[-127, 127]$ that can be placed into a signed 8-bit integer. We need to determine a bounding range $[-h, h]$, so that we can map data into $[-127,127]$. Formally, we have $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$, note that large values may need to be clipped for better quantization precision. 
+Assume our purpose is to quantize weight and activation into $[-127, 127]$ that can be placed into a signed 8-bit integer. We need to determine a bounding range $[-h, h]$, so that we can map data into $[-127,127]$. Formally, we have
 
-To simplify things, we do only layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$ . In terms of activation, we need to feed some realworld data to collect the intermediate result $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. If using MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
+ $s_x = h/127, x^Q = \text{round}(\text{clip}(x; -h, h) / s_x)$
 
-We take an approach of using shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive floating-point scale $s$, we rewrite it as $s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
+, note that large values may need to be clipped for better quantization precision. 
+
+To simplify things, we do only layer-wise quantization. For quantizing weight $w$, we set $h=\max(\{|a| | a \in x \})$
+
+ . In terms of activation, we need to feed some realworld data to collect the intermediate result $y$. Then we can use a heuristic approach to calibrate a threshold $h$ to get $y^Q$ that best approximates $y$. If using MXNet's quantization package, we can utilize the entropy-based calibration method to find the best fit. 
+
+We take an approach of using shift bit instead of a floating point for requantization that reduces work in symbol realization. For a positive floating-point scale $s$, we rewrite it as 
+
+$s\sim s_02^{-b}$, where $s_0$ and $b$ are positive integer. 
 
 ### Realizing Integer-only Inference
 

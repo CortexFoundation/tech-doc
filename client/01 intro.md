@@ -11,13 +11,16 @@ Requirements
 
 To ensure that your Cortex client runs gracfully, please check your system meets the following requirements:
 
-	| :fa:`linux` ``64-bit`` Linux OS
-	| :fa:`microchip` ``64-bit`` Processor
-	| :fa:`database` ``8GB`` of free RAM
-	| :fa:`hdd-o` ``25GB`` of free Disk (*the size of the block chain increases over time*)
+- System: Linux Ubuntu 18.04+
+- RAM: 8GB
+- GPU: Nvidia GPU with 10.7GB VRAM (1080ti, 2080ti, titan V, etc.)
+- Space: 25GB  (*the size of the block chain increases over time*)
+- CUDA version: 9.2+
+- CUDA driver: 396+
+- Compiler: Go 1.10+, GCC 5.4+
 
 
-.. note:: Currently we only officially support Linux (Debian), but we are actively investigating development for other operating systems and platforms(e.g. macOS, Ubuntu, Windows, Fedora). 
+note: Currently we only officially support Linux (Ubuntu), but we are actively investigating development for other operating systems and platforms(e.g. macOS, Ubuntu, Windows, Fedora). 
 
-Building Cortex clients requires a Go (version 1.7 or later), a C compiler, and a CUDA (version 9.2 or later). We will guide you through the Installation section.
+Building Cortex clients requires a Go (version 1.10 or later), a C compiler, and a CUDA (version 9.2 or later). We will guide you through the Installation section.
 
