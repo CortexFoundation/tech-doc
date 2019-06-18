@@ -2,6 +2,8 @@
 
 The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that requires far less energy than most other GPU, CPU or ASIC-bound PoW algorithms. The goal is to lower the mining requirements to lay the foundation for future scalability in AI computing demand market.
 
+Cuckoo Cycle is designed to be ASIC resistant and optimal for GPU based processing of transactions. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. As typically found in PoW digital assets, miners provide computing power to support the network and are rewarded with transaction fees, known as endorphin, for new issuances of the native asset.    
+
 The difficulty dynamically adjusts so that on average one block is produced by the entire network every 5 seconds (ie., 5s block time). this rate ensures the synchronization of system state and prevents double spending or alters history unless the attacker possesses more than 51% of the network mining power.
 
 ## Mining Rewards
