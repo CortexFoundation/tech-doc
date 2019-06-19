@@ -61,7 +61,7 @@ sudo apt-get update
 sudo apt-get install go-1.10
 ```
 
-## Miner
+## Start Mining
 
 MinerPool Website ：https://pool.cortexlabs.ai/
 
