@@ -1,5 +1,5 @@
 # Cortex Virtual Machine (CVM)
+CVM, stands for Cortex Virtual Machine, is ported from Ethereum's EVM with added support for AI inference on Cortex. CVM is compatible with Ethereum Virtual Machine (“EVM”) smart contracts and runs both existing contracts and inferred contracts with artificial intelligence. With the advanced computation supports, Cortex allows users to write machine learning programs on the blockchain and submit some interactions that depend on other contracts. CVM has two distinctive new features:  deterministic inference engine and inference support. 
 
-CVM is compatible with Ethereum Virtual Machine (“EVM”) smart contracts and runs both existing contracts and inferred contracts with artificial intelligent. With the advanced computation supports, Cortex allows
-users to write machine learning programs on the blockchain and submit some interactions that depends on other contracts. 
+CVM is equipped with Synapse deterministic engine. Synapse, also known as CVM Executor, guarantee the consistency of AI inference results in heterogeneous computing environments, while not losing performance or accuracy significantly. Synapse proposes a model-based fixed-point execution framework and a corresponding deterministic machine learning operator library. AI developers can train or quantize their models using MRT to be executable in CVM. AI models can be called in contracts through instruction sets, including Infer (code: 0xc0), InferArray (code: 0xc1).  The instruction sets allow contracts to include AI models and infers through CVM. 
 

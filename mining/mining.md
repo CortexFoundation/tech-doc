@@ -12,7 +12,7 @@ Any node participating in the network can be a miner. The successful miner of th
 
 - A static block reward for the 'winning' block, consisting of exactly 2.5 CTXC
 - All of the endorphines attach to the transactions set by the senders, that are executed within the winning block.
--  expended within the block, that is, all the gas consumed by the execution of all the transactions in the block submitted by the winning miner is compensated for by the senders. The gascost incurred is credited to the miner's account as part of the consensus protocol. Over time, it's expected these will dwarf the static block reward.
+-  All endorphins consumed by the execution of all the transactions in the block submitted by the winning miner is compensated for by the senders.
 
 ## The Algorithm
 
