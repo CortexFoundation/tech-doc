@@ -4,17 +4,16 @@ User Guide
 About
 -----
 
-The Cortex repository is a fork of [Go Ethereum](https://github.com/ethereum/go-ethereum>) which contains protocol changes to support ml model inference. This implements the Cortex network, which maintains a separate ledger from the Ethereum network, for several reasons, the most immediate of which are AI inference support and the consensus protocol is different.
+The Cortex repository is a fork of [Go Ethereum](https://github.com/ethereum/go-ethereum>) which contains protocol changes to support machine learning model inference. This implements the Cortex network, which maintains a separate ledger from the Ethereum network, for several reasons, the most immediate of which are AI inference support and the consensus protocol.
 
 Requirements
 ---------------
 
 To ensure that your Cortex client runs gracfully, please check your system meets the following requirements:
 
-- System: Linux Ubuntu 18.04+
-- RAM: 8GB
+- System: Linux Ubuntu 16.04+
 - GPU: Nvidia GPU with 10.7GB VRAM (1080ti, 2080ti, titan V, etc.)
-- Space: 25GB  (*the size of the block chain increases over time*)
+- Space: 2TB  (*the size of the block chain increases over time*)
 - CUDA version: 9.2+
 - CUDA driver: 396+
 - Compiler: Go 1.10+, GCC 5.4+

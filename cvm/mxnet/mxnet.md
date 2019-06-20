@@ -18,7 +18,7 @@ We apply integer-only inference in our approach. The current implementation in [
 
 ## Implementation
 
-Cortex is an Ethereum-based blockchain platform where we practice our approach. The framework includes two major components: MRT for quantization and CVM for inference. First, We implement a converter using MXNet’s [NNVM](https://tvm.ai/2017/10/06/nnvm-compiler-announcement.html) module, named **Model Representation Tool** (MRT), to convert the [MXNet Model Zoo](https://mxnet.incubator.apache.org/api/python/gluon/model_zoo.html) to quantized models. Second, we run the quantized models in the Cortex blockchain’s virtual machine **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts equipped with machine learning models.Cortex is a ethereum-based blockchain platform where we practice our approach. The framework includes two major components: MRT for quantization and CVM for inference. First, We implement a converter using MXNet's NNVM module **Model Representation Tool** (MRT) to convert MXNet Model Zoo to quantized models. Second, we run the quantized models in the Cortex blockchain's virtual machine **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts equipped with machine learning models.
+Cortex is an Ethereum-based blockchain platform where we practice our approach. The framework includes two major components: MRT for quantization and CVM for inference. First, We implement a converter using MXNet’s [NNVM](https://tvm.ai/2017/10/06/nnvm-compiler-announcement.html) module, named **Model Representation Tool** (MRT), to convert the [MXNet Model Zoo](https://mxnet.incubator.apache.org/api/python/gluon/model_zoo.html) to quantized models. Second, we run the quantized models in the Cortex blockchain’s virtual machine **Cortex Virtual Machine** (CVM), the runtime environment for smart contracts equipped with machine learning models.
 
 #### Fusion and Operator Rewriting
 
@@ -26,7 +26,7 @@ We illustrate our approach by following examples.
 
 ##### MAC Decomposition
 
-To rewrite the MAC (Multiply and ACcumulate) operator, suppose we are calculating the inner dot of two 8-bits integer vectors x and y, which may results in a 32-bit integer, specifically,
+To rewrite the MAC (Multiply and Accumulate) operator, suppose we are calculating the inner dot of two 8-bits integer vectors x and y, which may results in a 32-bit integer, specifically,
 
 $$
 s=<x, y> = \sum_i^n x_i y_i \in  Z_{\text{int32}}^{n}
