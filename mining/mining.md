@@ -1,10 +1,10 @@
 # Introduction
 
-The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that requires far less energy than most other GPU, CPU or ASIC-bound PoW algorithms. The goal is to lower the mining requirements to lay the foundation for future scalability in AI computing demand market.
+The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that is far less energy-intensive than most other CPU, GPU or ASIC-bound PoW algorithms. The goal is to lower mining requirements, ensuring true decentralization and laying the foundation for future scalability.
 
-Cuckoo Cycle is designed to be ASIC resistant and optimal for GPU based processing of transactions. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. As typically found in PoW digital assets, miners provide computing power to support the network and are rewarded with transaction fees, known as endorphin, for new issuances of the native asset.    
+Cuckoo Cycle is designed to be ASIC-resistant and optimal for GPU-based transactions processing. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. Just as in a typical PoW project, miners provide the computing power to support the Cortex network and in return are rewarded with transaction fees, which incidentally is Cortex’s way to issue more CTXCs, the native Cortex asset. 
 
-The difficulty dynamically adjusts so that on average one block is produced by the entire network every 5 seconds (ie., 5s block time). this rate ensures the synchronization of system state and prevents double spending or alters history unless the attacker possesses more than 51% of the network mining power.
+The difficulty adjusts dynamically so that on average a block is produced every 15 seconds, i.e. 15s block time. This rate ensures the synchronization of the system state while preventing double-spend and history alteration, unless an attacker possesses more than 51% of the network mining power.
 
 ## Mining Rewards
 
