@@ -12,7 +12,7 @@ You can get CTXC with the following methods:
 - Become a Cortex Miner (see [mining](mining.md))
 
 
-##Units
+##Fractional Units
 |Value|Unit|Honoring|
 |------------|-------|--------------|
 |1 CTXC    |CTXC|Cortex Coin|

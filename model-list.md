@@ -4,7 +4,7 @@ Cortex has 23 models trained with 4 datasets that serve 7 different purposes. Al
 
 ##Model List
 
-![model-list](/Users/oscarwei/Dropbox/markdown/tech-doc/models/model-list.jpg)
+![model-list](/Users/oscarwei/Dropbox/markdown/tech-doc/model-list.jpg)
 
 ##Methods
 

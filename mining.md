@@ -1,6 +1,6 @@
 # Introduction
 
-The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that is far less energy-intensive than most other CPU, GPU or ASIC-bound PoW algorithms. The goal is to lower mining requirements, ensuring true decentralization and laying the foundation for future scalability.
+The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that is far less energy-intensive than most other CPU, GPU or ASIC-bound PoW algorithms. The goal is to lower mining requirements, ensuring true decentralization, and laying the foundation for future scalability.
 
 Cuckoo Cycle is designed to be ASIC-resistant and optimal for GPU-based transactions processing. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. Just as in a typical PoW project, miners provide the computing power to support the Cortex network, in return are rewarded with transaction fees. The process incidentally is Cortex's way to issue more CTXCs, the native Cortex asset. 
 
@@ -68,7 +68,7 @@ Set miner account
 Set the miner pool URI for submitting solutions. Up to 3.
 
 #### --worker
-Enable multiple miners to mine with same account. Set different worker to differentiate 
+Enable multiple miners to mine with same account. Set different worker to differentiate different miner account
 
 #### --deviceids [id1,id2,id3]
 Set which GPU device use for mining, param is device ids concatenated by commas.

@@ -1,6 +1,6 @@
 # Endorphin
 
-Cortex charges a fee per computational step that is executed in a contract or transaction to prevent deliberate attacks and abuse on the Cortex network. Endorphin is the execution fee that senders of transactions need to pay for every operation made on Cortex. Every transaction is required to include an endorphin limit and a fee that it is willing to pay per endorphin. Miners have the choice of including the transaction and collecting the fee or not. 
+Endorphin is the execution fee that senders of transactions need to pay for every operation made on Cortex. Every transaction is required to include an endorphin limit and a fee that it is willing to pay per Endorphin. Miners have the choice of including the transaction and collecting the fee or not. 
 
 In contrast to the traditional blockchain, in which the reward for each packaging block is paid directly to the miners, a portion of the reward goes to the model provider to motivate developers to submit richer and better models. Endorphins invoking the contract, are not only allocated to miners who help package the block on the full node, but also used to pay the model providers. 
 

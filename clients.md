@@ -1,10 +1,7 @@
-User Guide
+Clients
 ==========
 
-About
------
-
-The Cortex repository is a fork of [Go Ethereum](https://github.com/ethereum/go-ethereum>) which contains protocol changes to support machine learning model inference. This implements the Cortex network, which maintains a separate ledger from the Ethereum network, for several reasons, the most immediate of which are AI inference support and the consensus protocol.
+The Cortex repository is a fork of [Go Ethereum](https://github.com/ethereum/go-ethereum>) which contains protocol changes to support machine learning model inference. This implements the Cortex network, which maintains a separate ledger from the Ethereum network, for several reasons, the most immediate of which are AI inference support and the deterministic inference consensus.
 
 Requirements
 ---------------
