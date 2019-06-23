@@ -1,16 +1,12 @@
 # Cortex Tech Doc
 
--------------------
-
-Trello board: https://trello.com/invite/b/BkfjsDUe/d66f82126032aa59b7b1f32451c147fe/technical-doc
-
-## Client
-
-## Smart Contracts
-
-## Mining
-
-## Wallet
-
-## Demo
+- [Introduction](cortex-intro.md)
+- [Mining](mining.md)
+- [AI Contract](ai-contracts.md)
+- [Operators](cvm-operators)
+- [AI DApp](ai-dapps.md)
+- [Cortex Remix](cortex-remix.md)
+- [Cortex Virtual Machine](cvm.md)
+- [Endorphin](endorphin.md)
+- [Storage Layer](storage-layer.md)
 

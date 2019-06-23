@@ -2,7 +2,7 @@
 
 The proof of work algorithm used is called [Cukoo Cycle](https://github.com/tromp/cuckoo), a graph theory-based algorithm that is far less energy-intensive than most other CPU, GPU or ASIC-bound PoW algorithms. The goal is to lower mining requirements, ensuring true decentralization and laying the foundation for future scalability.
 
-Cuckoo Cycle is designed to be ASIC-resistant and optimal for GPU-based transactions processing. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. Just as in a typical PoW project, miners provide the computing power to support the Cortex network and in return are rewarded with transaction fees, which incidentally is Cortex’s way to issue more CTXCs, the native Cortex asset. 
+Cuckoo Cycle is designed to be ASIC-resistant and optimal for GPU-based transactions processing. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. Just as in a typical PoW project, miners provide the computing power to support the Cortex network, in return are rewarded with transaction fees. The process incidentally is Cortex's way to issue more CTXCs, the native Cortex asset. 
 
 The difficulty adjusts dynamically so that on average, a block is produced every 15 seconds, i.e., 15s block time. This rate ensures the synchronization of the system state while preventing double-spend and history alteration unless an attacker possesses more than 51% of the network's mining power.
 
@@ -26,21 +26,16 @@ Please refer to full node requirements.
 
 ## Installation
 ### UBUNTU
-
 download Cortex Pool Miner
-
 ```bash
 git clone git@github.com:CortexFoundation/PoolMiner.git
-cd PoolMiner && make clean
+cd PoolMiner && make clean && make
 ```
 
 ### Dependency Version Check
 Ensure we have the correct version of gcc and  go
-
 gcc/g++ 5.4 or later is required.
-
 Use g++ --version or gcc --version to check which version you have.
-
 On Ubuntu, if your version is too old then you can install gcc/g++ 5.4 as follows:
 
 ```bash
@@ -50,9 +45,7 @@ sudo apt-get install g++-5.4
 ```
 
 go 1.10 or later is required
-
 Use go --version to check which version you have.
-
 Install Go 1.10 as follows:
 
 ```bash
@@ -64,31 +57,26 @@ sudo apt-get install go-1.10
 ## Start Mining
 
 MinerPool Website ：https://pool.cortexlabs.ai/
-
 MinerPool Uri：miner-cn.cortexlabs.ai:8009  or   miner.cortexlabs.ai:8009
 
 ### Options
 
 #### --account
-
 Set miner account
 
 #### --pool_uri [Necessary]
+Set the miner pool URI for submitting solutions. Up to 3.
 
-Set the miner pool URI for submitting solutions.
+#### --worker
+Enable multiple miners to mine with same account. Set different worker to differentiate 
 
 #### --deviceids [id1,id2,id3]
-
 Set which GPU device use for mining, param is device ids concatenated by commas.
 
 #### --verbosity
-
 Set the verbosity of log printing.
 
 ### Running Bash
-
 ```Bash
-./bin/miner --pool_uri miner-cn.cortexlabs.ai:8009 --verbosity 5 --deviceids 0
-./bin/miner --account "0xe291d43ad2eb6ea04e9f5e1a0c67f970702f8bd6" --pool_uri miner-cn.cortexlabs.ai:8009 --verbosity 5 --deviceids 0,1,2,3
-​```x
+./build/bin/cortex_miner -pool_uri=cuckoo.cortexlabs.ai:8008 -pool_uri_1=cuckoo.cortexlabs.ai:8008 -pool_uri_2=cuckoo.cortexlabs.ai:8008 -worker=cortex-nmg-4 -devices=0,1,2,3 -account=0xE893BA644128a0065B75d2c4f642615710802D4F
 ```
