@@ -4,13 +4,13 @@ The proof of work algorithm used is called [Cukoo Cycle](https://github.com/trom
 
 Cuckoo Cycle is designed to be ASIC-resistant and optimal for GPU-based transactions processing. PoW is used to facilitate a decentralized ecosystem where no single entity controls the network. Just as in a typical PoW project, miners provide the computing power to support the Cortex network and in return are rewarded with transaction fees, which incidentally is Cortex’s way to issue more CTXCs, the native Cortex asset. 
 
-The difficulty adjusts dynamically so that on average a block is produced every 15 seconds, i.e. 15s block time. This rate ensures the synchronization of the system state while preventing double-spend and history alteration, unless an attacker possesses more than 51% of the network mining power.
+The difficulty adjusts dynamically so that on average, a block is produced every 15 seconds, i.e., 15s block time. This rate ensures the synchronization of the system state while preventing double-spend and history alteration unless an attacker possesses more than 51% of the network's mining power.
 
 ## Mining Rewards
 
 Any node participating in the network can be a miner. The successful miner of the winning block receives:
 
-- A static block reward for the 'winning' block, consisting of exactly 2.5 CTXC
+- A static block reward for the 'winning' block, consisting of exactly 7.5 CTXC
 - All of the endorphines attach to the transactions set by the senders, that are executed within the winning block.
 -  All endorphins consumed by the execution of all the transactions in the block submitted by the winning miner is compensated for by the senders.
 

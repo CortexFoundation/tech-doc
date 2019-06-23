@@ -1,4 +1,9 @@
+#Interacting with machin learning models
+
+Solidity is a statically typed language used to write contracts on CVM. Operators are one the fundamental buidling blocks to interact with machine learning models on the Cortex network. A operator is a set of statements that performs a task or calculates a value. To use a function, you must define it somewhere in the scope from which you wish to call it.
+
 ## CVM Operators
+
 ###nn
 | OP         | Name          | Requirement       | Default          |
 |------------|---------------|-------------------|------------------|

@@ -6,11 +6,11 @@ Cortex Remix mainly consists of two functional modules: compilation and deployme
 
 ## Compilation
 
-The compilation module supports compilation and optimization of AI smart contracts. complied abi, bytecode, and other information can also be gathered here.
+The compilation module supports compilation and optimization of AI smart contracts. Complied abi, bytecode, and additional information are also displayed in this module.
 
 ## Deployment
 
-The contract deployment module can deploy the contract to the Cortex blockchain network with the support of Cortex Wallet, realizing on-chain AI model inference.
+The deployment module can help deploy AI smart contracts to the Cortex network with the support of Cortex Wallet, allowing for on-chain inference.
 
 ## Installation
 
