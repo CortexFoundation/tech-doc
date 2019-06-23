@@ -1,2 +1,0 @@
-CVM 全称 Cortex Virtual Machine， 由原 Ethereum 项目的 EVM 移植过来，在此基础上添加了对 Cortex 链上 AI 推断功能的支持。该功能主要分为两个模块，一方面是在 CVM 中支持了 Inference 指令，包含 Infer(code: 0xc0), InferArray(code: 0xc1)，前端如remix编译合约时同步增加一条infer函数来封装 CVM 接口，实现链上 AI 推断功能；另一方面，Synapse 作为定点化 AI 推断引擎，又名 CVM Executor，可以在异构计算环境下保证 AI 推断结果的一致性。Synapse 提出了模型定点化执行框架，并提出了相对应的确定性机器学习算子库，有兴趣的 AI 开发人员可以基于目前提出的框架训练或者量化。为保证解耦性，Synapse 是作为基于 CVM 的 device 形式存在的，是一个单独的模块，可以将其看作是 CVM 将需要Inference的模型和数据放入一块缓存，以中断的形式调用 Synapse 接口。
-
