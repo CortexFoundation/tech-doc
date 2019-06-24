@@ -198,3 +198,4 @@ sudo chmod +x /serving/cortex-core/bin/cortex.sh
 ```bash
 sudo supervisorctl tail cortexnode stdout
 ```
+
