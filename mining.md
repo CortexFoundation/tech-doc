@@ -22,7 +22,12 @@ Cuckoo Cycle focuses more on memory use, meaning the solution time is bound to m
 
 ## Requirements
 
-Please refer to full node requirements.
+- System: Linux Ubuntu 16.04+
+- GPU: Nvidia GPU with 10.7GB VRAM (1080ti, 2080ti, Titan V, etc.)
+- Space: 2TB  (*the size of the blockchain increases over time*)
+- CUDA version: 9.2+
+- CUDA driver: 396+
+- Compiler: Go 1.10+, GCC 5.4+
 
 ## Installation
 ### UBUNTU

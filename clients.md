@@ -7,7 +7,9 @@ The Cortex repository is a fork of [Go Ethereum](https://github.com/ethereum/go-
 To ensure that your Cortex client runs gracefully, please check your system meets the following requirements:
 
 - System: Linux Ubuntu 16.04+
-- GPU: Nvidia GPU with 10.7GB VRAM (1080ti, 2080ti, Titan V, etc.)
+- CPU: Xeon processor 16 Cores 
+- GPU: Nvidia GPU 1060
+- RAM: 32GB
 - Space: 2TB  (*the size of the blockchain increases over time*)
 - CUDA version: 9.2+
 - CUDA driver: 396+
