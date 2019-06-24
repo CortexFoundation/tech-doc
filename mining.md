@@ -11,7 +11,7 @@ The difficulty adjusts dynamically so that on average, a block is produced every
 Any node participating in the network can be a miner. The successful miner of the winning block receives:
 
 - A static block reward for the 'winning' block, consisting of exactly 7.5 CTXC
-- All of the endorphines attach to the transactions set by the senders, that are executed within the winning block.
+- All of the endorphins attach to the transactions set by the senders, that are executed within the winning block.
 -  All endorphins consumed by the execution of all the transactions in the block submitted by the winning miner is compensated for by the senders.
 
 ## The Algorithm
@@ -38,10 +38,10 @@ cd PoolMiner && make clean && make
 ```
 
 ### Dependency Version Check
-Ensure we have the correct version of gcc and  go
+Ensure you have the correct version of gcc and go
 gcc/g++ 5.4 or later is required.
 Use g++ --version or gcc --version to check which version you have.
-On Ubuntu, if your version is too old then you can install gcc/g++ 5.4 as follows:
+On Ubuntu, if your version is too old then you can update to gcc/g++ 5.4 as follows:
 
 ```bash
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -51,7 +51,7 @@ sudo apt-get install g++-5.4
 
 go 1.10 or later is required
 Use go --version to check which version you have.
-Install Go 1.10 as follows:
+Update to Go 1.10 as follows:
 
 ```bash
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
