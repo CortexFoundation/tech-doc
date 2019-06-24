@@ -110,10 +110,8 @@ go version
 Clone the source (Need permission)
 
 ```bash
-git clone git@github.com:CortexFoundation/CortexTheseus.git --branch dev-cerebro
+git clone https://github.com/CortexFoundation/CortexTheseus.git --branch dev
 (with git accessable key)
-git clone http://github.com/CortexFoundation/CortexTheseus --branch dev-cerebro
-(with git accessable account)
 
 cd CortexTheseus
 ```
@@ -121,8 +119,6 @@ cd CortexTheseus
 Once the dependencies are installed, run
 
 ```bash
-cd infernet && make clean
-cd .. && make clean
 make -j cortex
 ```
 
@@ -144,18 +140,10 @@ The compiled binary files are located in the ./build/bin
 Run the fullnode
 ----------------
 
-Deploy with script
-
-```bash
-wget https://raw.githubusercontent.com/lizhencortex/cortex-deploy/master/deploy.sh
-chmod +x deploy.sh
-sudo ./deploy.sh
-```
-
 ### Fullnode executables directly
 
 ```bash
-./cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --storage --cerebro --gcmode archive --rpcaddr 127.0.0.1
+./cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --gcmode archive
 ```
 
 ### Fullnode executables via supervisor
@@ -173,7 +161,7 @@ Create /serving/cortex-core/bin/cortex.sh
 #!/bin/bash
 export PATH=/usr/local/cuda-10.0/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-/serving/cortex-core/bin/cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --storage --cerebro --gcmode archive --rpcaddr 127.0.0.1
+/serving/cortex-core/bin/cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --gcmode archive
 ```
 
 Make the script executable

@@ -23,13 +23,13 @@ There are various applications to utilize contracts with ml models. Below exampl
  AI DApp development is similar to DApp development on Ethereum. It requires an understanding of Solidity programming language, web3.js, and JSON-RPC API. Below is a list of links to get you started:
 
   - [Solidity Docs](https://solidity.readthedocs.org/en/latest/) - Solidity is the Smart Contract language developed by Ethereum, which compiles to CVM (Cortex Virtual Machine) opcodes.
-  - [Cortex-Remix]() -  a browser-based compiler and IDE using programming language Solidity.
-  - [Web3 JavaScript API](https://github.com/ethereum/wiki/wiki/JavaScript-API) - This is the main JavaScript SDK to use when you want to interact with an Ethereum node.
-- [JSON RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) - This is the low-level JSON RPC 2.0 interface to interface with a node. This API is used by the [Web3 JavaScript API](https://github.com/ethereum/wiki/wiki/JavaScript-API).
+  - [Cortex-Remix](https://cerebro.cortexlabs.ai/remix) -  a browser-based compiler and IDE using programming language Solidity.
+  - [Web3 JavaScript API](https://web3js.readthedocs.io/en/1.0/) - This is the main JavaScript SDK to use when you want to interact with an Ethereum node.
+- [JSON RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) - This is the low-level JSON RPC 2.0 interface to interface with a node. 
 
 ## AI DApp Examples
 
-####Defi
+####DeFi
 For example, a decentralized lending app can run an AI algorithm to determine your interest rate based on your personal credit history. The AI used to analyze your credit score is not a black box, but instead, every step of the AI inference is transparent to prevent discrimination and ensure fairness. 
 
 ####Gaming

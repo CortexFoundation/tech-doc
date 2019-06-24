@@ -19,6 +19,8 @@ Building Cortex clients requires a Go (version 1.10 or later), a C compiler, and
 
 
 
+
+
 ## How to Run a Client
 
 Refer to [CortexTheseus](https://github.com/CortexFoundation/CortexTheseus)
