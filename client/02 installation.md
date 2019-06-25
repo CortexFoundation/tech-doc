@@ -1,5 +1,4 @@
-Installation
-------------
+## Installation
 
 Before we begin installing Cortex, we need to get some dependencies for your system.
 
@@ -105,7 +104,7 @@ Make sure you have installed correctly
 go version
 ```
 
-### Building the source
+## Building the source
 
 Clone the source (Need permission)
 
@@ -137,18 +136,14 @@ The compiled binary files are located in the ./build/bin
 ```
 
 
-Run the fullnode
-----------------
-
+##Run the fullnode
 ### Fullnode executables directly
 
 ```bash
 ./cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --gcmode archive
 ```
 
-### Fullnode executables via supervisor
-
-#### Create bash script
+### Create bash script
 
 ```bash
 rm /serving/cortex-core/bin/cortex.sh
@@ -170,7 +165,7 @@ Make the script executable
 sudo chmod +x /serving/cortex-core/bin/cortex.sh
 ```
 
-#### config
+### config
 
     [program:cortexnode]
     directory=/serving/cortex-core/bin/
