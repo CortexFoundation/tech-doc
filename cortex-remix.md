@@ -1,4 +1,4 @@
-#Cortex Remix
+# Cortex Remix
 
 [Cortex Remix](https://cerebro.cortexlabs.ai/remix) is a browser-based compiler and IDE using programming language Solidity. It is based on [Remix IDE](https://github.com/ethereum/remix-ide). It supports the compilation and deployment of AI smart contracts and debugging transactions.
 
