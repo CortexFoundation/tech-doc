@@ -1,9 +1,9 @@
-# Cortex Tech Doc
+# Cortex Documentation
 
 - [Introduction](cortex-intro.md) - Introduction to Cortex
 - [Mining](mining.md) - Mining instruction and PoW algorithm explained
 - [AI Contract](ai-contracts.md) - Instruction on the AI contract development
-- [Operators](cvm-operators.md) - A list of possible operators to interact with ml models
+- [Operators](operators.md) - A list of possible operators to interact with ml models
 - [AI DApp](ai-dapps.md) - Instruction and tools for AI DApp development
 - [Cortex Remix](cortex-remix.md) - Instruction on Cortex browser-based compiler and IDE
 - [Cortex Virtual Machine](cvm.md) - Explanation on CVM
