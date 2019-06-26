@@ -1,4 +1,5 @@
 .DS_Store
-/cvm
-/client
-/ref
+
+cvm/
+client/
+ref/
