@@ -12,5 +12,5 @@ Converting the original floating-point model to our CVM representation results i
 
 We apply the proposed converter on pre-trained models with ImageNet dataset from MXNet Model Zoo. The results of top-1 accuracy are shown below,
 
-![img](/Users/oscarwei/Dropbox/markdown/tech-doc/cvm/mxnet/mxnetvscvm.png)*Figure. 3*
+![img](mxnetvscvm.png)*Figure. 3*
 

@@ -45,9 +45,7 @@ contract AIContract {
 
 The first line tells the source code is written for Solidty version 0.4.18 or newer. The `pragma` command are used by the compiler to check compatability, while the caret symbol (^) means any *minor* version above 0.4.18, e.g., 0.4.19, but not 0.5.0.
 
-In Solidity, the data types of both the function parameters and output need to be specified. In this case, the function `post_process_yolo` takes `address model`, `address input`, and returns an integer. The line `uint256[] input_data;` declares a state variable `input_data` of type `uint256`. It can be accessed throughout the contract `AIContract`. The line `address model` declares a static variable called `model` of type `address` with variable of `0x0000000000000000000000000000000000001003`. 
-
-The line below specifies integer array of 256 bits `data_input` with length `(1 * 3 * 416 * 416 + 31)` moved by 5 digits for. It is to ensure enough length to read data stored on the Cortex blockchain. Similarly, ` uint256[] memory output` also specifies integer array of 256 bits with length `(1 * 28 + 31)` moved by 5 digits that is stored in the memory.
+In Solidity, the data types of both the function parameters and output need to be specified. In this case, the function `post_process_yolo` takes `address model`, `address input`, and returns an integer. The line below specifies integer array of 256 bits `data_input` with length `(1 * 3 * 416 * 416 + 31)` moved by 5 digits for. It is to ensure enough length to read data stored on the Cortex blockchain. Similarly, ` uint256[] memory output` also specifies integer array of 256 bits with length `(1 * 28 + 31)` moved by 5 digits that is stored in the memory.
 
 `inferArray` calls the on-chain model with paramemters model, input and output. When executed, the CVM will call the data and model on the Cortex blockchain, make inference, and return array of output. In this case, the contract `AIContract` returns the first value of `output` array.
 

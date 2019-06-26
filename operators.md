@@ -1,4 +1,4 @@
-#Interacting with machin learning models
+# Interacting with machin learning models
 
 Operators are one of the fundamental buidling blocks to interact with machine learning models on the Cortex network. A operator is a set of statements that performs a task or calculates a value. To use a function, you must define it somewhere in the scope from which you wish to call it.
 

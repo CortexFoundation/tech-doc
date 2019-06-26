@@ -12,9 +12,5 @@ After the completion of the upload phase, the file preparation phase is entered.
 
 ### Mature Phase
 
-After 100 blocks, the prepared files enter the mature phase. The model/data is saved on the storage layer of the Cortex blockchain.
-
-## Broadcasting
-
-After mature phase, the owner is responsible for broadcasting the file to the network to reach the entire distributed file system; otherwise, the network consensus will reject relevant contract calls.  
+After 100 blocks, the prepared files enter the mature phase. The model/data is saved on the storage layer of the Cortex blockchain. After mature phase, the file will completed broadcasting to the network to reach the entire distributed file system; otherwise, the network consensus will reject relevant contract calls.  
 
