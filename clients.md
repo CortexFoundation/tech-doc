@@ -125,6 +125,64 @@ Make sure you have installed correctly
 go version
 ```
 
+### Change Linux Open File Limit
+
+you will have to edit the following file:
+
+```bash
+vi /etc/sysctl.conf
+```
+
+Add the following line:
+
+```bash
+fs.file-max=500000
+```
+
+Of course, you can change the number per your needs. To verify the changes again use:
+
+```bash
+cat /proc/sys/fs/file-max
+```
+
+Users will need to logout and login again for the changes to take effect. If you want to apply the limit immediately, you can use the following command:
+
+```bash
+sysctl -p
+```
+
+####Set User Level Open File limits in Linux
+
+For that purpose, as user root, you will need to edit the following file:
+
+```bash
+vi /etc/security/limits.conf
+```
+
+The lines that you should add take the following parameters:
+
+```bash
+<domain>        <type>  <item>  <value>
+```
+
+Here is an example of setting a soft and hard limits for user cortex:
+```bash
+## Example hard limit for max opened files
+cortex        hard nofile 409600
+## Example soft limit for max opened files
+cortex        soft nofile 102400
+```
+
+Another example of setting a soft and hard limits for all user:
+```bash
+## Example hard limit for max opened files
+cortex        hard nofile 409600
+## Example soft limit for max opened files
+cortex.       soft nofile 102400
+```
+
+
+
 ## Building the source
 
 Clone the source (Need permission)

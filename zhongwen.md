@@ -56,3 +56,6 @@ Miner:
 - Total reward for mining: 150000000
 - Total supply: 299792458
 - Reward: 2.5 per block (half every 4 years)  =  8409600
+
+
+
