@@ -6,7 +6,7 @@ The idea of smart contracts is not originated by Cortex development team but by 
 
 Cortex officially supports Solidity programming language to develop AI contracts and complie to CVM bytcode. 
 
-  - [Solidity Docs](https://solidity.readthedocs.org/en/latest/) - Solidity is the Smart Contract language developed by Ethereum, which compiles to CVM (Cortex Virtual Machine) opcodes.
+  - [Solidity Docs](https://solidity.readthedocs.org/en/latest/) - Solidity is the Smart Contract language developed by Ethereum, which compiles to CVM (Cortex Virtual Machine) codes.
   - [Cortex-Remix](https://cerebro.cortexlabs.ai/remix) -  a browser-based compiler and IDE using programming language Solidity.
 
 ## Calling On-Chain Model

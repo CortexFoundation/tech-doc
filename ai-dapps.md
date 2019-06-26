@@ -24,7 +24,7 @@ There are various applications to utilize contracts with ml models. Below exampl
 
   - [Solidity Docs](https://solidity.readthedocs.org/en/latest/) - Solidity is the Smart Contract language developed by Ethereum, which compiles to CVM (Cortex Virtual Machine) opcodes.
   - [Cortex-Remix](https://cerebro.cortexlabs.ai/remix) -  a browser-based compiler and IDE using programming language Solidity.
-  - [Web3 JavaScript API](https://web3js.readthedocs.io/en/1.0/) - This is the main JavaScript SDK to use when you want to interact with  node.
+  - [Web3 JavaScript API](https://web3js.readthedocs.io/en/1.0/) - This is the main JavaScript SDK to use when you want to interact with a node.
 - [JSON RPC API](https://github.com/ethereum/wiki/wiki/JSON-RPC) - This is the low-level JSON RPC 2.0 interface to interface with a node. 
 
 ## AI DApp Examples
