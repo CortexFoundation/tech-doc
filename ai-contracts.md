@@ -11,18 +11,28 @@ Cortex officially supports Solidity programming language to develop AI contracts
 
 ## Calling On-Chain Model
 
-Function inferArray(model, input, output)
+Function infer(model, input, infer_output)
 
 - Parameters
 
   1. model - address of the model
-  2. Input - storage array of uint256
-  3. output - array of uint256, receive infer output
+  2. input - address of the data
+  3. infer_output - array of uint256, receive infer output
 
 - Returns
   None
 
-  
+Function inferArray(model, input_data, infer_output)
+
+- Parameters
+
+  1. model - address of the model
+  2. input_data - storage array of uint256
+  3. infer_output - array of uint256, receive infer output
+
+- Returns
+  None
+
 
 ## Fractional Units for Cortex
 
@@ -32,20 +42,33 @@ Refer to [CTXC](ctxc.md)
 
 This contract illustrate a simple implementation of calling and inferring a model on the Cortex blockchain. 
 
-```javascript
+```js
 pragma solidity ^0.4.18;
 contract AIContract {
-    function post_process_yolo(address model, address input) public returns (uint256) {
-    uint256[] memory output = new uint256[](uint256((1 * 28 + 31) >> 5));
-    inferArray(model, input, output);
-    return output[0];
+  uint256[] input_data;
+  uint256[] infer_output = new uint256[](uint256((1 * 10 + 31) >> 5));
+  
+  constructor() public {
+      input_data = new uint256[]((1 * 3 * 32 * 32 + 31) >> 5);
+  }
+  
+  function Infer(address model, address input) public returns (uint256) {
+    // feed data in input to model and store the output in infer_output
+    infer(model, input, infer_output);
+    return infer_output[0];
+  }
+  
+  function InferArray(address model) public returns (uint256) {
+    // feed data in input_data to model and store the output in infer_output
+    inferArray(model, input_data, infer_output);
+    return infer_output[0];
   }
 }
 ```
 
 The first line tells the source code is written for Solidty version 0.4.18 or newer. The `pragma` command are used by the compiler to check compatability, while the caret symbol (^) means any *minor* version above 0.4.18, e.g., 0.4.19, but not 0.5.0.
 
-In Solidity, the data types of both the function parameters and output need to be specified. In this case, the function `post_process_yolo` takes `address model`, `address input`, and returns an integer. The line below specifies integer array of 256 bits `data_input` with length `(1 * 3 * 416 * 416 + 31)` moved by 5 digits for. It is to ensure enough length to read data stored on the Cortex blockchain. Similarly, ` uint256[] memory output` also specifies integer array of 256 bits with length `(1 * 28 + 31)` moved by 5 digits that is stored in the memory.
+In Solidity, the data types of both the function parameters and output need to be specified. In the first case, the function `infer` takes `address model`, `address input`, `infer_output`, and returns the infer result stored in infer_output[0]. While `inferArray` take uint256 storage array as input data for the model. It is to ensure enough length to read data stored on the Cortex blockchain. The size of uint256 is equal to 32 int8. 
 
-`inferArray` calls the on-chain model with paramemters model, input and output. When executed, the CVM will call the data and model on the Cortex blockchain, make inference, and return array of output. In this case, the contract `AIContract` returns the first value of `output` array.
+`infer` and `inferArray` calls the on-chain model with paramemters model, input and output. When executed, the CVM will call the data and model on the Cortex blockchain, make inference, and set the result in the output, namely the first element of `output` array.
 
