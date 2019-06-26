@@ -5,6 +5,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 ## CVM Operators
 
 ###nn
+
 | OP         | Name          | Requirement       | Default          |
 |------------|---------------|-------------------|------------------|
 | Conv2D     | channels      |                   |                  |
@@ -32,6 +33,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 |            | ceil_mode     | FALSE             | FALSE            |
 
 ###reduce
+
 | OP     | Name     | Requirement          | Default |
 |--------|----------|----------------------|---------|
 | sum,max | axis     | -ndim <= axis < ndim | ()      |
@@ -40,6 +42,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 |        | dtype    | kInt32               | kInt32  |
 
 ###transform
+
 | OP            | Name        | Requirement                    | Default |
 |---------------|-------------|--------------------------------|---------|
 | expand_dims   | axis        | -ndim-1 <= axis <= ndim        |         |
@@ -60,6 +63,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | flatten       |             |                                |         |
 
 ###vision
+
 | OP                  | Name              | Requirement             | Default |
 |---------------------|-------------------|-------------------------|---------|
 | get_valid_count     | score_threshold   |                         | 0       |
@@ -74,6 +78,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 |                     | invalid_to_bottom | TRUE                    | TRUE    |
 
 ###broadcast
+
 | OP            | Name | Requirement | Default |
 |---------------|------|-------------|---------|
 | broadcast_add |      |             |         |
@@ -82,6 +87,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | broadcast_max |      |             |         |
 
 ###elemwise
+
 | OP              | Name | Requirement | Default |
 |-----------------|------|-------------|---------|
 | abs             |      |             |         |
@@ -97,11 +103,13 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 ##CVM Operator Attributes
 
 ###nn/convolution.cc
+
 | Name   | Precision Check | Attribute Check |
 | ------ | --------------- | --------------- |
 | conv2d | ✓               | ✓               |
 
 ###nn/nn.cc
+
 | Name   | Precision Check | Attribute Check |
 |--------|-----------------|-----------------|
 | conv2d | ✓               | ✓               |
@@ -109,22 +117,26 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | relu   | ✓               | ✓               |
 
 ###nn/pooling.cc
+
 | Name       | Precision Check | Attribute Check |
 | ---------- | --------------- | --------------- |
 | max_pool2d | ✓               | ✓               |
 
 ###nn/upsampling.cc
+
 | Name       | Precision Check | Attribute Check |
 | ---------- | --------------- | --------------- |
 | upsampling | ✓               | ✓               |
 
 ###nn/nms.cc
+
 | Name                | Precision Check | Attribute Check |
 |---------------------|-----------------|-----------------|
 | non_max_suppression | ✓               | ✓               |
 | get_valid_counts    | ✓               | ✓               |
 
 ###tensor/broadcast.cc
+
 | Name                | Precision Check | Attribute Check |
 |---------------------|-----------------|-----------------|
 | broadcast_add       | ✓               | ✓               |
@@ -133,12 +145,14 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | broadcast_max       | ✓               | ✓               |
 
 ###tensor/reduce.cc
+
 | Name   | Precision Check | Attribute Check |
 |--------|-----------------|-----------------|
 | sum    | ✓               | ✓               |
 | max    | ✓               | ✓               |
 
 ###tensor/elemwise.cc
+
 | Name                | Precision Check | Attribute Check |
 |---------------------|-----------------|-----------------|
 | abs                 | ✓               | ✓               |
@@ -152,6 +166,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | cvm_left_shift      | ✓               | ✓               |
 
 ###tensor/transform.cc
+
 | Name                | Precision Check | Attribute Check |
 |---------------------|-----------------|-----------------|
 | repeat              | ✓               | ✓               |
