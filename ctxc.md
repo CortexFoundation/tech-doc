@@ -1,4 +1,4 @@
-#CTXC
+# CTXC
 
 CTXC is the native token used within Cortex. It is used to pay for computational resources within the CVM. CTXC can be stored in Cortex Wallet ([download through official website](https://www.cortexlabs.ai/)) or any of the supported exchanges.
 
@@ -12,7 +12,7 @@ You can get CTXC with the following methods:
 - Become a Cortex Miner (see [mining](mining.md))
 
 
-##Fractional Units
+## Fractional Units
 |Value|Unit|Honoring|
 |------------|-------|--------------|
 |1 CTXC    |CTXC|Cortex Coin|

@@ -100,7 +100,7 @@ Operators are one of the fundamental buidling blocks to interact with machine le
 | cvm_right_shift |      |             |         |
 | cvm_left_shift  |      |             |         |
 
-##CVM Operator Attributes
+## CVM Operator Attributes
 
 **nn/convolution.cc**
 

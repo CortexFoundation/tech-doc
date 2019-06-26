@@ -10,7 +10,7 @@ Besides Dapp developers, users, and miners, Cortex brings a new relevant party i
 AI developers upload trained machine learning models onto the storage layer of the Cortex chain. These models can later be either inferred on their own or incorporated into smart contracts by Dapp developers. Each time an AI model is called, it's model uploader gets rewards in CTXCs, coming from a part of the network transaction fees. 
 This mechanism incentivizes AI developers to train and upload better models, leading to an evolving decentralized AI ecosystem; good models are openly distributed on the Cortex blockchain instead of being monopolized by a few big corporations.
 
-####AI Smart Contract and AI DApp
+#### AI Smart Contract and AI DApp
 
 Cortex adds machine learning support to smart contracts and DApps to adapt to real-world use cases. Developers can use the most popular language, Solidity, to create truly intelligent smart contracts and AI-enhanced DApps.
 

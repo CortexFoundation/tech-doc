@@ -151,7 +151,7 @@ Users will need to logout and login again for the changes to take effect. If you
 sysctl -p
 ```
 
-####Set User Level Open File limits in Linux
+#### Set User Level Open File limits in Linux
 
 For that purpose, as user root, you will need to edit the following file:
 
@@ -178,7 +178,7 @@ Another example of setting a soft and hard limits for all user:
 ## Example hard limit for max opened files
 cortex        hard nofile 409600
 ## Example soft limit for max opened files
-cortex.       soft nofile 102400
+cortex. /      soft nofile 102400
 ```
 
 
@@ -215,7 +215,7 @@ The compiled binary files are located in the ./build/bin
 ```
 
 
-##Run the fullnode
+## Run the fullnode
 ### Fullnode executables directly
 
 ```bash

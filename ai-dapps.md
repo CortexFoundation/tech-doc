@@ -18,7 +18,7 @@ There are various applications to utilize contracts with ml models. Below exampl
 
 - Others: on-chain data mining, facial recognition, recommendation, chatbot, machine translation, voice synthesis, etc.
 
-##Developer Tools
+## Developer Tools
 
  AI DApp development is similar to DApp development on Ethereum. It requires an understanding of Solidity programming language, web3.js, and JSON-RPC API. Below is a list of links to get you started:
 
@@ -29,14 +29,14 @@ There are various applications to utilize contracts with ml models. Below exampl
 
 ## AI DApp Examples
 
-####DeFi
+#### DeFi
 For example, a decentralized lending app can run an AI algorithm to determine your interest rate based on your personal credit history. The AI used to analyze your credit score is not a black box, but instead, every step of the AI inference is transparent to prevent discrimination and ensure fairness. 
 
-####Gaming
+#### Gaming
 CryptoKitties would be much cuter, more life-like, and unique if they incorporated AI. Imagine these kitties moving dynamically and behaving uniquely depending on your personal experience interacting with them. While Ethereum is not able to execute AI models and allow for this user experience, this is something that Cortex can uniquely enable.
 
-####Insurance
+#### Insurance
 Blockchain finds many use cases in the insurance industry, where immutability, fairness, openness, and transparency are in high demand. AI can help improve underwriting decisions, better manage risks, and prevent fraud. An insurance DAO powered by on-chain AI can bring us better, cheaper, fairer, and less bureaucratic insurance. 
 
-####Anti-fake AI
+#### Anti-fake AI
 The emergence of deepfakes (AI-manipulated videos that are indistinguishable to the human eye) poses a significant threat to society. Social stability will inevitably suffer if video recordings can simply be dismissed as untrustworthy in court. Anti-fake AI algorithms (algorithms that detect whether a video has been tampered with) will run on the blockchain to ensure their transparency and fairness, especially if there were to be used in court. 
