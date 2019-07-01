@@ -219,7 +219,7 @@ The compiled binary files are located in the ./build/bin
 ### Fullnode executables directly
 
 ```bash
-./cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --gcmode archive
+./cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,personal,ctxc,miner,net,txpool --verbosity 4 --gcmode archive
 ```
 
 ### Create bash script
@@ -235,7 +235,7 @@ Create /serving/cortex-core/bin/cortex.sh
 #!/bin/bash
 export PATH=/usr/local/cuda-10.0/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
-/serving/cortex-core/bin/cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,eth,ctx,miner,net,txpool --verbosity 4 --gcmode archive
+/serving/cortex-core/bin/cortex --port 37566 --rpc --rpccorsdomain '*' --rpcport 30089 --rpcaddr 127.0.0.1 --rpcapi web3,ctxc,miner,net,txpool,personal --verbosity 4 --gcmode archive
 ```
 
 Make the script executable
