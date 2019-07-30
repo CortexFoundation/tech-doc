@@ -615,11 +615,19 @@ $$
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axis` is `TShape`.
+Suppose Input `X`, `shape_like`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `shape_like`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1 })$, and `axes` is `TShape`, `axes`'s shape is K dimension.
 $$
+\forall axis \in \text{axes}: axis \in [-N, M)\\
+\text{real_axes} = \begin{cases} 
+\{j \mid j \in axes \and j \geqslant 0\} \bigcup
+\{j + N \mid j \in axes \and j < 0\}, & K > 0\\
+\{0, 1, \cdots, M-1\}, & K = 0
+\end{cases} \\
+\forall j \in \text{real_axes}: m_j \leqslant n_j\\
 Y[d_0, d_1, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
-\text{where } j \in [0, n_j) \and d_j \in \begin{cases}
-
+\text{where } j \in [0, N) \and d_j \in \begin{cases}
+[0, m_j), & j \in \text{real_axes} \\
+[0, n_j), & j \notin \text{real_axes}
 \end{cases}
 $$
 
