@@ -6,6 +6,10 @@
 
 struct `TShape`, a array of `uint32_t`, which is used to standing for data shape.
 
+#### Optional\<T\>
+
+the value can be `None`, or type of T.
+
 #### DLTensor
 
 Data format，a wrapper of data content pointer.
@@ -143,29 +147,9 @@ n_{q-K+N}, & q \geqslant K-N \\
 \forall (d_0, d_1, \cdots, d_{K-1}), \text{where } d_j \in [0, max(SA[j], SB[j])) \and j \in [0, K): \\
 Y[d_0, d_1, \cdots, d_{K-1}] = 
 \text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{M-1}], B[b_0, b_1, \cdots, b_{N-1}]), \\
-\text{where } a_i = min(d_{K-M+i}, m_i) \and i \in [0, M) \and \\
-b_j = min(d_{K-N+j}, n_j) \and j \in [0, N)
+\text{where } a_i = min(d_{K-M+i}, m_i-1) \and i \in [0, M) \and \\
+b_j = min(d_{K-N+j}, n_j-1) \and j \in [0, N)
 $$
-
-
-Math:
-
-```python
-1. Make A, B shape length equal, 
-	suppose A.shape is (a1, a2, ..., aN), B.shape is (b1, b2, ... bM), and N < M,
-	extend A.shape to (1, 1, ..., 1, a1, a2, ..., aN), total number of 1 is M-N.
-2. Promise the input shape satisfy the constraint,
-  foreach i in len(shape): 
-  	(A.shape[i] == 1) or (B.shape[i] == 1) or (A.shape[i] == B.shape[i])
-3. Calculate output shape,
-	oshp = [max(A.shape[i], B.shape[i]) for i in len(shape)]
-4. for oidx in range(oshp):
-  		# calulate input index by output index
-  		aidx = [min(A.shape[i], oidx[i]) for i in oidx]
-    	bidx = [min(B.shape[i], oidx[i]) for i in oidx]
-      Y[oidx] = BROADCAST_OP(A[aidx], B[bidx])
-```
-
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L575
 
 #### broadcast_add
@@ -452,7 +436,7 @@ $$
 Suppose `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Where all inputs' shape is N dimension, exactly $I^i$'s shape is $(n^i_0, n^i_1, \cdots, n^i_{N-1})$, and `axis` is in range $[0, N)$.
 $$
 \forall i \in [1, M) \; \forall j \in [0, N) \and j \ne \text{axis}: \;
-n^i_j = n^{i-1}_j \\
+n^i_j = n^{0}_j \\
 \forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, n^i_j) \and j \in [0, N): \\
 Y[d_0, d_1, \cdots, d_\text{axis-1}, \text{new_idx}, d_\text{axis+1}, \cdots, d_{N-1}] = I^i[d_0, d_1, \cdots, d_{N-1}], \\
 \text{where new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
@@ -536,12 +520,108 @@ $$
 
 #### slice | strided_slice
 
+*Math Formalization*
+
+Suppose Input `X`, Output `Y`, attributes `begin`, `end`, `strides`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `begin`'s shape is B dimension, `end`'s shape is E dimension, `stride`'s shape is S dimension.
+$$
+\text{b_arr}[b] = \begin{cases}
+\text{begin}[b] + n_i, & b \in [0, N) \and b < B \and begin[b] < 0 \\
+\text{begin}[b], & b \in [0, N) \and b < B \and begin[b] \geqslant 0 \\
+0, & b \in [0, N) \and b \geqslant B
+\end{cases}, b \in [0, N) \\
+\text{e_arr}[e] = \begin{cases}
+\text{end}[e] + n_i, & e \in [0, N) \and e < E \and end[e] < 0\\
+\text{end}[e], & e \in [0, N) \and e < E \and end[e] \geqslant 0\\
+n_{e}, & e \in [0, N) \and e \geqslant E
+\end{cases}, e \in [0, N) \\
+\text{s_arr}[s] = \begin{cases}
+\text{stride}[s], & s \in [0, N) \and s < S \\
+1, & s \in [0, N) \and s \geqslant S
+\end{cases}, s \in [0, N) \\
+\forall \{i \mid i \in [0, N)\}: \text{s_arr}[i] \ne 0 \\
+\text{b_range}(i) = \begin{cases}
+-1, & \text{s_arr}[i] < 0 \\
+0, & \text{s_arr}[i] \geqslant 0
+\end{cases} \\
+\text{e_range}(i) = \begin{cases}
+n_i - 1, & \text{s_arr}[i] < 0 \\
+n_i, & \text{s_arr}[i] \geqslant 0
+\end{cases} \\
+\text{b_vec}[b] = 
+clip(\text{b_arr}[b], \text{a_min}=\text{b_range}(b), \text{a_max}=\text{e_range}(b)-1), b \in [0, N) \\
+\text{e_vec}[e] = 
+clip(\text{e_arr}[e], \text{a_min}=\text{b_range}(e), \text{a_max}=\text{e_range}(e)-1), e \in [0, N) \\
+\forall \{i \mid i \in [0, N) \}: 
+\begin{cases}
+\text{b_vec}[i] < \text{e_vec}[i], & \text{s_arr}[i] > 0 \\
+\text{e_vec}[i] < \text{b_vec}[i], & \text{s_arr}[i] < 0
+\end{cases} \\
+\forall (d_0, d_1, \cdots, d_{N-1}), 
+\text{where } d_j \in [0, 
+\left\lceil{\text{e_vec}[j] - \text{b_vec}[j] \over \text{s_arr}[j]}\right\rceil) 
+\and j \in [0, N): \\
+Y[d_0, d_1, \cdots, d_{N-1}] = \\
+X[\text{b_vec}[0] + \text{s_arr}[0] * d_0,
+\text{b_vec}[1] + \text{s_arr}[1] * d_1,
+\cdots, \text{b_vec}[N-1] + \text{s_arr}[N-1] * d_{N-1}]]
+$$
+
+
 #### take
+
+*Math Formalization*
+
+Suppose Input `X`, `indices`, Output `Y`, attributes `axis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$, and `axis` is `Optional<int>` .
+
+1. Case axis is `None` :
+
+$$
+T = flatten(X) \\
+\forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) :\\
+Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1],\\
+\text{where } \text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}]
+$$
+
+2. Case axis is `int`:
+
+$$
+\text{axis} \in [-N, N) \\
+\text{real_axis} = \begin{cases}
+\text{axis}, & \text{axis} \geqslant 0 \\
+\text{axis} + N, & \text{axis} < 0
+\end{cases} \\
+\forall (d_0, d_1, \cdots, d_{M+N-1}), \text{where } d_j \in \begin{cases} 
+[0, n_j), & j < \text{axis} \\
+[0, m_{j-\text{axis}}), & j \in [\text{axis}, \text{axis}+M) \\
+[0, n_{j-M+1}), & j \in [\text{axis} + M, M+N)
+\end{cases} \and j \in [0, M+N) : \\
+Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{axis}-1}, \text{xdix}, d_{\text{axis}+M}, \cdots, d_{M+N-1}], \\
+\text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{axis}}, d_{\text{axis}+1}, \cdots, d_{\text{axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{axis}}-1)
+$$
+
+
 
 #### cvm_lut
 
+*Math Formalization*
+
+Suppose Input `indices`,`X`, Output `Y`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$ .
+$$
+Y=take(X, \text{indices}, \text{axis}=\text{None})
+$$
+
+
 #### slice_like
 
+*Math Formalization*
+
+Suppose Input `X`, Output `Y`, attributes `axis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axis` is `TShape`.
+$$
+Y[d_0, d_1, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
+\text{where } j \in [0, n_j) \and d_j \in \begin{cases}
+
+\end{cases}
+$$
 
 
 ### NMS Operator
