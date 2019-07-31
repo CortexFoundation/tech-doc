@@ -189,7 +189,7 @@ We only supported 2-D convolution operator.
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, `channels`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups}$, `B`' is `Optional<TShape>`, if `B` is not None, it's shape is $(\text{channels},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW), SH,SW \in [min\_attr, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW), DH,DW \in [min\_attr, max\_attr)$, `grous` is `int`, the value is in $\{1, IC\}$, `channels` is `int`, the value is $OC$.
+Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups}$, `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW) \in [1, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW) \in [1, max\_attr)$, `grous` is `int`, the value is in $\{1, C\}$.
 
 1. Case `groups` = 1
 
@@ -213,7 +213,7 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 
 This case is named *Depth-Wise Convolution*
 $$
-IC = 1\\
+IC = 1 \and OC = C \\
 Y[n,i,p,q]= kernel(X[n,i, p:p+\text{KH}, q:q+\text{KW}], W[i,0,:,:]) + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
@@ -228,42 +228,48 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, where `X` shape is (M * K), `W` shape is (N * K), `B` shape is (N,)
+Suppose Input `X`, `W`, `B`, where `X` shape is $(M * K)$, `W` shape is $(N * K)$, `B` is `Optional<DLTensor>`, if `B` is not `NONE`, it's shape is $(N,)$.
 
 Math:
 $$
-Y=XW^T+B
+Y=X W^T + \begin{cases}
+0, & \text{if B is None} \\
+B, & \text{otherwise}
+\end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L86
 
 #### MaxPooling
 
-We only supported 2-D max pooling.
-
 *Math Formalization*
 
-Suppose Input `X`, `pool_size`, where `X` format is `NCHW`, `pool_size` is two dimension array
+Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is 2-D `TShape`, exactly $(PSH, PSW)$, `padding` is 2-D `TShape`, exactly $(PH, PW) \in [min\_attr, max\_attr)$, if `padding` is  1-D, which means $PH = PW$, `strides` is 2-D `TShape`, exactly $(SH, SW)$, `ceil_mode` is `boolean`.
 
 Math:
 $$
-Y[n,i,p,q] = max\{X[n,i, p:p+\text{pool_size_h}, q:q+\text{pool_size_w}]\}, \\
-\forall \quad n \in N \and i \in C \and
-p \in \text{floor}(H - \text{pool_size_h}) + 1 \and
-q \in \text{floor}(W - \text{pool_size_w}) + 1
+PSH \in [0, H + 2PH + 1) \and PSW \in [0, W + 2PW + 1)\\
+Y[n,i,p,q] = max\{x \mid x \in X[n,i, p:p+\text{PSH}, q:q+\text{PSW}]\}, \\
+\forall n \in [0, N) \and i \in [0, C) \and \\
+p \in \left[0, \text{ceil_func}\left({H+2 \cdot \text{PH}-  \text{PSH}\over\text{SH}}\right)+1 \right) \and \\
+q \in \left[0, \text{ceil_func}\left({W+2 \cdot \text{PW}- \text{PSW} \over \text{SW}}\right)+1 \right) \and \\
+\text{ceil_func(val)} = \begin{cases}
+\lceil \text{val} \rceil, & \text{if ceil_mode is true} \\
+\lfloor \text{val} \rfloor, & \text{otherwise}
+\end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L692
 
-In source code at reference, many attributes are supplied as below:
+#### Upsampling
 
-1. padding, 2-D array, zero pad for input data at edge of image.
-2. strides, 2-D array, the strides of kernel move under input image.
-3. ceil_mode, boolean, when true, will use ceil instead of floor to compute the output shape.
+*Math Formalization*
 
- the output shape calculation with attributes above is
+Suppose Input `X`, Output `Y`, attributes `scale`, where `X`'s shape is $(N, C, H, W)$, `scale` is in range $[1, max\_attr)$.
 $$
-p \in \text{floor}((H+2*\text{padding}-\text{pool_size_h})/\text{stride})+1 \\
-q \in \text{floor}((W + 2 * \text{padding} - \text{pool_size_w})/\text{stride}) + 1
+Y[n, i, h, w] = X[n, i, \left\lfloor {h \over \text{scale}}\right\rfloor, \left\lfloor {w \over \text{scale}}\right\rfloor], \\
+\forall n \in [0, N) \and i \in [0, C) \and 
+h \in [0, H \cdot \text{scale}) \and w \in [0, W \cdot \text{scale})
 $$
+
 
 ### Elemwise Operator
 
@@ -276,9 +282,10 @@ Suppose Input `X`, Output `Y`.
 Math:
 $$
 y = \begin{cases}
-x, &  x \in X \and x \geqslant 0  \\
--x, & x \in X \and x < 0 
-\end{cases}
+x, &  x \geqslant 0  \\
+-x, & x < 0 
+\end{cases},
+\forall x \in X
 $$
 
 #### cvm_precision
@@ -290,9 +297,10 @@ Suppose Input `X`, Output `Y`.
 Math:
 $$
 y = \begin{cases}
-\lceil log_2(abs(x+1)) \rceil, & x \in X \and x \neq 0\\
-1, & x \in X \and  x = 0 
-\end{cases}
+\lceil log_2(abs(x+1)) \rceil, & x \neq 0\\
+1, & x = 0 
+\end{cases}, 
+\forall x \in X
 $$
 
 #### elemwise_add
@@ -329,10 +337,11 @@ $$
 Suppose Input `X`, Output `Y`, attribute `a_min`, `a_max`.
 $$
 y = \begin{cases}
-\text{a_max}, & x \in X \and x \geqslant \text{a_max} \\
-x, & x \in X \and x \in (\text{a_min}, \text{a_max}) \\
-\text{a_min}, & x \in X \and x \leqslant \text{a_min}
-\end{cases}
+\text{a_max}, & x \geqslant \text{a_max} \\
+x, & x \in (\text{a_min}, \text{a_max}) \\
+\text{a_min}, & x \leqslant \text{a_min}
+\end{cases},
+\forall x \in X
 $$
 
 
@@ -340,10 +349,10 @@ $$
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attribute `precision`.
+Suppose Input `X`, Output `Y`, attribute `precision`, where `precision` is in range $[1, 33)$.
 $$
-\alpha = 2^{\text{precision}-1}-1, \quad \text{precision} \in [1, 32] \\
-Y = clip(X, \text{a_min}=-\alpha, \text{a_max}=\alpha)
+Y = clip(X, \text{a_min}=-\alpha, \text{a_max}=\alpha), \\
+\text{where } \alpha = 2^\text{precision-1}-1
 $$
 
 
@@ -351,24 +360,22 @@ $$
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`.
+Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precision` is in range $[1, 33)$, and `shift_bit` is in range $[1, 33)$.
 $$
-\alpha = 2^{\text{precision} - 1} - 1, \quad \text{precision} \in [1, 32] \\
-T = {\left\lfloor 
-(\left\lfloor \frac{X}{2^{\text{shift_bit}} - 1} \right\rfloor + 1) 
-\div 2 \right\rfloor}, \quad \text{shift_bit} \in [1, 32] \\
-Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha)
+Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
+\text{where } T = {\left\lfloor 
+\left(\left\lfloor \frac{X}{2^{\text{shift_bit}} - 1} \right\rfloor + 1 \right) 
+\div 2 \right\rfloor} \and \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
 
 #### cvm_left_shift
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`. Where $\text{precision}$ is in range $[1, 32]$, and $\text{shift_bit}$ is in range $[1, 32]$.
+Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precision` is in range $[1, 33)$, and  `shift_bit` is in range $[1, 33)$.
 $$
-\alpha = 2^{\text{precision} - 1} - 1 \\
-T = X * 2^\text{shift_bit} \\
-Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha)
+Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
+\text{where } T = X * 2^\text{shift_bit} \and \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
 
 ### Transform Operator
@@ -636,6 +643,51 @@ $$
 
 #### get_valid_count
 
+*Math Formalization*
+
+Suppose Input `X`, Output `valid_count`, `Y`, attributes `score_threshold`, where `X`'s shape is $(B, N, K), K \geqslant 2$,  `score_threshold` is `int`.
+$$
+\text{valid_count}[b] = card\{ q \mid q \in [0, N) \and
+X[b, q, 1] > \text{score_threshold} \}, \\
+\quad \forall b \in [0, B)
+$$
+
+$$
+Y[b, \text{idx}, k] = X[b, n, k], \\
+\quad \forall b \in [0, B) \and n \in [0, N) \and 
+k \in [0, K) \and X[b, n, 1] > \text{score_threshold}, \\
+\quad \text{where idx = }
+card \{q \mid q \in [0, n) \and 
+X[b, q, 1] > \text{score_threshold} \}
+$$
+
+$$
+Y[b,n, k] = -1, \forall b \in [0, B) \and 
+n \in [\text{valid_count}[b], N) \and k \in [0, K)
+$$
+
+
+
 #### non_max_suppression
 
-### Common Operator
+*Math Formalization*
+
+Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`.
+$$
+Y[b, idx, k] = T[b, n, k], \\
+\forall b \in [0, B) \and n \in [0, min(N, \text{top_k}) \and 
+k \in [0, K) \and idx \in [0, \text{max_output_size}) \and \\
+iou(n, p) <= \text{out_threshold}, \forall p \in [0, n), \\
+\text{where } T = \text{reversed sort X over axis 1 by index at axis 2 foreach axis 0, } \\
+\text{ which index priority is [1, 0, 2, 3, 4, 5] and } \\
+iou(p, q) = \text{intersaction over union [T[b, p, 2:3], T[b, p, 4:5]], [T[b, q, 2:3], T[b, q, 4:5]] and } \\
+\text{idx} = card\{ p \mid p \in [0, n) \and
+iou(p, q) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
+$$
+
+$$
+Y[b, n, k] = -1, \\
+\forall b \in [0, B) \and n \in [idx, N) \and k \in [0, K), \\
+\text{where idx} = card\{ p \mid p \in [0, N) \and
+iou(p, q) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
+$$
