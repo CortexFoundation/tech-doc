@@ -189,38 +189,38 @@ We only supported 2-D convolution operator.
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, and output `Y`, where `X` format is `NCHW`(batch, in_channels, height, weight), `W` format is `OIHW`(out_channels, in_channels, kernel_h, kernel_w), `B` format is `O`(out_channels)
+Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, `channels`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups}$, `B`' is `Optional<TShape>`, if `B` is not None, it's shape is $(\text{channels},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW), SH,SW \in [min\_attr, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW), DH,DW \in [min\_attr, max\_attr)$, `grous` is `int`, the value is in $\{1, IC\}$, `channels` is `int`, the value is $OC$.
 
-Math:
+1. Case `groups` = 1
+
 $$
-Y[n,i,p,q]=\sum_{j=0}^{in\_channels} kernel(X[n,j, p:p+\text{kernel_h}, q:q+\text{kernel_w}], W[i,j,:,:])
-+ B[i], \\
-\forall \quad n \in N \and i \in C \and
-p \in \text{floor}(H - \text{pool_size_h}) + 1 \and
-q \in \text{floor}(W - \text{pool_size_w}) + 1
+Y[n,i,p,q]=\sum_{j=0}^{C} kernel(X[n,j, p:p+\text{KH}, q:q+\text{KW}], W[i,j,:,:])
++ \begin{cases}
+0, & \text{if B is None}\\
+B[i], & \text{otherwise}
+\end{cases}, \\
+\forall \quad n \in [0, N) \and i \in [0, OC) \and \\
+p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
+q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
 $$
 where $kernel$ function is 
 $$
-kernel(A, B) = \sum_{ki=0}^{kernel\_h} \sum_{kj = 0}^{kernel\_w} A[ki, kj] * B[ki, kj]
+kernel(A, B) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} A[k_i, k_j] \cdot B[k_i, k_j]
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L475
 
-In source code at reference, many attributes are designed for more complicated situation.
+2. Case `groups ` = $C$
 
-1. padding, 2-D array, zero pad for input data at edge of image.
-2. stride, 2-D array, the strides of kernel move under input image.
-3. dilation, 2-D array, select input image data with dilation for kernel convolution.
-
- the output shape calculation with attributes above is
+This case is named *Depth-Wise Convolution*
 $$
-f(x) = floor((x+2*\text{padding}-\text{dilation}*(\text{kernel_size}-1)-1)/\text{stride})+1
-$$
-
-##### Depth-Wise Convolution
-
-Math:
-$$
-Y[n,i,p,q]=B[i] + kernel(X[n,i, p:p+\text{kernel_h}, q:q+\text{kernel_w}], W[i,1,:,:])
+IC = 1\\
+Y[n,i,p,q]= kernel(X[n,i, p:p+\text{KH}, q:q+\text{KW}], W[i,0,:,:]) + \begin{cases}
+0, & \text{if B is None}\\
+B[i], & \text{otherwise}
+\end{cases}\\
+\forall n \in [0, N) \and i \in [0, C) \and\\
+p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
+q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L390
 
@@ -634,6 +634,8 @@ $$
 
 ### NMS Operator
 
+#### get_valid_count
 
+#### non_max_suppression
 
 ### Common Operator
