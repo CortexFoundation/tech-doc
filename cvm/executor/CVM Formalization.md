@@ -60,7 +60,7 @@ T = \left\{i \mid \text{axis} \in \text{axes} \and
 i = \begin{cases}
 \text{axis}, & \text{if axis } \geqslant 0 \\
 \text{axis} + N, & \text{otherwise}
-\end{cases} \right\} \\
+\end{cases} \right\}, \\
 \text{where } card \{\text{T}\} = M \text{ and } \\
 j \in [0, N), \forall j \in \text{T}
 $$
@@ -69,7 +69,8 @@ $$
 \text{real_axes} = \begin{cases}
 \{i \mid i \in [0, N) \and i \notin T\} , & \text{if exclude is true} \\
 T, & \text{otherwise}
-\end{cases}
+\end{cases}, \\
+R = card\{\text{real_axes}\}
 $$
 
 
@@ -88,7 +89,7 @@ Y[\underbrace{0, 0, \cdots, 0}_{K}] = \begin{cases}
 max\{x \mid x \in X \}, & \text{if op is max}
 \end{cases}, \\
 \text{where } K = \begin{cases}
-0, & \text{if keepdims is false}, \\
+1, & \text{if keepdims is false} \\
 N, & \text{otherwise}
 \end{cases}
 $$
@@ -98,20 +99,20 @@ $$
 $$
 Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}] = \\
 \begin{cases}
-\sum_{d_{J(0)}=0}^{n_{J(0)}} \cdots \sum_{d_{J(M-1)}=0}^{n_{J(M-1)}}
+\sum_{d_{J(0)}=0}^{n_{J(0)}} \cdots \sum_{d_{J(R-1)}=0}^{n_{J(R-1)}}
 X[d_0, d_1, \cdots, d_{N-1}], & \text{if op is sum} \\[1ex]
-max\{ X[d_0, d_1, \cdots, d_{N-1}] \mid d_{J(0)} \in [0, n_{J(0)}) \and \cdots \and
-d_{J(M-1)} \in [0, n_{J(M-1)}) \}, & \text{if op is max}
-\end{cases} \\
+\max \{ X[d_0, d_1, \cdots, d_{N-1}] \mid d_{J(0)} \in [0, n_{J(0)}) \and \cdots \and
+d_{J(R-1)} \in [0, n_{J(R-1)}) \}, & \text{if op is max}
+\end{cases}, \\
 \forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
-d_{I(K-1)} \in [0, n_{I(K-1)}) \\
-\text{where } K = N - M \text{ and } \\
+d_{I(K-1)} \in [0, n_{I(K-1)}), \\
+\text{where } K = N - R \text{ and } \\
 A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
 B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
 I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall i < j \text{ and } \\
-J : \{ j \mid j \in [0, M) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall i < j
+\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
+J : \{ j \mid j \in [0, R) \} \to B,
+\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R
 $$
 
 4. Otherwise
@@ -120,14 +121,14 @@ $$
 Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}], \\
 \forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
 d_{I(K-1)} \in [0, n_{I(K-1)}) \and \\
-d_{J(0)} = 0 \and \cdots \and d_{J(M-1)} = 0, \\
-\text{where } K = N - M \text{ and } \\
+d_{J(0)} = 0 \and \cdots \and d_{J(R-1)} = 0, \\
+\text{where } K = N - R \text{ and } \\
 A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
 B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
 I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall i < j \text{ and } \\
-J : \{ j \mid j \in [0, M) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall i < j \text{ and } \\
+\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
+J : \{ j \mid j \in [0, R) \} \to B,
+\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R \text{ and } \\
 M = \text{reduce_op}(X, \text{axes=axes, keepdims=false, exclude=exclude})
 $$
 
@@ -155,21 +156,21 @@ Broadcast operator perform the broadcast function to input datas, and the proces
 
 Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. Where `A`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$.
 $$
-K = max(M, N) \\
+Y[d_0, d_1, \cdots, d_{K-1}] = 
+\text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{M-1}], B[b_0, b_1, \cdots, b_{N-1}]), \\
+\forall d_0 \in [0, M_0) \and \cdots \and d_{K-1} \in [0, M_{K-1}), \\
+\text{where } K = max(M, N) \text{ and } M[i] = \max\{ SA[i], SB[i] \} \text{ and } \\
 SA[p] = \begin{cases}
 m_{p-K+M}, & p \geqslant K - M \\
 1, & p < K - M
-\end{cases}, p \in [0, K) \\
+\end{cases} \text{ and } \\
 SB[q] = \begin{cases}
 n_{q-K+N}, & q \geqslant K-N \\
 1, & q < K - N
-\end{cases}, q \in [0, K) \\
-\forall \{i \mid i \in [0, K) \}: SA[i]=SB[i] \or SA[i]=1 \or SB[i]=1 \\
-\forall (d_0, d_1, \cdots, d_{K-1}), \text{where } d_j \in [0, max(SA[j], SB[j])) \and j \in [0, K): \\
-Y[d_0, d_1, \cdots, d_{K-1}] = 
-\text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{M-1}], B[b_0, b_1, \cdots, b_{N-1}]), \\
-\text{where } a_i = min(d_{K-M+i}, m_i-1) \and i \in [0, M) \and \\
-b_j = min(d_{K-N+j}, n_j-1) \and j \in [0, N)
+\end{cases} \text{ and } \\
+\forall i \in [0, K): SA[i]=SB[i] \or SA[i]=1 \or SB[i]=1 \text{ and } \\
+a_i = \min(d_{K-M+i}, m_i-1)\text{ and }
+b_j = \min(d_{K-N+j}, n_j-1)
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L575
 
@@ -215,31 +216,36 @@ Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `di
 1. Case `groups` = 1
 
 $$
-Y[n,i,p,q]=\sum_{j=0}^{C} kernel(X[n,j, p:p+\text{KH}, q:q+\text{KW}], W[i,j,:,:])
+Y[n,i,p,q]=\sum_{j=0}^{C} 
+\text{kernel}(X[n,j, p:p+\text{KH}, q:q+\text{KW}], W[i,j,:,:])
 + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
 \end{cases}, \\
-\forall \quad n \in [0, N) \and i \in [0, OC) \and \\
+\forall n \in [0, N) \and i \in [0, OC) \and \\
 p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
 q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
 $$
-where $kernel$ function is 
+where $\text{kernel}$ function is 
 $$
-kernel(A, B) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} A[k_i, k_j] \cdot B[k_i, k_j]
+\text{kernel}(A, B) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} A[k_i, k_j] \cdot B[k_i, k_j]
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L475
 
 2. Case `groups ` = $C$
 
-This case is named *Depth-Wise Convolution*
+This case is named *Depth-Wise Convolution*.
 $$
-IC = 1 \and OC = C \\
+IC = 1, \\
+OC = C
+$$
+
+$$
 Y[n,i,p,q]= kernel(X[n,i, p:p+\text{KH}, q:q+\text{KW}], W[i,0,:,:]) + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
-\end{cases}\\
-\forall n \in [0, N) \and i \in [0, C) \and\\
+\end{cases}, \\
+\forall n \in [0, N) \and i \in [0, OC) \and\\
 p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
 q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
 $$
@@ -265,17 +271,25 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 *Math Formalization*
 
 Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is 2-D `TShape`, exactly $(PSH, PSW)$, `padding` is 2-D `TShape`, exactly $(PH, PW) \in [min\_attr, max\_attr)$, if `padding` is  1-D, which means $PH = PW$, `strides` is 2-D `TShape`, exactly $(SH, SW)$, `ceil_mode` is `boolean`.
-
-Math:
 $$
-PSH \in [0, H + 2PH + 1) \and PSW \in [0, W + 2PW + 1)\\
-Y[n,i,p,q] = max\{x \mid x \in X[n,i, p:p+\text{PSH}, q:q+\text{PSW}]\}, \\
+PSH \in [0, H + 2PH + 1), \\
+PSW \in [0, W + 2PW + 1)
+$$
+
+$$
+Y[n,i,p,q] = \max\{\text{pad}(n, i, p', q') \\
+\mid p' \in [p-\text{PH}, p-\text{PH}+\text{PSH}+1), 
+q' \in [q-\text{PW}, q-\text{PW}+\text{PSW} + 1)\}, \\
 \forall n \in [0, N) \and i \in [0, C) \and \\
 p \in \left[0, \text{ceil_func}\left({H+2 \cdot \text{PH}-  \text{PSH}\over\text{SH}}\right)+1 \right) \and \\
-q \in \left[0, \text{ceil_func}\left({W+2 \cdot \text{PW}- \text{PSW} \over \text{SW}}\right)+1 \right) \and \\
-\text{ceil_func(val)} = \begin{cases}
+q \in \left[0, \text{ceil_func}\left({W+2 \cdot \text{PW}- \text{PSW} \over \text{SW}}\right)+1 \right), \\
+\text{where } \text{ceil_func(val)} = \begin{cases}
 \lceil \text{val} \rceil, & \text{if ceil_mode is true} \\
 \lfloor \text{val} \rfloor, & \text{otherwise}
+\end{cases} \text{ and } \\
+\text{pad}(n, i, p, q) = \begin{cases} 
+X[n, i, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
+0, & \text{otherwise}
 \end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L692
@@ -386,7 +400,7 @@ $$
 Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
 \text{where } T = {\left\lfloor 
 \left(\left\lfloor \frac{X}{2^{\text{shift_bit}} - 1} \right\rfloor + 1 \right) 
-\div 2 \right\rfloor} \and \alpha = 2 ^ {\text{precision} - 1} - 1
+\div 2 \right\rfloor} \text{ and } \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
 
 #### cvm_left_shift
@@ -396,7 +410,7 @@ $$
 Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precision` is in range $[1, 33)$, and  `shift_bit` is in range $[1, 33)$.
 $$
 Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
-\text{where } T = X * 2^\text{shift_bit} \and \alpha = 2 ^ {\text{precision} - 1} - 1
+\text{where } T = X * 2^\text{shift_bit} \text{ and } \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
 
 ### Transform Operator
@@ -407,13 +421,11 @@ $$
 
 Suppose Input `X`, Output `Y`, attribute `axis`, `repeats`. Where `X`'s shape is N dimension, exactly  $(n_0, n_1, \cdots, n_{\text{axis}}, \cdots, n_{N-1})$, `Y`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{\text{axis}} \cdot repeats, \cdots, n_{N-1})$. Obviously, axis is in range $[0, N)$, repeats is in range $[1, +\infty)$.
 $$
-\forall \{(d_0, d_1, \cdots, d_{N-1}) \mid d_j \in 
-\begin{cases} 
-[0, n_j), & j \ne \text{axis} \\
-[0, n_j \cdot \text{repeats}), & j = \text{axis}
-\end{cases} \and j \in [0, N) \}: \\
 Y[d_0, d_1, \cdots, d_\text{axis}, \cdots, d_{N-1}] = 
-X[d_0, d_1, \cdots, \left\lfloor{d_\text{axis} \over \text{repeats}}\right\rfloor, \cdots, d_{N-1}]
+X[d_0, d_1, \cdots, \left\lfloor{d_\text{axis} \over \text{repeats}}\right\rfloor, \cdots, d_{N-1}], \\
+\forall d_0 \in [0, n_0) \and \cdots d_{axis-1} \in [0, n_{axis-1}) \and
+d_{axis} \in [0, n_{axis} \cdot \text{repeats}) \and \\
+d_{axis+1} \in [0, n_{axis+1}) \and \cdots \and d_{N-1} \in [0, n_{N-1})
 $$
 
 
@@ -423,19 +435,22 @@ $$
 
 Suppose Input `X`, Output `Y`, attribute `reps`. Where `X`'s shape is N dimension, exactly  $(n_0, n_1, \cdots, n_{N-1})$, `reps` is M dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$.
 $$
-\forall r \in \text{reps}: r \in [1, max\_attr) \\
-\forall (k_0, k_1, \cdots, k_{K-1}), 
-\text{where } k_j \in [0, SX[j] \cdot SR[j]) \and j \in [0, K) \and K=max(M, N): \\
+r \in [1, max\_attr), \forall r \in \text{reps}
+$$
+
+$$
 Y[k_0, \cdots, k_{K-N-1}, k_{K-N}, k_{K-N+1}, \cdots, k_{K-1}] = \\
 X[k_{K-N+0} \text{ mod } n_0, k_{K-N+1} \text{ mod } n_1, \cdots, k_{K-N+N-1} \text{ mod } n_{N-1}], \\
-\text{where } SX[p] = \begin{cases}
+\forall k_0 \in [0, M_0) \and \cdots \and k_{K-1} \in [0, M_{K-1}), \\
+\text{where } K = \max\{M, N\} \text{ and } M[i] = SX[i] \cdot SR[i] \text{ and } \\
+SX[p] = \begin{cases}
 n_{p-K+N}, & p \in [K-N, K-1) \\
 1, & p \in [0, K-N)
-\end{cases} \and p \in [0, K) \and \\
+\end{cases} \text{ and } \\
 SR[q] = \begin{cases}
 m_{q-K+M}, & q \in [K-M, K-1) \\
 1, & q \in [0, K-M)
-\end{cases} \and q \in [0, K)
+\end{cases}
 $$
 
 
@@ -445,14 +460,16 @@ $$
 
 Suppose Input `X`, Output `Y`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$.
 $$
-\forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N): \\
-Y[flatten\_index(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1})]  =  \\
-X[d_0, d_1, \cdots, d_{N-1}]
+Y[\text{flatten_index}(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1})]  =  \\
+X[d_0, d_1, \cdots, d_{N-1}], \\
+\forall d_0 \in [0, n_0) \and d_1 \in [0, n_1) \and \cdots \and
+d_{N-1} \in [0, n_{N-1})
 $$
-where $flatten\_index$ is 
+where $\text{flatten_index}$ is 
 $$
-flatten\_index(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1}) = \\
-d_0 * n_1 * n_2 * \cdots * n_{N-1} + d_1 * n_2 * n_3 * \cdots * n_{N-1} + 
+\text{flatten_index}(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1}) = \\
+d_0 \cdot \prod_{i = 1}^{N-1} n_i + 
+d_1 \cdot \prod_{i = 2}^{N-1} n_i + 
 \cdots + d_{N-2} * n_{N-1} + d_{N-1}
 $$
 
@@ -493,9 +510,9 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `target_shape`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `target_shape` is M dimension, exactly $(m_0, m_1, \cdots,  m_{M-1})$ , and satisfy constraint : $m_0 * m_1 * \cdots * m_{M-1} = n_0 * n_1 * \cdots * n_{N-1}$.
 $$
-T = flatten(X) \\
-\forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M): \\
-Y[d_0, d_1, \cdots, d_{N-1}] = T[flatten\_index(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1})]
+Y[d_0, d_1, \cdots, d_{M-1}] = T[\text{flatten_index}(d_0, d_1, \cdots, d_{M-1}, m_0, m_1, \cdots, m_{N-1})], \\
+\forall d_0 \in [0, m_0) \and \cdots \and d_{N-1} \in [0, m_{N-1}), \\
+\text{where } T = \text{flatten}(X)
 $$
 
 
@@ -695,20 +712,36 @@ $$
 
 Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`.
 $$
-Y[b, idx, k] = T[b, n, k], \\
-\forall b \in [0, B) \and n \in [0, min(N, \text{top_k}) \and 
-k \in [0, K) \and idx \in [0, \text{max_output_size}) \and \\
-iou(n, p) <= \text{out_threshold}, \forall p \in [0, n), \\
-\text{where } T = \text{reversed sort X over axis 1 by index at axis 2 foreach axis 0, } \\
-\text{ which index priority is [1, 0, 2, 3, 4, 5] and } \\
-iou(p, q) = \text{intersaction over union [T[b, p, 2:3], T[b, p, 4:5]], [T[b, q, 2:3], T[b, q, 4:5]] and } \\
-\text{idx} = card\{ p \mid p \in [0, n) \and
-iou(p, q) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
+Y[b, \text{idx}(n), k] = X[b, I(n), k], \\
+\forall b \in [0, B) \and n \in [0, \min(N, \text{top_k})) \and 
+k \in [0, K) \and \\
+\text{idx}(n) \in [0, \text{max_output_size}) \and
+\text{iou_check}(n), \\
+\text{where } I: \{ i \mid i \in [0, N) \} \to \{ i \mid i \in [0, N) \}, \\
+\text {satisfy } X[b, I(i), 1] > X[b, I(j), 1] \or (X[b, I(i), 1] = X[b, I(j), 1] \and \\
+(X[b, I(i), 0] > X[b, I(j), 0] \or (X[b, I(i), 0] = X[b, I(j), 0] \and \\
+(X[b, I(i), 2] > X[b, I(j), 2] \or (X[b, I(i), 2] = X[b, I(j), 2] \and \\
+(X[b, I(i), 3] > X[b, I(j), 3] \or (X[b, I(i), 3] = X[b, I(j), 3] \and \\
+(X[b, I(i), 4] > X[b, I(j), 4] \or (X[b, I(i), 4] = X[b, I(j), 4] \and \\
+(X[b, I(i), 5] > X[b, I(j), 5] \or (X[b, I(i), 5] = X[b, I(j), 5] \and \\
+I(i) < I(j)))))))))))), 
+\forall 0 \leqslant i < j < N \text{ and } \\
+\text{iou_check}(i) =
+iou(I(i), I(0)) \leqslant \text{iou_threshold} \and \cdots \and \\
+iout(I(i), I(i-1)) \leqslant \text{iout_threshold} \text{ and } \\
+\text{iou}(p, q) = \begin{cases}
+\text{overlap ratio T[b, p, :], T[b, q, :], } &
+\begin{array}{}
+\text{if force_suppress is true } \or \\
+T[b, p, 0] < 0 \or T[b, p, 1] = T[b, q, 1] 
+\end{array} \\[1ex]
+0, & \text{otherwise}
+\end{cases} \text{ and } \\
+\text{idx}(i) = card\{ I(p) \mid p \in [0, i) \and
+\text{iou}(I(p), I(q)) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
 $$
 
 $$
 Y[b, n, k] = -1, \\
-\forall b \in [0, B) \and n \in [idx, N) \and k \in [0, K), \\
-\text{where idx} = card\{ p \mid p \in [0, N) \and
-iou(p, q) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
+\forall b \in [0, B) \and n \in [\min\{\text{idx}(N), \text{max_output_size}\}, N) \and k \in [0, K)
 $$
