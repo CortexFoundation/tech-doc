@@ -52,65 +52,86 @@ Data format，a wrapper of data content pointer.
 
 Reduce operator perform the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
 
-*Attributes Constraints*
-
-1. axes is `TShape` type, by default (). The axis or axes along which to perform the reduction.
-   + no duplicate
-   + range [-ndim, ndim). If axis < 0, axis += ndim
-2. keepdims is `false` (`boolean` type) by default. If this is set to `True`, the reduced axes are left with 1.
-3. exclude is `false` by default. Whether to perform reduction on axis that are NOT in axis instead.
-
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`, `exclude` and reduce function `REDUCE_OP`.
+Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `axes` is `TShape`, it's dimension is M, $M \in [0, N+1) \and card\{i \mid i \in \text{axes}\}=M$, `keepdims` is `boolean`, `exclude` is `boolean`.
+$$
+T = \left\{i \mid \text{axis} \in \text{axes} \and 
+i = \begin{cases}
+\text{axis}, & \text{if axis } \geqslant 0 \\
+\text{axis} + N, & \text{otherwise}
+\end{cases} \right\} \\
+\text{where } card \{\text{T}\} = M \text{ and } \\
+j \in [0, N), \forall j \in \text{T}
+$$
 
-```python
-real_axes = calculate the real axes depending on (axes, exclude)
-```
-
-Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/reduce.cc#L6
-
-1. len(real_axes) == 0 and exclude == true 
-
-   Math:	$Y = X$
-
-   Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/reduce.cc#L42
-
-2. len(real_axes) == 0 and exclude == false
-
-   Math: 
-
-   ```python
-   Y[0] = X[0] # do reduce op over all axis
-   for x in X[1:]:
-     Y[0] = REDUCE_OP(x, Y[0])
-   ```
-
-   Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/reduce.cc#L45
-
-3. other case
-
-   Math:
-
-   ```python
-   init Y with 0
-   for xidx in range(X.shape):
-   	yidx = [x if ix not in real_axes for ix in xidx]
-   	Y[yidx] = REDUCE_OP(Y[yidx], X[xidx])
-   ```
-
-   Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/reduce.cc#L52
+$$
+\text{real_axes} = \begin{cases}
+\{i \mid i \in [0, N) \and i \notin T\} , & \text{if exclude is true} \\
+T, & \text{otherwise}
+\end{cases}
+$$
 
 
-#### max
 
-set `REDUCE_OP` to be `max`.
+1. Case `exclude` = true and $M=N$
 
-#### sum
+$$
+Y = X
+$$
 
-set `REDUCE_OP` to be `sum`.
+2. Case `exclude` = false and $M = 0$
 
-Example:
+$$
+Y[\underbrace{0, 0, \cdots, 0}_{K}] = \begin{cases} 
+\sum_{x \in X} x, & \text{if op is sum} \\[1ex]
+max\{x \mid x \in X \}, & \text{if op is max}
+\end{cases}, \\
+\text{where } K = \begin{cases}
+0, & \text{if keepdims is false}, \\
+N, & \text{otherwise}
+\end{cases}
+$$
+
+3. Case `keepdims` is false
+
+$$
+Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}] = \\
+\begin{cases}
+\sum_{d_{J(0)}=0}^{n_{J(0)}} \cdots \sum_{d_{J(M-1)}=0}^{n_{J(M-1)}}
+X[d_0, d_1, \cdots, d_{N-1}], & \text{if op is sum} \\[1ex]
+max\{ X[d_0, d_1, \cdots, d_{N-1}] \mid d_{J(0)} \in [0, n_{J(0)}) \and \cdots \and
+d_{J(M-1)} \in [0, n_{J(M-1)}) \}, & \text{if op is max}
+\end{cases} \\
+\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
+d_{I(K-1)} \in [0, n_{I(K-1)}) \\
+\text{where } K = N - M \text{ and } \\
+A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
+B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
+I: \{ i \mid i \in [0, K) \} \to A,
+\text{ satisfy } I(i) < I(j), \forall i < j \text{ and } \\
+J : \{ j \mid j \in [0, M) \} \to B,
+\text{ satisfy } J(i) < J(j), \forall i < j
+$$
+
+4. Otherwise
+
+$$
+Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}], \\
+\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
+d_{I(K-1)} \in [0, n_{I(K-1)}) \and \\
+d_{J(0)} = 0 \and \cdots \and d_{J(M-1)} = 0, \\
+\text{where } K = N - M \text{ and } \\
+A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
+B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
+I: \{ i \mid i \in [0, K) \} \to A,
+\text{ satisfy } I(i) < I(j), \forall i < j \text{ and } \\
+J : \{ j \mid j \in [0, M) \} \to B,
+\text{ satisfy } J(i) < J(j), \forall i < j \text{ and } \\
+M = \text{reduce_op}(X, \text{axes=axes, keepdims=false, exclude=exclude})
+$$
+
+*Example*
 
 ```python
 data = [[[1, 2], [2, 3], [1, 3]],
