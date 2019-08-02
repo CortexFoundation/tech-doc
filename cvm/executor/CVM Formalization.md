@@ -48,6 +48,17 @@ Data format，a wrapper of data content pointer.
 
 算子输入输出的数据格式为`DLTensor`，precision属性在(0, 32]范围内。
 
+##### Description Format
+
+所有的数学描述采用规范：
+$$
+Y[y_\text{indexes}] = X[x_\text{indexes}], \\
+\forall \text{given range}, \\
+\text{where } \text{condition}_1 \text{ and } \text{condition}_2 \text{ and } 
+\cdots \text{ condition}_n
+$$
+描述：对于所有给定取值范围，在指定坐标下，都有$Y=X$，其中定义的变量或条件用$\text{and}$相连接。
+
 ### Reduce Operator
 
 Reduce operator perform the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
@@ -607,14 +618,15 @@ clip(\text{e_arr}[e], \text{a_min}=\text{b_range}(e), \text{a_max}=\text{e_range
 \text{b_vec}[i] < \text{e_vec}[i], & \text{s_arr}[i] > 0 \\
 \text{e_vec}[i] < \text{b_vec}[i], & \text{s_arr}[i] < 0
 \end{cases} \\
-\forall (d_0, d_1, \cdots, d_{N-1}), 
-\text{where } d_j \in [0, 
-\left\lceil{\text{e_vec}[j] - \text{b_vec}[j] \over \text{s_arr}[j]}\right\rceil) 
-\and j \in [0, N): \\
+
 Y[d_0, d_1, \cdots, d_{N-1}] = \\
 X[\text{b_vec}[0] + \text{s_arr}[0] * d_0,
 \text{b_vec}[1] + \text{s_arr}[1] * d_1,
-\cdots, \text{b_vec}[N-1] + \text{s_arr}[N-1] * d_{N-1}]]
+\cdots, \text{b_vec}[N-1] + \text{s_arr}[N-1] * d_{N-1}]] \\
+\forall (d_0, d_1, \cdots, d_{N-1}), 
+\text{where } d_j \in [0, 
+\left\lceil{\text{e_vec}[j] - \text{b_vec}[j] \over \text{s_arr}[j]}\right\rceil) 
+\and j \in [0, N)
 $$
 
 
@@ -628,9 +640,9 @@ Suppose Input `X`, `indices`, Output `Y`, attributes `axis`. Where `X`'s shape i
 
 $$
 T = flatten(X) \\
-\forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) :\\
 Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1],\\
-\text{where } \text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}]
+\forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) \text{ and }\\
+\text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}] 
 $$
 
 2. Case axis is `int`:
@@ -641,13 +653,14 @@ $$
 \text{axis}, & \text{axis} \geqslant 0 \\
 \text{axis} + N, & \text{axis} < 0
 \end{cases} \\
+Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{real_axis}-1}, \text{xdix}, d_{\text{real_axis}+M}, \cdots, d_{M+N-1}], \\
 \forall (d_0, d_1, \cdots, d_{M+N-1}), \text{where } d_j \in \begin{cases} 
-[0, n_j), & j < \text{axis} \\
-[0, m_{j-\text{axis}}), & j \in [\text{axis}, \text{axis}+M) \\
-[0, n_{j-M+1}), & j \in [\text{axis} + M, M+N)
+[0, n_j), & j < \text{real_axis} \\
+[0, m_{j-\text{real_axis}}), & j \in [\text{real_axis}, \text{real_axis}+M) \\
+[0, n_{j-M+1}), & j \in [\text{real_axis} + M, M+N)
 \end{cases} \and j \in [0, M+N) : \\
-Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{axis}-1}, \text{xdix}, d_{\text{axis}+M}, \cdots, d_{M+N-1}], \\
-\text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{axis}}, d_{\text{axis}+1}, \cdots, d_{\text{axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{axis}}-1)
+
+\text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{real_axis}}, d_{\text{real_axis}+1}, \cdots, d_{\text{real_axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{real_axis}}-1)
 $$
 
 
