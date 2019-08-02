@@ -217,7 +217,7 @@ Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `di
 
 $$
 Y[n,i,p,q]=\sum_{j=0}^{C} 
-\text{kernel}(X[n,j, p, q], W[i,j,:,:])
+\text{kernel}(n, j, p, q, n, i)
 + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
@@ -228,9 +228,9 @@ q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 
 $$
 where $\text{kernel}$ function is 
 $$
-\text{kernel}(A, B) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+ki*DH,q'+kj*DW) \cdot B[k_i, k_j], \\
-\text{where } p' \in [p \cdot \text{SH} -\text{PH}, p \cdot \text{SH} -\text{PH}+\text{KH}*DH), \text{and}\\
-q' \in [q \cdot \text{SW}-\text{PW}, q \cdot \text{SW}-\text{PW}+\text{KW}*DW)\}, \text{and} \\
+\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+ki*DH,q'+kj*DW) \cdot W[o, i, k_i, k_j], \\
+\text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and } \\
+q' = q \cdot \text{SW}-\text{PW} \text{ and } \\
 \text{pad}(p, q) = \begin{cases} 
 X[n, j, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
 0, & \text{otherwise}
@@ -247,7 +247,7 @@ OC = C
 $$
 
 $$
-Y[n,i,p,q]= kernel(X[n,i, p, q], W[i,0,:,:]) + \begin{cases}
+Y[n,i,p,q]= kernel(n,i, p, q, i,0) + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
 \end{cases}, \\
