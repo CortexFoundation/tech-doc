@@ -48,6 +48,17 @@ Data format，a wrapper of data content pointer.
 
 算子输入输出的数据格式为`DLTensor`，precision属性在(0, 32]范围内。
 
+##### Description Format
+
+所有的数学描述采用规范：
+$$
+Y[y_\text{indexes}] = X[x_\text{indexes}], \\
+\forall \text{given range}, \\
+\text{where } \text{condition}_1 \text{ and } \text{condition}_2 \text{ and } 
+\cdots \text{ condition}_n
+$$
+描述：对于所有给定取值范围，在指定坐标下，都有$Y=X$，其中定义的变量或条件用$\text{and}$相连接。
+
 ### Reduce Operator
 
 Reduce operator perform the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
