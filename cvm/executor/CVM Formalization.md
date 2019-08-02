@@ -488,9 +488,9 @@ Suppose `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Wh
 $$
 \forall i \in [1, M) \; \forall j \in [0, N) \and j \ne \text{axis}: \;
 n^i_j = n^{0}_j \\
-\forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, n^i_j) \and j \in [0, N): \\
 Y[d_0, d_1, \cdots, d_\text{axis-1}, \text{new_idx}, d_\text{axis+1}, \cdots, d_{N-1}] = I^i[d_0, d_1, \cdots, d_{N-1}], \\
-\text{where new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
+\forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}) \text{ and } \\d_j \in [0, n^i_j) \and j \in [0, N), \text{ and }\\
+\text{new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
 $$
 
 
@@ -500,9 +500,9 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `axis`, `num_newaxis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$,  `axis` is in range $[-N-1, N+1)$,  and `num_newaxis` is in range $[min\_attr, max\_attr)$.
 $$
-\forall (d_0, d_1,\cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N): \\
 Y[d_0,d_1, \cdots, d_{axis-1}, \underbrace{1, 1, \cdots, 1}_{\text{num_newaxis}}, d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\ 
-\text{where } \text{real_axis} = 
+\forall (d_0, d_1,\cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N), \text{and} \\
+\text{real_axis} = 
 \begin{cases}
 \text{axis},& \text{axis} \geqslant 0 \\
 \text{axis} + N,& \text{axis} < 0
