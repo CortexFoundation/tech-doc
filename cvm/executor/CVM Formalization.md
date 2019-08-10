@@ -72,7 +72,7 @@ i = \begin{cases}
 \text{axis}, & \text{if axis } \geqslant 0 \\
 \text{axis} + N, & \text{otherwise}
 \end{cases} \right\}, \\
-\text{where } card \{\text{T}\} = M \text{ and } \\
+\text{where } card \; \text{T} = M \text{ and }
 j \in [0, N), \forall j \in \text{T}
 $$
 
@@ -239,8 +239,8 @@ q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 
 $$
 where $\text{kernel}$ function is 
 $$
-\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+ki*DH,q'+kj*DW) \cdot W[o, i, k_i, k_j], \\
-\text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and } \\
+\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+ki*\text{DH},q'+kj*\text{DW}) \cdot W[o, i, k_i, k_j], \\
+\text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and }
 q' = q \cdot \text{SW}-\text{PW} \text{ and } \\
 \text{pad}(p, q) = \begin{cases} 
 X[n, j, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
