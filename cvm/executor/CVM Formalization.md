@@ -239,7 +239,7 @@ q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 
 $$
 where $\text{kernel}$ function is 
 $$
-\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+ki*\text{DH},q'+kj*\text{DW}) \cdot W[o, i, k_i, k_j], \\
+\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+k_i*\text{DH},q'+k_j*\text{DW}) \cdot W[o, i, k_i, k_j], \\
 \text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and }
 q' = q \cdot \text{SW}-\text{PW} \text{ and } \\
 \text{pad}(p, q) = \begin{cases} 
@@ -440,7 +440,7 @@ Suppose Input `X`, Output `Y`, attribute `axis`, `repeats`. Where `X`'s shape is
 $$
 Y[d_0, d_1, \cdots, d_\text{axis}, \cdots, d_{N-1}] = 
 X[d_0, d_1, \cdots, \left\lfloor{d_\text{axis} \over \text{repeats}}\right\rfloor, \cdots, d_{N-1}], \\
-\forall d_0 \in [0, n_0) \and \cdots d_{axis-1} \in [0, n_{axis-1}) \and
+\forall d_0 \in [0, n_0) \and \cdots \and d_{axis-1} \in [0, n_{axis-1}) \and
 d_{axis} \in [0, n_{axis} \cdot \text{repeats}) \and \\
 d_{axis+1} \in [0, n_{axis+1}) \and \cdots \and d_{N-1} \in [0, n_{N-1})
 $$
@@ -497,11 +497,14 @@ $$
 
 Suppose `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Where all inputs' shape is N dimension, exactly $I^i$'s shape is $(n^i_0, n^i_1, \cdots, n^i_{N-1})$, and `axis` is in range $[0, N)$.
 $$
-\forall i \in [1, M) \; \forall j \in [0, N) \and j \ne \text{axis}: \;
-n^i_j = n^{0}_j \\
+n^i_j = n^0_j, \forall i \in [1, M) \and j \in [0, N) \and j \neq \text{axis}
+$$
+
+$$
 Y[d_0, d_1, \cdots, d_\text{axis-1}, \text{new_idx}, d_\text{axis+1}, \cdots, d_{N-1}] = I^i[d_0, d_1, \cdots, d_{N-1}], \\
-\forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}) \text{ and } \\d_j \in [0, n^i_j) \and j \in [0, N), \text{ and }\\
-\text{new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
+\forall d_0 \in [0, n^i_0) \and \cdots \and d_{N-1} \in [0, n^i_{N-1})
+\and i \in [0, M), \\
+\text{where new_idx} = \sum_{j=0}^{i-1} n^j_\text{axis} + d_\text{axis}
 $$
 
 
@@ -511,9 +514,11 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `axis`, `num_newaxis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$,  `axis` is in range $[-N-1, N+1)$,  and `num_newaxis` is in range $[min\_attr, max\_attr)$.
 $$
-Y[d_0,d_1, \cdots, d_{axis-1}, \underbrace{1, 1, \cdots, 1}_{\text{num_newaxis}}, d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\ 
-\forall (d_0, d_1,\cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N), \text{and} \\
-\text{real_axis} = 
+Y[d_0,d_1, \cdots, d_{\text{real_axis}-1}, 
+\underbrace{0, 0, \cdots, 0}_{\text{num_newaxis}}, 
+d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
+\forall d_0 \in [0, n_0) \and \cdots \and d_{N-1} \in [0, n_{N-1}), \\
+\text{where real_axis} = 
 \begin{cases}
 \text{axis},& \text{axis} \geqslant 0 \\
 \text{axis} + N,& \text{axis} < 0
@@ -539,7 +544,10 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is TShape and dimension is M.
 $$
-\forall \text{axis} \in \text{axes}: axis \in [-N, N) \\
+\text{axis} \in [-N, N), \forall \text{axis} \in \text{axes}
+$$
+
+$$
 \text{real_axes} = 
 \begin{cases}
 \{\text{axis} \mid \text{axis} \geqslant 0 \and \text{axis} \in \text{axes} \} \bigcup
@@ -547,12 +555,20 @@ $$
 & M > 0 \\
 \{\text{axis} \mid n_\text{axis} = 1 \and \text{axis} \in [0, N) \}, & M = 0
 \end{cases} \\
-\forall \text{axis} \in \text{real_axes}: n_{axis} = 1 \\
-\forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N): \\
-Y[s_0, s_1, \cdots, s_{N-K-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
-\text{where } K = \mathbf|\text{real_axes}\mathbf| \and s_{i-count(i)} = d_i 
-\and i \in [0, N) \and i \notin \text{real_axes} \and \\
-count(i) = \mathbf|\{\text{axis} \mid \text{axis} < i \and \text{axis} \in \text{real_axes} \}\mathbf|
+$$
+
+$$
+n_\text{axis} = 1, \forall \text{axis} \in \text{real_axis}
+$$
+
+$$
+Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-K-1)}] = X[d_0, d_1, \cdots, d_{N-1}], \\
+\forall d_0 \in [0, n_0) \and d_1 \in [0, n_1) 
+\and \cdots \and d_{N-1} \in [0, n_{N-1}), \\
+\text{where } K = card \; \text{real_axes} \text{ and } \\
+I: \{i \mid i \in [0, N-K) \} \to 
+\{i \mid i \in [0, N) \and i \notin \text{real_axes} \}, \\
+\text{satisfy } I(i) < I(j), \forall 0 \leqslant i < j < N-K
 $$
 
 
