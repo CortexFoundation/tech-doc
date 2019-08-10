@@ -499,9 +499,9 @@ Suppose `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Wh
 $$
 \forall i \in [1, M) \; \forall j \in [0, N) \and j \ne \text{axis}: \;
 n^i_j = n^{0}_j \\
-\forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}), \text{where } d_j \in [0, n^i_j) \and j \in [0, N): \\
 Y[d_0, d_1, \cdots, d_\text{axis-1}, \text{new_idx}, d_\text{axis+1}, \cdots, d_{N-1}] = I^i[d_0, d_1, \cdots, d_{N-1}], \\
-\text{where new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
+\forall i \in [0, M) \; \forall (d_0, d_1, \cdots, d_{N-1}) \text{ and } \\d_j \in [0, n^i_j) \and j \in [0, N), \text{ and }\\
+\text{new_idx} = n^0_\text{axis} + n^1_\text{axis} + \cdots + n^{i-1}_\text{axis} + d_\text{axis}
 $$
 
 
@@ -511,9 +511,9 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `axis`, `num_newaxis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$,  `axis` is in range $[-N-1, N+1)$,  and `num_newaxis` is in range $[min\_attr, max\_attr)$.
 $$
-\forall (d_0, d_1,\cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N): \\
 Y[d_0,d_1, \cdots, d_{axis-1}, \underbrace{1, 1, \cdots, 1}_{\text{num_newaxis}}, d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\ 
-\text{where } \text{real_axis} = 
+\forall (d_0, d_1,\cdots, d_{N-1}), \text{where } d_j \in [0, n_j) \and j \in [0, N), \text{and} \\
+\text{real_axis} = 
 \begin{cases}
 \text{axis},& \text{axis} \geqslant 0 \\
 \text{axis} + N,& \text{axis} < 0
@@ -618,14 +618,15 @@ clip(\text{e_arr}[e], \text{a_min}=\text{b_range}(e), \text{a_max}=\text{e_range
 \text{b_vec}[i] < \text{e_vec}[i], & \text{s_arr}[i] > 0 \\
 \text{e_vec}[i] < \text{b_vec}[i], & \text{s_arr}[i] < 0
 \end{cases} \\
-\forall (d_0, d_1, \cdots, d_{N-1}), 
-\text{where } d_j \in [0, 
-\left\lceil{\text{e_vec}[j] - \text{b_vec}[j] \over \text{s_arr}[j]}\right\rceil) 
-\and j \in [0, N): \\
+
 Y[d_0, d_1, \cdots, d_{N-1}] = \\
 X[\text{b_vec}[0] + \text{s_arr}[0] * d_0,
 \text{b_vec}[1] + \text{s_arr}[1] * d_1,
-\cdots, \text{b_vec}[N-1] + \text{s_arr}[N-1] * d_{N-1}]]
+\cdots, \text{b_vec}[N-1] + \text{s_arr}[N-1] * d_{N-1}]] \\
+\forall (d_0, d_1, \cdots, d_{N-1}), 
+\text{where } d_j \in [0, 
+\left\lceil{\text{e_vec}[j] - \text{b_vec}[j] \over \text{s_arr}[j]}\right\rceil) 
+\and j \in [0, N)
 $$
 
 
@@ -639,9 +640,9 @@ Suppose Input `X`, `indices`, Output `Y`, attributes `axis`. Where `X`'s shape i
 
 $$
 T = flatten(X) \\
-\forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) :\\
 Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1],\\
-\text{where } \text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}]
+\forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) \text{ and }\\
+\text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}] 
 $$
 
 2. Case axis is `int`:
@@ -652,13 +653,14 @@ $$
 \text{axis}, & \text{axis} \geqslant 0 \\
 \text{axis} + N, & \text{axis} < 0
 \end{cases} \\
+Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{real_axis}-1}, \text{xdix}, d_{\text{real_axis}+M}, \cdots, d_{M+N-1}], \\
 \forall (d_0, d_1, \cdots, d_{M+N-1}), \text{where } d_j \in \begin{cases} 
-[0, n_j), & j < \text{axis} \\
-[0, m_{j-\text{axis}}), & j \in [\text{axis}, \text{axis}+M) \\
-[0, n_{j-M+1}), & j \in [\text{axis} + M, M+N)
+[0, n_j), & j < \text{real_axis} \\
+[0, m_{j-\text{real_axis}}), & j \in [\text{real_axis}, \text{real_axis}+M) \\
+[0, n_{j-M+1}), & j \in [\text{real_axis} + M, M+N)
 \end{cases} \and j \in [0, M+N) : \\
-Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{axis}-1}, \text{xdix}, d_{\text{axis}+M}, \cdots, d_{M+N-1}], \\
-\text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{axis}}, d_{\text{axis}+1}, \cdots, d_{\text{axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{axis}}-1)
+
+\text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{real_axis}}, d_{\text{real_axis}+1}, \cdots, d_{\text{real_axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{real_axis}}-1)
 $$
 
 
