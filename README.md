@@ -36,7 +36,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 
 - [Storage Layer](storage-layer.md) - Explanation on storage stack and how models/data are uploaded
 
-- [Wiki](http://ec2-18-191-10-249.us-east-2.compute.amazonaws.com:5000/)
+- [Wiki](http://ec2-18-191-10-249.us-east-2.compute.amazonaws.com:5000/) You can find json-rpc here
 
 
 
