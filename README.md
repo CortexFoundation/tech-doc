@@ -12,7 +12,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 
 - [Cortex Clients](clients.md) - Official golang implementation of the CortexTheseus protocol
 
-- [Mining](mining.md) - Mining instruction and PoW algorithm explained
+- [Mining](mining.md) - Mining instruction and PoW algorithm explained (https://www.cortexlabs.ai/forum/topic/72/radiance-cortex-gpu-nvidia-8g-miner-v1-0-0/2)
 
 - [Cortex Virtual Machine](cvm.md) - Explanation on CVM
 
