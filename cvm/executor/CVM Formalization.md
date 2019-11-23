@@ -239,7 +239,7 @@ q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 
 $$
 where $\text{kernel}$ function is 
 $$
-\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} pad(p'+k_i*\text{DH},q'+k_j*\text{DW}) \cdot W[o, i, k_i, k_j], \\
+\text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} \text{pad}(p'+k_i*\text{DH},q'+k_j*\text{DW}) \cdot W[o, i, k_i, k_j], \\
 \text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and }
 q' = q \cdot \text{SW}-\text{PW} \text{ and } \\
 \text{pad}(p, q) = \begin{cases} 
@@ -253,12 +253,11 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 
 This case is named *Depth-Wise Convolution*.
 $$
-IC = 1, \\
-OC = C
+IC = 1 \text{ and }OC = C
 $$
 
 $$
-Y[n,i,p,q]= kernel(n,i, p, q, i,0) + \begin{cases}
+Y[n,i,p,q]= \text{kernel}(n,i, p, q, i,0) + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
 \end{cases}, \\
@@ -290,7 +289,8 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is 2-D `TShape`, exactly $(PSH, PSW)$, `padding` is 2-D `TShape`, exactly $(PH, PW) \in [min\_attr, max\_attr)$, if `padding` is  1-D, which means $PH = PW$, `strides` is 2-D `TShape`, exactly $(SH, SW)$, `ceil_mode` is `boolean`.
 $$
 PSH \in [0, H + 2PH + 1), \\
-PSW \in [0, W + 2PW + 1)
+PSW \in [0, W + 2PW + 1), \\
+PSH > PH \and PSW > PW
 $$
 
 $$
@@ -578,21 +578,19 @@ $$
 
 Suppose Input `X`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is TShape and dimension is M, where M is in $\{0, N\}$.
 $$
-\forall \text{axis} \in \text{axes}: \text{axis} \in [-N, N) \\
-\text{real_axes} = \begin{cases}
-(r_0, r_1, \cdots, r_{N-1}), \text{where } r_j = 
-\begin{cases} 
-\text{axes}_j, & \text{axes}_j \geqslant 0 \\
-\text{axes}_j + N, & \text{axes}_j < 0 
-\end{cases} \and
-j \in [0, N), & M=N\\
-(n_{N-1}, n_{N-2}, \cdots, n_0), & M = 0
-\end{cases} \\
-\{i \mid i \in \text{real_axes}\} = \{j \mid j \in [0, N) \} \\
-\forall (d_0, d_1, \cdots, d_{N-1}), 
-\text{where } d_j \in [0, n_{\text{real_axes}_{j}}) \and j \in [0, N): \\
-Y[d_0, d_1, \cdots, d_{N-1}] = X[s_0, s_1, \cdots, s_{N-1}], \\
-\text{where } s_{\text{real_axes}[j]} = d_j \and j \in [0, N)
+\text{axis} \in [-N, N), \forall \text{axis} \in \text{axes}
+$$
+
+$$
+Y[d_{\text{real_axes}_0}, d_{\text{real_axes}_1}, \cdots, d_{\text{real_axes}_{N-1}}] = 
+X[d_0, d_1, \cdots, d_{N-1}], \\
+\forall d_0 \in [0, n_0) \and \cdots \and d_{N-1} \in [0, n_{N-1}), \\
+\text{where real_axes}_i = \begin{cases}
+\text{axes}_i, & M = N \and \text{axes}_i \geqslant 0 \\
+\text{axes}_i + N, & M = N \and \text{axes}_i < 0 \\
+N-1-i, & M = 0
+\end{cases} \text{ and } \\
+card \; \{\text{real_axes}_i \mid i \in [0, N) \} = N
 $$
 
 
@@ -745,7 +743,7 @@ $$
 
 *Math Formalization*
 
-Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`.
+Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
 $$
 Y[b, \text{idx}(n), k] = X[b, I(n), k], \\
 \forall b \in [0, B) \and n \in [0, \min(N, \text{top_k})) \and 
