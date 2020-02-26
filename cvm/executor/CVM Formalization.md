@@ -743,7 +743,7 @@ $$
 
 *Math Formalization*
 
-Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
+Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $(0, +\infty)$,  101 stands for bounding box full-overlap specifically, and larger integer is equivalent to that. `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
 $$
 R[b, i, k] = X[b, I(i), k], \\
 \forall b \in [0, B) \and i \in [0, T) \and k \in [0, K), \\
