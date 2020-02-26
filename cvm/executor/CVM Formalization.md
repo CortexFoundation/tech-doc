@@ -745,36 +745,47 @@ $$
 
 Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $[0, +\infty)$, `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
 $$
-Y[b, \text{idx}(n), k] = X[b, I(n), k], \\
-\forall b \in [0, B) \and n \in [0, \min(N, \text{top_k})) \and 
-k \in [0, K) \and \\
-\text{idx}(n) \in [0, \text{max_output_size}) \and
-\text{iou_check}(n), \\
-\text{where } I: \{ i \mid i \in [0, N) \} \to \{ i \mid i \in [0, N) \}, \\
-\text {satisfy } X[b, I(i), 1] > X[b, I(j), 1] \or (X[b, I(i), 1] = X[b, I(j), 1] \and \\
-(X[b, I(i), 0] > X[b, I(j), 0] \or (X[b, I(i), 0] = X[b, I(j), 0] \and \\
-(X[b, I(i), 2] > X[b, I(j), 2] \or (X[b, I(i), 2] = X[b, I(j), 2] \and \\
-(X[b, I(i), 3] > X[b, I(j), 3] \or (X[b, I(i), 3] = X[b, I(j), 3] \and \\
-(X[b, I(i), 4] > X[b, I(j), 4] \or (X[b, I(i), 4] = X[b, I(j), 4] \and \\
-(X[b, I(i), 5] > X[b, I(j), 5] \or (X[b, I(i), 5] = X[b, I(j), 5] \and \\
-I(i) < I(j)))))))))))), 
-\forall 0 \leqslant i < j < N \text{ and } \\
-\text{iou_check}(i) =
-iou(I(i), I(0)) \leqslant \text{iou_threshold} \and \cdots \and \\
-iout(I(i), I(i-1)) \leqslant \text{iout_threshold} \text{ and } \\
+R[b, i, k] = X[b, I(i), k], \\
+\forall b \in [0, B) \and i \in [0, T) \and k \in [0, K), \\
+\text{where } T = \text{max}\{
+\text{min}(N, \text{valid_count}[b]), 0\} \text{ and } \\
+I: \{ i \mid i \in [0, T) \} \to \{ i \mid i \in [0, T) \}, \\
+\text {satisfy } X[b, I(i), 1] > X[b, I(j), 1] \or \\
+(X[b, I(i), 1] = X[b, I(j), 1] \and I(i) < I(j)), 
+\forall 0 \leqslant i < j < T
+$$
+
+$$
+Y[b, n, k] = R[b, \text{IDX}(n), k], \\
+\forall b \in [0, B) \and n \in [0, \min\{T, \text{MOS}, card\{U\}\}) \and 
+k \in [0, K), \\
+\text{where } \text{TK} = 
+\begin{cases}
++\infty, & \text{if top_k < 0} \\[1ex]
+\text{top_k}, & \text{otherwise}
+\end{cases} \text{ and } \\
+\text{MOS} = 
+\begin{cases}
++\infty, & \text{if max_output_size < 0} \\[1ex]
+\text{max_output_size}, & \text{otherwise}
+\end{cases} \text{ and } \\
 \text{iou}(p, q) = \begin{cases}
-\text{overlap ratio T[b, p, :], T[b, q, :], } &
+\text{overlap_ratio}(R[b, p, :], R[b, q, :]), &
 \begin{array}{}
-\text{if force_suppress is true } \or \\
-T[b, p, 0] < 0 \or T[b, p, 1] = T[b, q, 1] 
+\text{force_suppress is true} \or R[b, p, 0] = R[b, q, 0] 
 \end{array} \\[1ex]
 0, & \text{otherwise}
 \end{cases} \text{ and } \\
-\text{idx}(i) = card\{ I(p) \mid p \in [0, i) \and
-\text{iou}(I(p), I(q)) \leqslant \text{iou_threshold}, \forall q \in [0, p) \}
+\text{U} = \{p \mid p \in [0, min\{TK, T\}) \and
+\text{iou}(p, q) < \text{iou_threshold}, 
+\forall q \in U \and q < p\}
+ \text{ and } \\
+\text{IDX}: \{i \mid i \in [0, card\{U\})\} \to U, \text{satisfy }
+\text{IDX}(i) < \text{IDX}(j), \forall 0 \leqslant i < j < card\{U\}
 $$
 
 $$
 Y[b, n, k] = -1, \\
-\forall b \in [0, B) \and n \in [\min\{\text{idx}(N), \text{max_output_size}\}, N) \and k \in [0, K)
+\forall b \in [0, B) \and k \in [0, K) \and 
+n \in [min\{T, \text{MOS},card\{U\}\}, N)
 $$
