@@ -776,8 +776,8 @@ k \in [0, K), \\
 \end{array} \\[1ex]
 0, & \text{otherwise}
 \end{cases} \text{ and } \\
-\text{U} = \{p \mid p \in [0, min\{TK, T\}) \and
-\text{iou}(p, q) < \text{iou_threshold}, 
+\text{U} = \{p \mid p \in [0, min\{TK, T\}) \and 
+R[b,p,0] >= 0 \and \text{iou}(p, q) < \text{iou_threshold}, 
 \forall q \in U \and q < p\}
  \text{ and } \\
 \text{IDX}: \{i \mid i \in [0, card\{U\})\} \to U, \text{satisfy }
