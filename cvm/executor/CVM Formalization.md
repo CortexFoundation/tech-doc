@@ -165,24 +165,21 @@ Broadcast operator perform the broadcast function to input datas, and the proces
 
 *Math Formalization*
 
-Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. Where `A`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$.
-$$
-Y[d_0, d_1, \cdots, d_{K-1}] = 
-\text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{M-1}], B[b_0, b_1, \cdots, b_{N-1}]), \\
-\forall d_0 \in [0, M_0) \and \cdots \and d_{K-1} \in [0, M_{K-1}), \\
-\text{where } K = max(M, N) \text{ and } M[i] = \max\{ SA[i], SB[i] \} \text{ and } \\
-SA[p] = \begin{cases}
-m_{p-K+M}, & p \geqslant K - M \\
-1, & p < K - M
-\end{cases} \text{ and } \\
-SB[q] = \begin{cases}
-n_{q-K+N}, & q \geqslant K-N \\
-1, & q < K - N
-\end{cases} \text{ and } \\
-\forall i \in [0, K): SA[i]=SB[i] \or SA[i]=1 \or SB[i]=1 \text{ and } \\
-a_i = \min(d_{K-M+i}, m_i-1)\text{ and }
-b_j = \min(d_{K-N+j}, n_j-1)
-$$
+Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A`'s shape is $M$ dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is $N$ dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$. 
+
+1. Extends `A`'s shape and  `B`'s shape into $K = max(M, N)$ dimension by prefixing their shapes with $1$, denoted by $SA$ and  $SB$, respectively, where $$SA_i = \begin{cases}
+   m_{i-K+M}, & i \geqslant K - M \\
+   1, & i < K - M
+   \end{cases} \text{ and } 
+   SB_i = \begin{cases}
+   n_{i-K+N}, & i \geqslant K-N \\
+   1, & i < K - N
+   \end{cases}$$ 
+
+2. For $\forall i \in [0, K)$, assert $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y`'s shape is $K$ dimension, exactly $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
+3. For $\forall i \in [0, K)$, $Y[d_0, d_1, \cdots, d_{K-1}] = 
+   \text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{K-1}], B[b_0, b_1, \cdots, b_{K-1}])$, where $d_{i} \in [0, k_{i}), a_i = \min(d_{i}, SA_i-1)$ and $b_i = \min(d_{i}, SB_i-1)$.
+
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L575
 
 #### broadcast_add
