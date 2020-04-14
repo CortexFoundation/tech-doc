@@ -413,7 +413,7 @@ Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precis
 $$
 Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
 \text{where } T = {\left\lfloor 
-\left(\left\lfloor \frac{X}{2^{\text{shift_bit}} - 1} \right\rfloor + 1 \right) 
+\left(\left\lfloor \frac{X}{2^{\text{shift_bit} - 1}} \right\rfloor + 1 \right) 
 \div 2 \right\rfloor} \text{ and } \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
 
