@@ -38,7 +38,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 
 - [Wiki](http://ec2-18-191-10-249.us-east-2.compute.amazonaws.com:5000/) You can find json-rpc here
 
-
+- [Cuckoo](https://github.com/CortexFoundation/PoolMiner/blob/dev/README.md) cuckoo cycle by cortex
 
 ## Getting Started
 
