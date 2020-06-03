@@ -159,30 +159,43 @@ sum(data, axis=[1,2])
 [ 12.  19.  27.]
 ```
 
+#### sum
+
+Test Parameter (sum):
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 34, 67\}, l=\{1, 58\}, r=\{1, 64\}$
+
+​	axis: $(1, )$
+
+#### max
+
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 34, 67\}, l=\{1, 58\}, r=\{1, 64\}$
+
+
+
 ### Broadcast Operator
 
 Broadcast operator perform the broadcast function to input datas, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
 
 *Math Formalization*
 
-Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. Where `A`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$.
-$$
-Y[d_0, d_1, \cdots, d_{K-1}] = 
-\text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{M-1}], B[b_0, b_1, \cdots, b_{N-1}]), \\
-\forall d_0 \in [0, M_0) \and \cdots \and d_{K-1} \in [0, M_{K-1}), \\
-\text{where } K = max(M, N) \text{ and } M[i] = \max\{ SA[i], SB[i] \} \text{ and } \\
-SA[p] = \begin{cases}
-m_{p-K+M}, & p \geqslant K - M \\
-1, & p < K - M
-\end{cases} \text{ and } \\
-SB[q] = \begin{cases}
-n_{q-K+N}, & q \geqslant K-N \\
-1, & q < K - N
-\end{cases} \text{ and } \\
-\forall i \in [0, K): SA[i]=SB[i] \or SA[i]=1 \or SB[i]=1 \text{ and } \\
-a_i = \min(d_{K-M+i}, m_i-1)\text{ and }
-b_j = \min(d_{K-N+j}, n_j-1)
-$$
+Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A`'s shape is $M$ dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is $N$ dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$. 
+
+1. Extends `A`'s shape and  `B`'s shape into $K = max(M, N)$ dimension by prefixing their shapes with $1$, denoted by $SA$ and  $SB$, respectively, where $$SA_i = \begin{cases}
+   m_{i-K+M}, & i \geqslant K - M \\
+   1, & i < K - M
+   \end{cases} \text{ and } 
+   SB_i = \begin{cases}
+   n_{i-K+N}, & i \geqslant K-N \\
+   1, & i < K - N
+   \end{cases}$$ 
+
+2. For $\forall i \in [0, K)$, assert $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y`'s shape is $K$ dimension, exactly $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
+3. For $\forall i \in [0, K)$, $Y[d_0, d_1, \cdots, d_{K-1}] = 
+   \text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{K-1}], B[b_0, b_1, \cdots, b_{K-1}])$, where $d_{i} \in [0, k_{i}), a_i = \min(d_{i}, SA_i-1)$ and $b_i = \min(d_{i}, SB_i-1)$.
+
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L575
 
 #### broadcast_add
@@ -202,17 +215,63 @@ broadcast_add(x, y) = [[ 1.,  1.,  1.],
                        [ 2.,  2.,  2.]]
 ```
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
 #### broadcast_sub
 
 set `BROADCAST_OP` to `sub`.
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
 
 #### broadcast_mul
 
 set `BROADCAST_OP` to `multiply`.
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
+#### broadcast_div
+
+set `BROADCAST_OP` to `divide`.
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
 #### broadcast_max
 
 set `BROADCAST_OP` to `max`.
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
+#### 
 
 ### NN Operator
 
@@ -267,6 +326,8 @@ q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L390
 
+
+
 #### Dense
 
 *Math Formalization*
@@ -281,6 +342,24 @@ B, & \text{otherwise}
 \end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L86
+
+Test Parameter:
+
+​	X.shape: $(i, j), i = \{1, 14, 27\}, j = \{1, 12, 23\}$
+
+​	W.shape: $(k, j),  k = \{1, 18\}, j = \{1, 12, 23\}$
+
+​	units: $k$
+
+​	use_bias:false
+
+#### Relu
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### MaxPooling
 
@@ -311,6 +390,14 @@ X[n, i, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L692
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	pool_size: $(1, 2)$
+
+
+
 #### Upsampling
 
 *Math Formalization*
@@ -322,6 +409,11 @@ Y[n, i, h, w] = X[n, i, \left\lfloor {h \over \text{scale}}\right\rfloor, \left\
 h \in [0, H \cdot \text{scale}) \and w \in [0, W \cdot \text{scale})
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	scale: 2
 
 ### Elemwise Operator
 
@@ -339,6 +431,12 @@ x, &  x \geqslant 0  \\
 \end{cases},
 \forall x \in X
 $$
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
 
 #### cvm_precision
 
@@ -364,6 +462,14 @@ $$
 Y = A + B
 $$
 
+Test Parameter:
+
+	A.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	B.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
 #### elemwise_sub
 
 *Math Formalization*
@@ -372,6 +478,14 @@ Suppose Input `A`, `B`, Output `Y`. Where `A` and `B` have the same shape, $(n_0
 $$
 Y = A - B
 $$
+
+Test Parameter:
+
+	A.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	B.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
 
 #### negative
 
@@ -396,6 +510,15 @@ x, & x \in (\text{a_min}, \text{a_max}) \\
 \forall x \in X
 $$
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	a_max: $10$
+
+​	a_min: $-19$
+
+
 
 #### cvm_clip
 
@@ -407,6 +530,17 @@ Y = clip(X, \text{a_min}=-\alpha, \text{a_max}=\alpha), \\
 \text{where } \alpha = 2^\text{precision-1}-1
 $$
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	a_max: 10
+
+​	a_min: -19
+
+​	precision: 2
+
+
 
 #### cvm_right_shift
 
@@ -416,9 +550,17 @@ Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precis
 $$
 Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
 \text{where } T = {\left\lfloor 
-\left(\left\lfloor \frac{X}{2^{\text{shift_bit}} - 1} \right\rfloor + 1 \right) 
+\left(\left\lfloor \frac{X}{2^{\text{shift_bit} - 1}} \right\rfloor + 1 \right) 
 \div 2 \right\rfloor} \text{ and } \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
+
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	precision: 2
+
+​	shift_bit: 2
 
 #### cvm_left_shift
 
@@ -429,6 +571,16 @@ $$
 Y = clip(T, \text{a_min} = -\alpha, \text{a_max}=\alpha), \\
 \text{where } T = X * 2^\text{shift_bit} \text{ and } \alpha = 2 ^ {\text{precision} - 1} - 1
 $$
+
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	precision: 2
+
+	shift_bit: 2
+
+#### 
 
 ### Transform Operator
 
@@ -445,6 +597,11 @@ d_{axis} \in [0, n_{axis} \cdot \text{repeats}) \and \\
 d_{axis+1} \in [0, n_{axis+1}) \and \cdots \and d_{N-1} \in [0, n_{N-1})
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	repeats: 2
 
 #### tile
 
@@ -458,18 +615,23 @@ $$
 $$
 Y[k_0, \cdots, k_{K-N-1}, k_{K-N}, k_{K-N+1}, \cdots, k_{K-1}] = \\
 X[k_{K-N+0} \text{ mod } n_0, k_{K-N+1} \text{ mod } n_1, \cdots, k_{K-N+N-1} \text{ mod } n_{N-1}], \\
-\forall k_0 \in [0, M_0) \and \cdots \and k_{K-1} \in [0, M_{K-1}), \\
-\text{where } K = \max\{M, N\} \text{ and } M[i] = SX[i] \cdot SR[i] \text{ and } \\
-SX[p] = \begin{cases}
+\forall k_0 \in [0, S_0) \and \cdots \and k_{K-1} \in [0, S_{K-1}), \\
+\text{where } K = \max\{M, N\} \text{ and } S_i = SX_i \cdot SR_i \text{ and } \\
+SX_p = \begin{cases}
 n_{p-K+N}, & p \in [K-N, K-1) \\
 1, & p \in [0, K-N)
 \end{cases} \text{ and } \\
-SR[q] = \begin{cases}
+SR_q = \begin{cases}
 m_{q-K+M}, & q \in [K-M, K-1) \\
 1, & q \in [0, K-M)
 \end{cases}
 $$
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	reps: $(2, 2, 3)$
 
 #### flatten
 
@@ -490,6 +652,11 @@ d_1 \cdot \prod_{i = 2}^{N-1} n_i +
 \cdots + d_{N-2} * n_{N-1} + d_{N-1}
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### concatenate
 
@@ -507,6 +674,13 @@ Y[d_0, d_1, \cdots, d_\text{axis-1}, \text{new_idx}, d_\text{axis+1}, \cdots, d_
 \text{where new_idx} = \sum_{j=0}^{i-1} n^j_\text{axis} + d_\text{axis}
 $$
 
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}
+
+​	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### expand_dims
 
@@ -525,6 +699,11 @@ d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
 \end{cases}
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	axis: 2
 
 #### reshape
 
@@ -537,6 +716,15 @@ Y[d_0, d_1, \cdots, d_{M-1}] = T[\text{flatten_index}(d_0, d_1, \cdots, d_{M-1},
 \text{where } T = \text{flatten}(X)
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+	shape: $(r, l, j, i), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+
+
+​	
 
 #### squeeze
 
@@ -571,6 +759,11 @@ I: \{i \mid i \in [0, N-K) \} \to
 \text{satisfy } I(i) < I(j), \forall 0 \leqslant i < j < N-K
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### transpose
 
@@ -593,6 +786,11 @@ N-1-i, & M = 0
 card \; \{\text{real_axes}_i \mid i \in [0, N) \} = N
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### slice | strided_slice
 
@@ -643,6 +841,11 @@ X[\text{b_vec}[0] + \text{s_arr}[0] * d_0,
 \and j \in [0, N)
 $$
 
+Test Parameter:
+
+	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	
 
 #### take
 
@@ -708,6 +911,13 @@ Y[d_0, d_1, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
 [0, n_j), & j \notin \text{real_axes}
 \end{cases}
 $$
+
+Test Parameter:
+
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
+
+​	axis: $(0, 1)$
+
 
 
 ### NMS Operator
