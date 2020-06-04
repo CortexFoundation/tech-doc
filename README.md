@@ -10,6 +10,10 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 
 - [Introduction](cortex-intro.md) - Introduction to Cortex
 
+- [Details About Cortex](cortex-details.md) - Details about the Cortex Project
+
+- [Hello World Tutorial](hello-world-tutorial-contract.md) - Get Started Calling an AI Model in a Smart Contract
+
 - [Cortex Clients](clients.md) - Official golang implementation of the CortexTheseus protocol
 
 - [Mining](mining.md) - Mining instruction and PoW algorithm explained (https://www.cortexlabs.ai/forum/topic/72/radiance-cortex-gpu-nvidia-8g-miner-v1-0-0/2)
@@ -38,7 +42,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 
 - [Wiki](http://ec2-18-191-10-249.us-east-2.compute.amazonaws.com:5000/) You can find json-rpc here
 
-
+- [Cuckoo](https://github.com/CortexFoundation/PoolMiner/blob/dev/README.md) cuckoo cycle by cortex
 
 ## Getting Started
 
