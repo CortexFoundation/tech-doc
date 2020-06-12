@@ -1,6 +1,7 @@
-# Apple Demo in Jetson Nano Car
 
-*One newer to CortexLabs may be confused about the project application in real environment , and this is a preview demo guiding you having a quick glance at the special point as our [official website](www.cortexlabs.ai) introduced: AI on Blockchain.*
+#Apple Demo in Jetson Nano Car
+
+*Newcomers may be confused about what real-life application can CortexLabs bring to the table. This repository provides a quick glance into what we are doing at Cortex, as indicated on our [official website](www.cortexlabs.ai) introduced: AI on Blockchain.*
 
 ## A Compressed GIF Version
 
@@ -8,18 +9,19 @@
 
 
 
-The gif above is a demo running in Jetson Nano Car produced by NVIDIA. And the inference framework is [CVM Runtime](https://github.com/CortexFoundation/cvm-runtime) developed by CortexLabs.
+The gif above is a demo Car running Jetson Nano by NVIDIA. The inference framework used is our very own [CVM Runtime](https://github.com/CortexFoundation/cvm-runtime) by CortexLabs.
 
-The full video has been uploaded in YouTube via CortexLabs official account. Click [Here](https://youtu.be/88c-446s9JE) to watch.
+The full video has been uploaded on YouTube via CortexLabs official account. Click [Here](https://youtu.be/88c-446s9JE) to watch.
 
 ## Video Guide
 
-The procedure showed in the video contains:
+Below is the written steps shown in the video:
 
-1. Execute the deterministic AI framework: **cvm-runtime** in Jetson Nano Car, it's off-chain and deterministic. That is  edge devices can execute real-time AI decision with our AI framework.
-2. And then upload the image data to blockchain and call on-chain AI contract call since the result must be consistent with native execute progress. The benefits have
-   - Real-time AI decision can be strictly reproduction in future requests for analisis.
-   - A decentralization and crediable blockchain record will largely add the confidence level of AI inference. Any doubt about the last AI decision will only focus on the AI inference procedure and model supplier, instead of the credibility of inference itself.
+1. Execute deterministic AI framework, **cvm-runtime**, in an off-chain edge device that can make Ai decision in realtime. In this case, the Jetson Nano Car.
+2. Upload the image data to Cortex blockchain and call the on-chain AI contract to ensure results are consistent across the Jetson Nano Car and on-chain AI contract.
+The purpose is to:
+   - Strictly reproduce real-time AI decisions in future requests for analysis or audit.
+   - Add the confidence level of AI inference by using a decentralization and credible blockchain record will. Any doubt of the last AI decision will focus on the AI inference procedure and model creator, instead of the inference process.
 
 ## Implementation Details
 
@@ -27,17 +29,17 @@ The procedure showed in the video contains:
 
 ### Real-time AI Inference In Jetson Nano Car
 
-Please clone our cvm-runtime project in GitHub and compile. More details refer to the project link:
+Please clone our cvm-runtime project in GitHub and compile. Refer to the project link for more detail:
 
 [cvm-runtime in GitHub](https://github.com/CortexFoundation/cvm-runtime)
 
 #### Developer API
 
-We have supplied some interface in cvm-runtime, both python and c++ are available to invoke. And we will introduce the python API for the video demo. The python API is located in `{ProjectRoot}/python`.
+We have created a few interfaces in cvm-runtime, both python and c++ are available to invoke. We will use the python API that is shown in the video demo for demonstration. The python API is located in `{ProjectRoot}/python`.
 
 ##### cvm.runtime
 
-The package expose three main inference interface: 
+The package has three main inference interface: 
 
 | Name            | Parameters                     | Function                           |
 | --------------- | ------------------------------ | ---------------------------------- |
@@ -60,7 +62,7 @@ cvm.runtime.CVMAPIFreeModel(model_reference)
 
 ### Upload Image to Blockchain
 
-Image upload has many procedures, and all tha lower and instrinstic representation format is transaction with different parameters. The default raw transaction JSON RPC format is:
+Image upload ton the blockchain requires many procedures. All the lower and intrinsic representation format is transacted with different parameters. The default raw transaction JSON RPC format is:
 
 #### ctxc_sendRawTransaction
 
@@ -70,7 +72,7 @@ Image upload has many procedures, and all tha lower and instrinstic representati
 
 `Object` - The transaction object
 
-- `from`: `DATA`, 20 Bytes - The address the transaction is send from.
+- `from`: `DATA`, 20 Bytes - The address the transaction is sent from.
 - `to`: `DATA`, 20 Bytes - (optional when creating new contract) The address the transaction is directed to.
 - `gas`: `QUANTITY` - (optional) Integer of the gas provided for the transaction execution. It will return unused gas.
 - `gasPrice`: `QUANTITY` - (optional, default: To-Be-Determined) Integer of the gasPrice used for each paid gas
@@ -84,13 +86,13 @@ Image upload has many procedures, and all tha lower and instrinstic representati
 
 `DATA`, 32 Bytes - the transaction hash, or the zero hash if the transaction is not yet available.
 
-Use `ctxc_getTransactionReceipt` to get the contract address, after the transaction was mined, when you created a contract.
+Use `ctxc_getTransactionReceipt` to get the contract address, after the transaction ismined, you can create a contract.
 
-After acknowledging the native transaction rules, it's time to introduce the detail upload procedure.
+After acknowledging the native transaction rules, it's time to introduce the detailed upload procedure.
 
 #### 1. Create torrent for image data
 
-You should save the image data into disk named `data`, create the torrent file and organize at the same level. Directory structure should look like this:
+You should save the image data in folder called `data`, create the torrent file and organize at the same level. Directory structure should look like this:
 
 ```
 root_directory/
@@ -100,15 +102,15 @@ root_directory/
 
 #### 2. Announce image uploading onto blockchain
 
-First, we should tell the blockchain that I want to upload an image, and supply the image information to blockchain via transaction before download. The most important thing is the torrent info hash. After blockchain node received the uploaded transaction, it will start to find the torrent corresponding with the info hash from tracker and DHT network. 
+First, we should tell the blockchain that we want to upload an image, and supply the image information to the blockchain via transaction before download. The most important thing is the torrent info hash. After blockchain node received the uploaded transaction, it will start to find the torrent corresponding with the info hash from tracker and DHT network. 
 
-**Be attention**, do not forget to seed the `root_directory` directory list above in you local environment. It's important for chain-node to find the right torrent, or chain-node cannot find it and refused to download the image you want to upload. You can use some tools as torrent seeding server such as *qbittorrent*, *libtorrent* etc to serve the `root_directory`.
+**Be aware** Do not forget to seed the `root_directory` directory list above in your local environment. It's important for chain-node to find the right torrent, or else the chain-node will not be able to find it then refuse to download the image you want to upload. You can use a torrent seeding server such as *qbittorrent*, *libtorrent* etc to serve the `root_directory`.
 
-Image is called as `Input` in blockchain, same as contract deployment that is send an transaction of key `to` is null. Howerver, `Input` deployment has an unique hex prefix indicator: `0002` before the contract data.
+Image is called as `Input` in blockchain, same as contract deployment that sends a transaction of key `to` is null. However, `Input` deployment has a unique hex prefix indicator: `0002` before the contract data.
 
-The `Input` meta is a structure of `Comments, InfoHash, RawSize, Shape `, and then one use the RLP method to encode the list above. 
+The `Input` meta is a structure of `Comments, InfoHash, RawSize, Shape `, and then one uses the RLP method to encode the list above. 
 
-So a normal announce image upload trasaction may looks like this:
+So an announce image upload trasaction may looks like this:
 
 - `method`: ctxc_sendRawTransaction
 - `parameters`: 
@@ -118,21 +120,21 @@ So a normal announce image upload trasaction may looks like this:
 
 #### 3. Wait for seeding block
 
-After announcing the uploaded image onto blockchain, we have set some seeding blocks left for chain-node to download the torrent from DHT network. The default seeding block number in MainNet and TestNet is 6, that is you have to wait six blocks(about 90 sec) mined before starting next step.
+After announcing the uploaded image on the blockchain, we have set some seeding blocks left for chain-node to download the torrent from DHT network. The default seeding block number in MainNet and TestNet is 6, that is you have to wait for six blocks(about 90 sec) mined before starting the next step.
 
 #### 4. Push upload progress
 
-`Input` uploading consumes CTXC. You should transfer to the `Input` contract address with specific gas price: 277777. One the specfic transaction should push your upload progress on chain 512K size. The calculate formula of transaction number to be sent is $\lceil RawSize / 512K \rceil$.
+`Input` uploading consumes CTXC. You should transfer to the `Input` contract address with a specific gas price: 277777. One of the specific transaction should push your upload progress on-chain with 512K size. The calculated formula of the transaction number to be sent is $\lceil RawSize / 512K \rceil$.
 
 #### 5. Wait for mature block
 
-Once push progress done, the mature block is set to wait for chain-node to download. The MainNet mature block number is 100 and the TestNet is 1 for quick test. 
+Once the push process is done, the mature block is set to wait for the chain-node to download. The MainNet mature block number is 100, but the TestNet is set to 1 to speed up the testing. 
 
 ### AI Contract on Blockchain Inference
 
-If you are newer to contract deployment, may you click the [link](ai-contracts.md) to review how to deploy contract.
+If you are new to contract deployment, use this [link](ai-contracts.md) to learn how to deploy a contract.
 
-Here is the contract core inference code in videos: 
+Here is the core contract inference code in the video: 
 
 ```javascript
     function bet(address _input, address _receiveAddress) payable public {
@@ -166,4 +168,4 @@ Here is the contract core inference code in videos:
     }
 ```
 
-The `bet` function will transfer you 0.02 CTXC if on-chain AI recognize an image as apples, and given that you have inferenced as apples in car, you'll receive the reward CTXC after calling contract.
+The `bet` function will transfer 0.02 CTXC to you if on-chain AI recognize an image as apples as well as the deterministic AI framework in the Jetson Nano Car, you'll receive the reward CTXC after calling the contract.
