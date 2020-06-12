@@ -17,7 +17,7 @@ The full video has been uploaded on YouTube via CortexLabs official account. Cli
 
 Below is the written steps shown in the video:
 
-1. Execute deterministic AI framework, **cvm-runtime**, in an off-chain edge device that can make Ai decision in realtime. In this case, the Jetson Nano Car.
+1. Execute deterministic AI framework, **cvm-runtime**, in an off-chain edge device that can make AI decision in realtime. In this case, the Jetson Nano Car.
 2. Upload the image data to Cortex blockchain and call the on-chain AI contract to ensure results are consistent across the Jetson Nano Car and on-chain AI contract.
 The purpose is to:
    - Strictly reproduce real-time AI decisions in future requests for analysis or audit.
@@ -62,7 +62,7 @@ cvm.runtime.CVMAPIFreeModel(model_reference)
 
 ### Upload Image to Blockchain
 
-Image upload ton the blockchain requires many procedures. All the lower and intrinsic representation format is transacted with different parameters. The default raw transaction JSON RPC format is:
+Image upload ton the blockchain requires many procedures. All the lower and intrinsic representation format is a transaction with different parameters. The default raw transaction JSON RPC format is:
 
 #### ctxc_sendRawTransaction
 
