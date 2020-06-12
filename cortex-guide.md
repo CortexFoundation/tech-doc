@@ -22,7 +22,7 @@ CortexLabs chain-node GitHub project is named [**CortexTheseus**](https://github
 
 This is an simple demo for quick learning that what @CortexLabs can do with AI, edge devices and blockchain. More Information about the video refers to [Apple Demo](apple-demo.md).
 
-![demo](/Users/dragwav/cortex/tech-doc/cvm/demo/demo.gif)
+![demo](cvm/demo/demo.gif)
 
 ## Start Up
 
