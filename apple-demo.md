@@ -1,5 +1,5 @@
 
-#Apple Demo in Jetson Nano Car
+# Apple Demo in Jetson Nano Car
 
 *Newcomers may be confused about what real-life application can CortexLabs bring to the table. This repository provides a quick glance into what we are doing at Cortex, as indicated on our [official website](www.cortexlabs.ai) introduced: AI on Blockchain.*
 
