@@ -101,7 +101,7 @@ Cortex Virtual Machine is inherited from EVM in Ethereum project and add some ne
 - Contract Deployment refers to the [link](ai-contracts.md).
 - AI Dapps refer to the [link](ai-dapps.md).
 - Contract Editor: Remix refer to the [link](cortex-remix.md).
-- Solidity Project: 
+- Solidity Project refers to the [link](https://github.com/CortexFoundation/ctxc-solc).
 
 ### Synapse / CVM Executor
 
