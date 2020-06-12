@@ -6,7 +6,7 @@
 
 The inspiration of CortexLabs starts from the development of virtual machine in Ethereum project, which can execute simple contract logic. And further more, can it execute the AI on blockchain? The absolute answer is YES! That is the **AI on Blockchain** @CortexLabs.
 
-Firstly, Welcom to visit our offical website: https://www.cortexlabs.ai.
+Firstly, welcome to visit our offical website: https://www.cortexlabs.ai.
 
 And then , we will give an total review of our foundation structure. All the whole projects of CortexLabs are arranged in the below image. You can have a quick glance at the CortexLabs' global mind map, and then find the corresponding sections in the documentation from the picture.
 
@@ -26,7 +26,7 @@ This is an simple demo for quick learning that what @CortexLabs can do with AI, 
 
 ## Start Up
 
-The Cortex Theseus project start-up documentation is located at [link](clients.md)
+The Cortex Theseus project start-up documentation is located at the [link](clients.md).
 
 ## Cortex Release
 
