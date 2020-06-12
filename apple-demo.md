@@ -90,7 +90,7 @@ After acknowledging the native transaction rules, it's time to introduce the det
 
 #### 1. Create torrent for image data
 
-You should save the image data into disk named `data`, create the torrent file and organize at the same level. Directory structure looks like this:
+You should save the image data into disk named `data`, create the torrent file and organize at the same level. Directory structure should look like this:
 
 ```
 root_directory/

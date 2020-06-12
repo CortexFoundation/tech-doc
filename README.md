@@ -6,12 +6,6 @@ The current challenge to execute machine learning programs on the conventional b
 
 Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, which can execute AI programs on-chain, and is compatible with the EVM. In other words, the Cortex chain can execute all the Ethereum Dapps, and on top of that, incorporate machine learning into these Dapps. For the first time, instead of a black box, we can run ml models on the blockchain in a decentralized, immutable, and transparent manner − network consensus verifies every step of the AI inference.
 
-## A Quick Time Demo
-
-This is an simple demo for quick learning that what @CortexLabs can do with AI, edge devices and blockchain. More Information about the video refers to [Apple Demo](apple-demo.md).
-
-![demo](cvm/demo/demo.gif)
-
 ## Basic Concepts
 
 - [Introduction](cortex-intro.md) - Introduction to Cortex
