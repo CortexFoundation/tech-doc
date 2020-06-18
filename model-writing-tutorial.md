@@ -18,23 +18,23 @@ There will be 5 main steps
 
 - A Linux System (if you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and use google if you get stuck. You're always welcomed to ask questions in our Telegram group.
 
-(1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
+> (1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
 
-(2) Start a folder named `.ssh`, put in your key pair and start a text file named `config`
+> (2) Start a folder named `.ssh`, put in your key pair and start a text file named `config`
 
-(3) Open the command palette in Visual Studio code (`command + P` in Mac), type in
-`> Remote-SSH: Connect to Host`
-Then choose `Add New SSH Host`.
+> (3) Open the command palette in Visual Studio code (`command + P` in Mac), type in
+> `> Remote-SSH: Connect to Host`
+> Then choose `Add New SSH Host`.
 
-Type in your address `ubuntu@your-aws-instance-public-ip`
+> Type in your address `ubuntu@your-aws-instance-public-ip`
 
-Substitute in your own public ip here. Note that each time you restart your instance, the public ip changes, so you need to reconfigure upon each restart.
+> Substitute in your own public ip here. Note that each time you restart your instance, the public ip changes, so you need to reconfigure upon each restart.
 
-Type in the absolute path to your configuration file. Your path should end with something like `/.ssh/config`
+> Type in the absolute path to your configuration file. Your path should end with something like `/.ssh/config`
 
 - A machine with GPU and CUDA installed properly for your Linux version.
 
-# Mnist Training & Quantization
+# Compile CVM-Runtime
 
 ## 1. Configure for compilation
 
@@ -66,17 +66,23 @@ Now type `g++` to see if you have `g++` installed. If not, `sudo apt-get install
 
 You might need to switch to a machine with GPU and CUDA installed if you don't have one.
 
-## Install MRT
+# Train Your Model
 
-Now go to MXNET's website (https://mxnet.apache.org/get_started/?platform=linux&language=python&processor=gpu&environ=pip&) to
-install the GPU version of MXNET suited for your CUDA. The install command should look something like `$pip3 install mxnet-cu102`
+## Install MXNET
 
-Use `$nvcc --version` to find out your CUDA version.
+Now go to [MXNET's website](https://mxnet.apache.org/get_started/?platform=linux&language=python&processor=gpu&environ=pip&) to
+install the GPU version of MXNET suited for your CUDA. The install command should look something like
+
+`$pip3 install mxnet-cu102`
+
+Use `$nvcc --version` to find out your CUDA version; make sure that it matches the number after "cu", in this case it is version 10.
+
+Now run
 
 ```
 pip3 install gluoncv
 
-make python(dep? make python will cause "no module named mrt")
+make dep
 ```
 
 ### Mnist Training
@@ -87,9 +93,9 @@ Execute the following command:
 python3 tests/mrt/train_mnist.py
 ```
 
-Training model is stored in `~/mrt_model`.
+Trained models are stored in `~/mrt_model`.
 
-### Mnist Quantization
+# Quantize Your Model
 
 To prepare the model for the Cortex blockchain, we need to quantize it. Cortex's original research has led to a tool called MRT that readily helps us quantize ML models for deterministic inference on the blockchain. If you're interested in how it works under the hood, check out this article (link) released on the blog of Amazon's MXNet team, who has officially endorsed the MRT.
 
@@ -101,8 +107,28 @@ python3 python/mrt/main2.py python/mrt/model_zoo/mnist.ini
 
 All the pre-quantized model configuration file is stored in `python/mrt/model_zoo`, and the file `config.example.ini` expositions all the key meanings and value.
 
-## Upload quantized model
+# Upload quantized model
 
-Now the model is fully quantized, we're ready to upload it!
+Now the model is fully quantized, we're ready to upload it! Let's go the [Cerebro Explorer](https://cerebro.cortexlabs.ai/) .
 
-## Inference the model
+In the menu bar at the top, find "upload" under "AI Contract"
+
+![cerebroMenu](imgs/cerebroMenu.png)
+
+`mnist_.json` and `mnist_.params` are your models, stored in `~/mrt_model`.
+
+# Inference the model
+
+We will try to call this model that you just trained from a smart contract to recognize handwritten digits!
+<br />
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+Questions:
+
+1. relationship between cvm-runtime, cvm and mrt?
+2. can we train the model before compiling cvm-rumtime?
