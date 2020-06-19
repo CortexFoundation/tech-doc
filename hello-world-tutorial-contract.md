@@ -233,9 +233,9 @@ Now click on the dropdown arrow and you can see the list of callable functions i
 
 ![callables](imgs/callable.png)
 
-Paste your custom image input (that monstrous array above) into SetInput and then click the button, confirm the transaction in the popup window.
+Paste your custom image input (that monstrous array above) into SetInput and then click the button, confirm the transaction in the popup window. Wait until the transaction is confirmed. This could take a while!
 
-Finally, click on DigitRecognitionInfer, confirm the transaction. Your final inference result should be stored in currentInferResult in a few seconds!
+Finally, click on `DigitRecognitionInfer`, confirm the transaction. Your final inference result should be stored in `currentInferResult` in a few seconds!
 
 Expect to see something like this:
 ![res](imgs/res.png)
