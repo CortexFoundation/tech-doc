@@ -2,17 +2,17 @@
 
 In this tutorial, we will write a simple handwritten digit recognition model and convert it via MRT for uploading to the Cortex blockchain.
 
-There will be 5 main steps
+There will be 4 main stages
 
-(1) We will first train a model with the MXNET framework.
+(1) Install CVM-Runtime & MRT & other dependencies.
 
-(2) Install MRT dependencies
+CVM-Runtime a deterministic machine learning framework (written in C++) that execute your models on the Cortex blockchain during the runtime. An integral part of CVM-Runtime is MRT (written in Python), which prepares your model for CVM-Runtime.
 
-(3) Write a .ini configuration file to ready MRT for converting our model
+(2) Train a model using the MXNet framework.
 
-(4) Run MRT to convert the model
+(3) Quantize the trained model using MRT.
 
-(5) Upload the model
+(4) Upload the model
 
 ### Prerequisites:
 
@@ -34,15 +34,23 @@ There will be 5 main steps
 
 - A machine with GPU and CUDA installed properly for your Linux version.
 
-# Compile CVM-Runtime
+# Install CVM-runtime
 
-## 1. Configure for compilation
+## 1. Git clone the repository
+
+```bash
+git clone -b wlt https://github.com/CortexFoundation/cvm-runtime.git
+
+cd cvm-runtime
+```
+
+## 2. Configure for compilation
 
 Set the `ENABLE_CUDA` variable `ON` in `config.cmake` line 6.
 
 ![config](imgs/config.png)
 
-## 2. Compile MRT
+## 3. Compile MRT
 
 You may need to install `make` if you have not already.
 
