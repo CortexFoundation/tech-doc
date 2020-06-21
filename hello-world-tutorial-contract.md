@@ -49,13 +49,11 @@ contract Infer {
         }
     }
 
-    // set input_data in the contract as the user input, which we pass into the function as an argument
     function SetInput(uint256[] data) public {
-        for(uint i = 1; i < input_data.length; ++i) {
+        for(uint i = 0; i < input_data.length; ++i) {
           input_data[i] = data[i];
         }
     }
-
     // recognize digit using randomly generated input image
    function DigitRecognitionInfer() public {
         uint256[] memory output = new uint256[](uint256(1));
@@ -64,7 +62,6 @@ contract Infer {
         currentInferResult = currentInferResult % 10;
     }
 }
-
 
 ```
 
@@ -100,7 +97,7 @@ contract Infer {
 ```javascript
  // If we want to input custom user image, we input it as the "data" argument in this function
     function SetInput(uint256[] data) public {
-        for(uint i = 1; i < input_data.length; ++i) {
+        for(uint i = 0; i < input_data.length; ++i) {
           input_data[i] = data[i];
         }
     }
@@ -143,7 +140,7 @@ Click on the Cortex logo ![cortexlogo](imgs/cortexlogo.png) on the left to go to
 
 Now if a window does not pop up, click on your Cortex wallet on the top right corner to see the transaction window. You may leave everything as default and click on "confirm". (You should see your account filled in automatically; if not, you may need to log into your wallet first and reload) A wallet window should pop up asking you to confirm the transaction like the one below. Review the details and then click "confirm" again.
 
-![confirmation](imgs/confirmation.png)
+![confirmation](imgs/testNetDeploy.png)
 
 After a few minutes, your contract should have been successfully deployed and show up under the "Deployed Contracts" section!
 
@@ -233,9 +230,9 @@ Now click on the dropdown arrow and you can see the list of callable functions i
 
 ![callables](imgs/callable.png)
 
-Paste your custom image input (that monstrous array above) into SetInput and then click the button, confirm the transaction in the popup window.
+Paste your custom image input (that monstrous array above) into SetInput and then click the button, confirm the transaction in the popup window. Wait until the transaction is confirmed. This could take a while!
 
-Finally, click on DigitRecognitionInfer, confirm the transaction. Your final inference result should be stored in currentInferResult in a few seconds!
+Finally, click on `DigitRecognitionInfer`, confirm the transaction. Your final inference result should be stored in `currentInferResult` in a few seconds!
 
 Expect to see something like this:
 ![res](imgs/res.png)
