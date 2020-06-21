@@ -49,13 +49,11 @@ contract Infer {
         }
     }
 
-    // set input_data in the contract as the user input, which we pass into the function as an argument
     function SetInput(uint256[] data) public {
-        for(uint i = 1; i < input_data.length; ++i) {
+        for(uint i = 0; i < input_data.length; ++i) {
           input_data[i] = data[i];
         }
     }
-
     // recognize digit using randomly generated input image
    function DigitRecognitionInfer() public {
         uint256[] memory output = new uint256[](uint256(1));
@@ -64,7 +62,6 @@ contract Infer {
         currentInferResult = currentInferResult % 10;
     }
 }
-
 
 ```
 
@@ -100,7 +97,7 @@ contract Infer {
 ```javascript
  // If we want to input custom user image, we input it as the "data" argument in this function
     function SetInput(uint256[] data) public {
-        for(uint i = 1; i < input_data.length; ++i) {
+        for(uint i = 0; i < input_data.length; ++i) {
           input_data[i] = data[i];
         }
     }
