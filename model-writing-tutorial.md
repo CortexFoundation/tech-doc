@@ -116,9 +116,12 @@ python3 tests/mrt/train_mnist.py
 
 Trained models are stored in `~/mrt_model`.
 
+**Very Important Note:**
+If you're training a custom model, keep in mind that MRT must see your dataset as well (more tutorial coming on this topic! Meanwhile, feel free to directly alter the source code yourself for workarounds). This is because MRT needs to get an idea of the range of activation values in each layer of your neural network in order to know how to quantize your model for optimal performance.
+
 # Stage III: Quantize Your Model
 
-To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from introduction that Cortex's original research has led to a tool called MRT that readily helps us quantize ML models for deterministic inference on the blockchain.
+To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from Introduction that MRT is a tool originating from Cortex's research in on-chain inference of ML models - it helps us quantize ML models for deterministic inference on the blockchain.
 
 Execute the following command:
 
@@ -154,7 +157,7 @@ We will try to call this model that you just trained from a smart contract to re
 
 1. Relationship between cvm-runtime, cvm and mrt?
 
-2) Why does MRT have to see our data?
+2. Why does MRT have to see our data?
 
 # Footnotes
 
