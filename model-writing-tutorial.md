@@ -6,6 +6,10 @@ Cortex is currently the _only_ public blockchain that allows on-chain execution 
 
 A few vocabulary essential for the rest of the tutorial:
 
+**CVM:**
+
+CVM, short for Cortex Virtual Machine, is the core of the Cortex blockchain. It is responsible for executing code on-chain. It is backward compatible with Ethereum's [EVM](https://ethdocs.org/en/latest/introduction/what-is-ethereum.html) with added support for on-chain machine learning inference. While it is virtually impossible to execute nontrivial ML models on the EVM, CVM is specially designed for on-chain ML inference with innovations such as utilization of node machines' GPUs and deterministic quantization of ML models.
+
 **CVM-Runtime**:
 
 An open-source deterministic machine learning framework written in C++. During runtime, the CVM (Cortex Virtual Machine) executes your models via CVM-Runtime. It is comparable to other frameworks such as MXNet, TensorFlow etc. with the important distinction that it is deterministic.
@@ -32,6 +36,8 @@ We will work through be 4 main stages
 
 - A machine with GPU and CUDA installed properly for your Linux version.
 
+- Working knowledge of Linux/Unix programming.
+
 - Willingness to debug for yourself. While we seek to be as comprehensive as possible in this tutorial, we cannot cover all the idiosyncrasies of different machines and environments.
 
 If you encounter any problems during the course, feel free to reach out to our core dev team via our [Telegram](https://t.me/CortexOfficialEN) or [Twitter](https://twitter.com/CTXCBlockchain/). We seek to constantly improve our documentation.
@@ -41,6 +47,8 @@ Let's get started!
 # Tutorial
 
 ## Stage I: Install CVM-runtime and Other Dependencies
+
+### **Install CVM-Runtime**
 
 ### 1. Git clone the CVM-runtime repository
 
@@ -75,22 +83,22 @@ sudo apt-get update
 sudo apt-get install cmake
 ```
 
-Now type `g++` to see if you have `g++` installed. If not, `sudo apt-get install g++`
+Now type `g++` in your shell to see if you have `g++` installed. If not, run `sudo apt-get install g++`
 
 You might need to switch to a machine with GPU and CUDA installed if you don't have one.
 
-# Train Your Model
-
-## Install MXNET
+### **Install MXNET & MRT dependencies**
 
 Now go to [MXNET's website](https://mxnet.apache.org/get_started/?platform=linux&language=python&processor=gpu&environ=pip&) to
 install the GPU version of MXNET suited for your CUDA. The install command should look something like
 
-`$pip3 install mxnet-cu102`
+```bash
+pip3 install mxnet-cu102
+```
 
-Use `$nvcc --version` to find out your CUDA version; make sure that it matches the number after "cu", in this case it is version 10.
+Run `$nvcc --version` to find out your CUDA version; make sure that it matches the number after "cu", in this case it is general version 10.
 
-Now run
+Now run the commands below install other dependencies needed for our model training and quantization later.
 
 ```
 pip3 install gluoncv
@@ -98,7 +106,7 @@ pip3 install gluoncv
 make dep
 ```
 
-### Mnist Training
+# Stage II: Train Your Model
 
 Execute the following command:
 
@@ -108,9 +116,9 @@ python3 tests/mrt/train_mnist.py
 
 Trained models are stored in `~/mrt_model`.
 
-# Quantize Your Model
+# Stage III: Quantize Your Model
 
-To prepare the model for the Cortex blockchain, we need to quantize it. Cortex's original research has led to a tool called MRT that readily helps us quantize ML models for deterministic inference on the blockchain. If you're interested in how it works under the hood, check out this article (link) released on the blog of Amazon's MXNet team, who has officially endorsed the MRT.
+To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from introduction that Cortex's original research has led to a tool called MRT that readily helps us quantize ML models for deterministic inference on the blockchain.
 
 Execute the following command:
 
@@ -120,7 +128,7 @@ python3 python/mrt/main2.py python/mrt/model_zoo/mnist.ini
 
 All the pre-quantized model configuration file is stored in `python/mrt/model_zoo`, and the file `config.example.ini` expositions all the key meanings and value.
 
-# Upload quantized model
+# Stage IV: Upload Your Model
 
 Now the model is fully quantized, we're ready to upload it! Let's go the [Cerebro Explorer](https://cerebro.cortexlabs.ai/) .
 
@@ -130,7 +138,7 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 `mnist_.json` and `mnist_.params` are your models, stored in `~/mrt_model`.
 
-# Inference the model
+# Stage V (surprise ;): Call & Execute Your Model On-chain
 
 We will try to call this model that you just trained from a smart contract to recognize handwritten digits!
 <br />
@@ -141,10 +149,12 @@ We will try to call this model that you just trained from a smart contract to re
 <br/>
 <br/>
 <br/>
-Questions:
 
-1. relationship between cvm-runtime, cvm and mrt?
-2. can we train the model before compiling cvm-rumtime?
+# FAQ
+
+1. Relationship between cvm-runtime, cvm and mrt?
+
+2) Why does MRT have to see our data?
 
 # Footnotes
 
