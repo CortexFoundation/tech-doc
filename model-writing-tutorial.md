@@ -1,42 +1,48 @@
-# AI Models for Cortex Tutorial
+# Write & Upload AI Models to Cortex
 
-In this tutorial, we will write a simple handwritten digit recognition model and convert it via MRT for uploading to the Cortex blockchain.
+# Introduction
 
-There will be 4 main stages
+Cortex is currently the _only_ public blockchain that allows on-chain execution of machine learning models. Every step of the inference is transparent to the public, verified by blockchain consensus.
 
-(1) Install CVM-Runtime & MRT & other dependencies.
+A few vocabulary essential for the rest of the tutorial:
 
-CVM-Runtime a deterministic machine learning framework (written in C++) that execute your models on the Cortex blockchain during the runtime. An integral part of CVM-Runtime is MRT (written in Python), which prepares your model for CVM-Runtime.
+**CVM-Runtime**:
+
+An open-source deterministic machine learning framework written in C++. During runtime, the CVM (Cortex Virtual Machine) executes your models via CVM-Runtime. It is comparable to other frameworks such as MXNet, TensorFlow etc. with the important distinction that it is deterministic.
+
+**MRT**:
+
+MRT (written in Python) is one of the most important parts of CVM-Runtime. It quantizes and prepares your model for on-chain execution by CVM-Runtime. At the risk of oversimplification, MRT compresses and converts your model from floating point to integer only so that its execution is efficient and deterministic across different devices. The original research was endorsed by the official team of Amazon MXNet and the details can be read [here](https://medium.com/apache-mxnet/quantizing-neural-network-models-in-mxnet-for-strict-consistency-on-blockchain-b5c950674866).
+
+In this tutorial, we will write a simple handwritten digit recognition model, convert it via MRT, and upload it to the Cortex blockchain so that it can be executed on-chain.
+
+We will work through be 4 main stages
+
+(1) Install CVM-Runtime (including MRT) and other dependencies.
 
 (2) Train a model using the MXNet framework.
 
-(3) Quantize the trained model using MRT.
+(3) Quantize the model trained in stage (2) using MRT.
 
 (4) Upload the model
 
-### Prerequisites:
+**Prerequisites:**
 
-- A Linux System (if you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and use google if you get stuck. You're always welcomed to ask questions in our Telegram group.
-
-> (1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
-
-> (2) Start a folder named `.ssh`, put in your key pair and start a text file named `config`
-
-> (3) Open the command palette in Visual Studio code (`command + P` in Mac), type in
-> `> Remote-SSH: Connect to Host`
-> Then choose `Add New SSH Host`.
-
-> Type in your address `ubuntu@your-aws-instance-public-ip`
-
-> Substitute in your own public ip here. Note that each time you restart your instance, the public ip changes, so you need to reconfigure upon each restart.
-
-> Type in the absolute path to your configuration file. Your path should end with something like `/.ssh/config`
+- A machine with the Linux Operating System <sup>[1]</sup>. The official implementation is currently only in Linux, but if you're passionate about implementing CVM-Runtime in a different operating system, pull requests are more than welcomed!
 
 - A machine with GPU and CUDA installed properly for your Linux version.
 
-# Install CVM-runtime
+- Willingness to debug for yourself. While we seek to be as comprehensive as possible in this tutorial, we cannot cover all the idiosyncrasies of different machines and environments.
 
-## 1. Git clone the repository
+If you encounter any problems during the course, feel free to reach out to our core dev team via our [Telegram](https://t.me/CortexOfficialEN) or [Twitter](https://twitter.com/CTXCBlockchain/). We seek to constantly improve our documentation.
+
+Let's get started!
+
+# Tutorial
+
+## Stage I: Install CVM-runtime and Other Dependencies
+
+### 1. Git clone the CVM-runtime repository
 
 ```bash
 git clone -b wlt https://github.com/CortexFoundation/cvm-runtime.git
@@ -44,31 +50,30 @@ git clone -b wlt https://github.com/CortexFoundation/cvm-runtime.git
 cd cvm-runtime
 ```
 
-## 2. Configure for compilation
+### 2. Configure for compilation
 
-Set the `ENABLE_CUDA` variable `ON` in `config.cmake` line 6.
+In `config.cmake`, set the `ENABLE_CUDA` variable to `ON` on line 6.
 
 ![config](imgs/config.png)
 
-## 3. Compile MRT
+### 3. Compile
 
 You may need to install `make` if you have not already.
 
 ```bash
-export PYTHONPATH=/home/ubuntu/cvm-runtime/python:${PYTHONPATH}
-
-export LD_LIBRARY_PATH=/home/ubuntu/cvm-runtime/build:${LD_LIBRARY_PATH}
-
 make -j8 lib
 ```
 
-If you encounter this error while running `make -j8 lib`
+If you encounter this error below
 
 ![cmake](imgs/cmake.png)
 
-Run `sudo apt-get update`
+you should install `cmake`. Try the following commands:
 
-Then `sudo apt-get install cmake` to install `cmake`.
+```bash
+sudo apt-get update
+sudo apt-get install cmake
+```
 
 Now type `g++` to see if you have `g++` installed. If not, `sudo apt-get install g++`
 
@@ -140,3 +145,21 @@ Questions:
 
 1. relationship between cvm-runtime, cvm and mrt?
 2. can we train the model before compiling cvm-rumtime?
+
+# Footnotes
+
+[1] If you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and use google if you get stuck. You're always welcomed to ask questions in our Telegram group.
+
+> (1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
+
+> (2) Start a folder named `.ssh`, put in your key pair and start a text file named `config`
+
+> (3) Open the command palette in Visual Studio code (`command + P` in Mac), type in
+> `> Remote-SSH: Connect to Host`
+> Then choose `Add New SSH Host`.
+
+> Type in your address `ubuntu@your-aws-instance-public-ip`
+
+> Substitute in your own public ip here. Note that each time you restart your instance, the public ip changes, so you need to reconfigure upon each restart.
+
+> Type in the absolute path to your configuration file. Your path should end with something like `/.ssh/config`
