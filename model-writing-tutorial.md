@@ -4,6 +4,10 @@
 
 Cortex is currently the _only_ public blockchain that allows on-chain execution of machine learning models. Every step of the inference is transparent to the public, verified by blockchain consensus.
 
+**Why should I upload my model to Cortex?**
+
+You will get paid a small amount in CTXC each time your model is called in a smart contract. This award comes from part of miner's award.
+
 A few vocabulary essential for the rest of the tutorial:
 
 **CVM:**
@@ -141,9 +145,13 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 `mnist_.json` and `mnist_.params` are your models, stored in `~/mrt_model`.
 
-# Stage V (surprise ;): Call & Execute Your Model On-chain
+# Conclusion
 
-We will try to call this model that you just trained from a smart contract to recognize handwritten digits!
+Voila! You have successfully trained a handwritten digit recognition model and uploaded it to the Cortex blockchain. Now anyone, anywhere in the world can see and use your model. Each time your model is called, you will get a small reward in CTXC (this amount comes to a share of the miner's award).
+
+If you want to learn how to call your model from a smart contract, we have a [tutorial](https://github.com/CortexFoundation/tech-doc/blob/master/hello-world-tutorial-contract.md) for that too.
+
+Happy building!
 <br />
 <br/>
 <br/>
