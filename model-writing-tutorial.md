@@ -10,7 +10,7 @@ You will get paid a small amount in CTXC each time your model is called in a sma
 
 A few vocabulary essential for the rest of the tutorial:
 
-**CVM:**
+**CVM**:
 
 CVM, short for Cortex Virtual Machine, is the core of the Cortex blockchain. It is responsible for executing code on-chain. It is backward compatible with Ethereum's [EVM](https://ethdocs.org/en/latest/introduction/what-is-ethereum.html) with added support for on-chain machine learning inference. While it is virtually impossible to execute nontrivial ML models on the EVM, CVM is specially designed for on-chain ML inference with innovations such as utilization of node machines' GPUs and deterministic quantization of ML models.
 
@@ -118,10 +118,12 @@ Execute the following command:
 python3 tests/mrt/train_mnist.py
 ```
 
-Trained models are stored in `~/mrt_model`.
+This Python program does two things (1) train a handwritten digit model using MXNet. (2) prepare your dataset (MNIST in this case) for the MRT, which needs to see your dataset in order to get an idea of the range of activation values - only then can it know how to quantize your model for optimal performance.
+
+Trained models are stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your models should be under `../mrt_models`).
 
 **Very Important Note:**
-If you're training a custom model, keep in mind that MRT must see your dataset as well (more tutorial coming on this topic! Meanwhile, feel free to directly alter the source code yourself for workarounds). This is because MRT needs to get an idea of the range of activation values in each layer of your neural network in order to know how to quantize your model for optimal performance.
+If you're training a custom model with your custom dataset, keep in mind that you must alter the code to allow MRT to read your dataset properly. We're working on a more friendly interface regarding this. Meanwhile, feel free to directly alter the source code yourself for workarounds.
 
 # Stage III: Quantize Your Model
 
@@ -143,7 +145,7 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-`mnist_.json` and `mnist_.params` are your models, stored in `~/mrt_model`.
+`mnist_.json` and `mnist_.params` are your models, stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your models should be under `../mrt_models`).
 
 # Conclusion
 
@@ -153,11 +155,6 @@ If you want to learn how to call your model from a smart contract, we have a [tu
 
 Happy building!
 <br />
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
 <br/>
 <br/>
 
