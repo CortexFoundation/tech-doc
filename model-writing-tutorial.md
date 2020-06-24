@@ -6,7 +6,7 @@ Cortex is currently the _only_ public blockchain that allows on-chain execution 
 
 **Why should I upload my model to Cortex?**
 
-You will get paid a small amount in CTXC each time your model is called in a smart contract. This award comes from part of miner's award.
+You will get paid a small amount in CTXC each time your model is called in a smart contract. This award comes from part of miner's award and its aim is to incentivize ML developers to upload their models to the blockchain for the world to use.
 
 A few vocabulary essential for the rest of the tutorial:
 
@@ -64,7 +64,7 @@ cd cvm-runtime
 
 ### 2. Configure for compilation
 
-In `config.cmake`, set the `ENABLE_CUDA` variable to `ON` on line 6.
+In `config.cmake`, set the `ENABLE_CUDA` variable to `ON` on line 6. This allows us to utilize the GPU.
 
 ![config](imgs/config.png)
 
@@ -102,7 +102,7 @@ pip3 install mxnet-cu102
 
 Run `$nvcc --version` to find out your CUDA version; make sure that it matches the number after "cu", in this case it is general version 10.
 
-Now run the commands below install other dependencies needed for our model training and quantization later.
+Now run the commands below to install other dependencies needed for our model training and quantization later.
 
 ```
 pip3 install gluoncv
@@ -120,10 +120,10 @@ python3 tests/mrt/train_mnist.py
 
 This Python program does two things (1) train a handwritten digit model using MXNet. (2) prepare your dataset (MNIST in this case) for the MRT, which needs to see your dataset in order to get an idea of the range of activation values - only then can it know how to quantize your model for optimal performance.
 
-Trained models are stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your models should be under `../mrt_models`).
+It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your model should be under `../mrt_models`).
 
 **Very Important Note:**
-If you're training a custom model with your custom dataset, keep in mind that you must alter the code to allow MRT to read your dataset properly. We're working on a more friendly interface regarding this. Meanwhile, feel free to directly alter the source code yourself for workarounds.
+If you're training a custom model with your custom dataset, keep in mind that you must alter the source code to allow MRT to read your dataset properly. We're working on a more friendly interface regarding this. Meanwhile, feel free to directly alter the source code yourself for workarounds.
 
 # Stage III: Quantize Your Model
 
@@ -149,7 +149,7 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 # Conclusion
 
-Voila! You have successfully trained a handwritten digit recognition model and uploaded it to the Cortex blockchain. Now anyone, anywhere in the world can see and use your model. Each time your model is called, you will get a small reward in CTXC (this amount comes to a share of the miner's award).
+Voila! You have successfully trained a handwritten digit recognition model and uploaded it to the Cortex blockchain. Now anyone, anywhere in the world can see and use your model. Each time your model is called, you will get a small reward in CTXC (this amount comes from a share of the miner's award). Note that this amount will be added to the balance of the address from which you deployed the model, but reward of one single call to your model is small so you need to adjust the unit to Turing to be able to see it.
 
 If you want to learn how to call your model from a smart contract, we have a [tutorial](https://github.com/CortexFoundation/tech-doc/blob/master/hello-world-tutorial-contract.md) for that too.
 
@@ -160,9 +160,9 @@ Happy building!
 
 # FAQ
 
-1. Relationship between cvm-runtime, cvm and mrt?
+1. Relationship between CVM-Runtime, CVM and MRT?
 
-2. Why does MRT have to see our data?
+CVM is the virtual machine that executes code on the Cortex blockchain. CVM-Runtime, if you recall from earlier, is a machine learning framework responsible for on-chain execution of _ML models_. You can consider CVM-Runtime part of the CVM; in fact, it is perhaps the biggest innovation of CVM - before CVM, there was no known way to execute ML models on-chain. MRT is the part of CVM-Runtime that prepares regular float-point ML models (via quantization) for execution on-chain. You can learn more details from this tree graph [here](https://github.com/CortexFoundation/tech-doc/blob/master/cortex-guide.md).
 
 # Footnotes
 
