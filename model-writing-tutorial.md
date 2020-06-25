@@ -118,12 +118,7 @@ Execute the following command:
 python3 tests/mrt/train_mnist.py
 ```
 
-This Python program does two things (1) train a handwritten digit model using MXNet. (2) prepare your dataset (MNIST in this case) for the MRT, which needs to see your dataset in order to get an idea of the range of activation values - only then can it know how to quantize your model for optimal performance.
-
-It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your model should be under `../mrt_models`).
-
-**Very Important Note:**
-If you're training a custom model with your custom dataset, keep in mind that you must alter the source code to allow MRT to read your dataset properly. We're working on a more friendly interface regarding this. Meanwhile, feel free to directly alter the source code yourself for workarounds.
+This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your model should be under `../mrt_model`).
 
 # Stage III: Quantize Your Model
 
@@ -136,6 +131,10 @@ python3 python/mrt/main2.py python/mrt/model_zoo/mnist.ini
 ```
 
 All the pre-quantized model configuration file is stored in `python/mrt/model_zoo`, and the file `config.example.ini` expositions all the key meanings and value.
+
+**Very Important Note:**
+
+If you're training a custom model with your custom dataset, keep in mind that you must alter the source code to allow MRT to read your dataset properly. This is because MRT needs to see your dataset (during calibration) in order to get an idea of the range of activation values for each neural layer - only then can it know how to quantize your model for optimal performance. We're working on a more friendly interface regarding this. Meanwhile, feel free to directly alter the source code yourself for workarounds.
 
 # Stage IV: Upload Your Model
 
