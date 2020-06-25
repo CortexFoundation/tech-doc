@@ -118,7 +118,7 @@ Execute the following command:
 python3 tests/mrt/train_mnist.py
 ```
 
-This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your model should be under `../mrt_model`).
+This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (you can alter this path in the `python/mrt/conf.py` file).
 
 # Stage III: Quantize Your Model
 
@@ -130,7 +130,7 @@ Execute the following command:
 python3 python/mrt/main2.py python/mrt/model_zoo/mnist.ini
 ```
 
-All the pre-quantized model configuration file is stored in `python/mrt/model_zoo`, and the file `config.example.ini` expositions all the key meanings and value.
+All the pre-quantized model configuration files are stored in `python/mrt/model_zoo`, and the file `config.example.ini` contains the model configuration for our case.
 
 **Very Important Note:**
 
@@ -144,7 +144,7 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-`mnist_.json` and `mnist_.params` are your models, stored under `~/mrt_model` (assuming you're `cvm-runtime` folder is under the root directory. If not, your models should be under `../mrt_models`).
+`mnist_.json` and `mnist_.params` are your models, stored under `~/mrt_model` (assuming you did not alter the `python/mrt/conf.py` file).
 
 # Conclusion
 
