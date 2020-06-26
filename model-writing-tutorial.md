@@ -138,13 +138,25 @@ If you're training a custom model with your custom dataset, keep in mind that yo
 
 # Stage IV: Upload Your Model
 
-Now the model is fully quantized, we're ready to upload it! Let's go the [Cerebro Explorer](https://cerebro.cortexlabs.ai/) .
+Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params` are your quantized models, stored under `~/mrt_model` (assuming you have not altered the path in the `python/mrt/conf.py` file). Create a separate folder named `data` and rename your `mnist_.json` to `symbol` and your `mnist_.params` to `params`. Run `ls -l` to check your operating system is not hiding the file name extension, as the full file names need to be correct for successful upload.
+
+We're now ready to upload them! Let's go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/). (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
 
 In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-`mnist_.json` and `mnist_.params` are your models, stored under `~/mrt_model` (assuming you did not alter the `python/mrt/conf.py` file).
+Then
+
+![fixedPoint](imgs/fixedPoint.png)
+
+Now select your two model files at the same time.
+
+![select](imgs/select.png)
+
+You can leave the `shape` as it is if you've been following this tutorial to train the MNIST model.
+
+![upload](imgs/upload.png)
 
 # Conclusion
 
