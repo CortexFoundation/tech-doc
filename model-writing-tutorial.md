@@ -146,7 +146,7 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-Then
+Then choose `Fixed Point Model Data`. Recall our MRT has converted our ML model from float-point to (integer-only) fix-point for deterministic on-chain inference.
 
 ![fixedPoint](imgs/fixedPoint.png)
 
@@ -154,9 +154,13 @@ Now select your two model files at the same time.
 
 ![select](imgs/select.png)
 
-You can leave the `shape` as it is if you've been following this tutorial to train the MNIST model.
-
 ![upload](imgs/upload.png)
+
+Change the input shape in the grey box `shape`. (Note: even if your input is of shape 1,28,28 you need to re-type it anyway. We will do this here if you've been following this tutorial, setting the input to 1,28,28 for our model)
+
+Now make sure you're signed in to your TestNet wallet. (Important!)
+
+Type in the model description, click `save` and then hit `upload`!
 
 # Conclusion
 
