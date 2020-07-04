@@ -120,6 +120,32 @@ python3 tests/mrt/train_mnist.py
 
 This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (you can alter this path in the `python/mrt/conf.py` file).
 
+If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and feel free to modify the model training file as you see fit.
+
+Go ahead and open the `train_mnist.py` file. There are a few steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training
+
+## Step 1
+
+Our main interest here is the `train_mnist()` function. Notice by default, we offered 3 architectures that you can choose from (`dapp`, `lenet`, `mlp`). If you do not specify the architecture, the default is `dapp`.
+
+```python
+if version == 'dapp':
+    net = nn.HybridSequential(prefix='DApp_')
+    with net.name_scope():
+        net.add(
+                nn.Conv2D(channels=16, kernel_size=(3, 3), activation='relu'),
+                nn.MaxPool2D(pool_size=(2, 2), strides=(1, 1)),
+                nn.Conv2D(channels=32, kernel_size=(3, 3), activation='relu'),
+                nn.MaxPool2D(pool_size=(2, 2), strides=(1, 1)),
+                nn.Conv2D(channels=64, kernel_size=(3, 3), activation='relu'),
+                nn.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
+                nn.Conv2D(channels=128, kernel_size=(1, 1), activation='relu'),
+                nn.MaxPool2D(pool_size=(2, 2), strides=(2, 2)),
+                nn.Flatten(),
+                nn.Dense(10, activation=None),
+        )
+```
+
 # Stage III: Quantize Your Model
 
 To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from Introduction that MRT is a tool originating from Cortex's research in on-chain inference of ML models - it helps us quantize ML models for deterministic inference on the blockchain.
