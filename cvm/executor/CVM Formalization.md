@@ -270,56 +270,37 @@ Test Parameter:
 
 #### Convolution
 
-We only supported 2-D convolution operator.
+We only supported 2-D convolution operator. Also alias *Group-wise Convolution*.
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups}$, `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW) \in [1, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW) \in [1, max\_attr)$, `grous` is `int`, the value is in $\{1, C\}$.
-
-1. Case `groups` = 1
+Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups} \and OC \text{ mod } \text{groups} = 0$, `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW) \in [1, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW) \in [1, max\_attr)$, `grous` is `int`, the value is in $\{1, C\}$.
+$$
+OC = \text{groups} * OPG, \text{where } OPG \in \mathbb N^+ \\
+C = IC * \text{groups}
+$$
 
 $$
-Y[n,i,p,q]=\sum_{j=0}^{C} 
-\text{kernel}(n, j, p, q, n, i)
-+ \begin{cases}
+Y[n,oc,p,q]= \sum_{ic = 0}^{IC} \text{kernel}(n,(oc \div OPG) * IC + ic, p, q, oc,ic) + \begin{cases}
 0, & \text{if B is None}\\
 B[i], & \text{otherwise}
 \end{cases}, \\
-\forall n \in [0, N) \and i \in [0, OC) \and \\
+\forall n \in [0, N) \and oc\in [0, OC) \and\\
 p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
-q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right),\\
+q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
 $$
-where $\text{kernel}$ function is 
+
+where $\text{kernel}$ function does the 2D image convolution calculation, and the formulation is 
 $$
 \text{kernel}(n, j, p, q, o, i) = \sum_{k_i=0}^{\text{KH}} \sum_{k_j = 0}^{\text{KW}} \text{pad}(p'+k_i*\text{DH},q'+k_j*\text{DW}) \cdot W[o, i, k_i, k_j], \\
 \text{where } p' = p \cdot \text{SH} -\text{PH} \text{ and }
 q' = q \cdot \text{SW}-\text{PW} \text{ and } \\
 \text{pad}(p, q) = \begin{cases} 
 X[n, j, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
-0, & \text{otherwise}
+0, & \text{otherwise}a
 \end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L475
-
-2. Case `groups ` = $C$
-
-This case is named *Depth-Wise Convolution*.
-$$
-IC = 1 \text{ and }OC = C
-$$
-
-$$
-Y[n,i,p,q]= \text{kernel}(n,i, p, q, i,0) + \begin{cases}
-0, & \text{if B is None}\\
-B[i], & \text{otherwise}
-\end{cases}, \\
-\forall n \in [0, N) \and i \in [0, OC) \and\\
-p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
-q \in \left[0, \left\lfloor{W+2 \cdot \text{PW}-\text{DW} \cdot (\text{KW}-1)-1 \over \text{SW}}\right\rfloor+1 \right)
-$$
-Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L390
-
-
 
 #### Dense
 
