@@ -65,23 +65,24 @@ A reduce operator performs the reduction function to input data based on the par
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has is N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select .
+Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has is N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select. $R$, with size $r$, is the set of real axes where we do the reduction.
 $$
-T = \left\{i \mid \text{axis} \in \text{axes} \and 
-i = \begin{cases}
-\text{axis}, & \text{if axis } \geqslant 0 \\
-\text{axis} + N, & \text{otherwise}
+T = \left\{x \mid i \in \text{axes} \and 
+x = \begin{cases}
+i, & \text{if } i\geqslant 0 \\
+i + N, & \text{otherwise}
 \end{cases} \right\}, \\
-\text{where } card \; \text{\{T\}} = M \text{ and }
+\text{where } card\{T\} = M \text{ and }
 j \in [0, N), \forall j \in \text{T}
 $$
 
 $$
-\text{real_axes} = \begin{cases}
-\{x| 0 \leq x < N, x \in Z\} -T , & \text{if exclude is true} \\
+\text{let }U =\{0, 1,..., N-1\}\\
+R = \begin{cases}
+U -T , & \text{if exclude is true} \\
 T, & \text{otherwise}
 \end{cases}, \\
-R = card\{\text{real_axes}\}
+r = card\{R\}
 $$
 
 
@@ -105,41 +106,33 @@ N, & \text{otherwise}
 \end{cases}
 $$
 
-3. Case `keepdims` is false
+3. Case `keepdims` is false, $R$ dimensions of input $X$ will be reduced and the result $Y$ will have only 
 
 $$
-Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}] = \\
+Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-r-1)}] = \\
 \begin{cases}
 \sum_{d_{J(0)}=0}^{n_{J(0)}} \cdots \sum_{d_{J(R-1)}=0}^{n_{J(R-1)}}
 X[d_0, d_1, \cdots, d_{N-1}], & \text{if op is sum} \\[1ex]
 \max \{ X[d_0, d_1, \cdots, d_{N-1}] \mid d_{J(0)} \in [0, n_{J(0)}) \and \cdots \and
 d_{J(R-1)} \in [0, n_{J(R-1)}) \}, & \text{if op is max}
 \end{cases}, \\
-\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
-d_{I(K-1)} \in [0, n_{I(K-1)}), \\
-\text{where } K = N - R \text{ and } \\
-A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
-B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
-I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
-J : \{ j \mid j \in [0, R) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R
+\text{where } 0 \leq d_i < n_i , \forall i\in[0, N),\text{ and }\\
+I: \{ 0, 1,...,N-r-1 \} \to U-R,
+\text{ s.t. } I(i) < I(j), \forall 0 \leqslant i < j < N-r \text{ and } \\
+J : \{0, 1,...,r-1 \} \to R,
+\text{ s.t. } J(i) < J(j), \forall 0 \leqslant i < j < R
 $$
 
 4. Otherwise
 
 $$
-Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}], \\
-\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
-d_{I(K-1)} \in [0, n_{I(K-1)}) \and \\
-d_{J(0)} = 0 \and \cdots \and d_{J(R-1)} = 0, \\
-\text{where } K = N - R \text{ and } \\
-A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
-B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
-I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
-J : \{ j \mid j \in [0, R) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R \text{ and } \\
+Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-r-1)}], \\
+
+\text{where }  0 \leq d_i < n_i , \forall i \in U-R, \text{ and } d_i=0, \forall i\in R\\
+I: \{0, 1,..., N-r-1\} \to U-R,
+\text{ s.t. } I(i) < I(j), \forall 0 \leqslant i < j < N-r \text{ and } \\
+J : \{0, 1,..., r-1\} \to R,
+\text{ s.t. } J(i) < J(j), \forall 0 \leqslant i < j < R \text{ and } \\
 M = \text{reduce_op}(X, \text{axes=axes, keepdims=false, exclude=exclude})
 $$
 
