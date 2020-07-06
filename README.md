@@ -21,6 +21,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 - [Model List](model-list.md) - 13 pre-loaded models by Cortex team
 - [Model and Data Upload](model-data-upload.md) - Instruction on how to upload model and data
 - [CTXC](ctxc.md) - CTXC and fractional units explained
+- [Quota](quota.md) - Quota and related rules description
 - [AI DApp](ai-dapps.md) - Instruction and tools for AI DApp development
 - [Endorphin](endorphin.md) - Explanation on the fee structure and mechanism
 - [Storage Layer](storage-layer.md) - Explanation on storage stack and how models/data are uploaded
