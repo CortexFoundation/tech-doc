@@ -4,7 +4,7 @@
 
 #### TShape
 
-struct `TShape`, a array of `uint32_t`, which is used to standing for data shape.
+struct `TShape`, a array of `uint32_t`, which stands for data shape.
 
 #### Optional\<T\>
 
@@ -16,17 +16,17 @@ Data format，a wrapper of data content pointer.
 
 *Attributes*
 
-- dtype must be INT8 or INT32.
+- `dtype` must be INT8 or INT32.
 
-- shape is `TShape` type, storing data shape, for example (1, 2, 3).
+- `shape` is `TShape` type, storing data shape, for example (1, 2, 3).
 
-- precision is the max bit of each element take up, -1 stands for non-defined; normal value betweens range (0, 32]; others is non-available, which means a error occurs, either logic error or runtime error.
+- `precision` is the max bit of each element take up, -1 stands for non-defined; a normal values' is between range (0, 32]; others is non-available, which means an error occurs, either logic error or runtime error.
 
   *Notes*: we define a `p` precision data is between range $[-\alpha, \alpha], \alpha=2^{p-1}-1$ for all elements, for example: data that precision is 8 means all value is larger than -128 and less than 128, this is strong constraint.
 
 *Public Interface*
 
-- ndim is the dimensions of data, for example 3.
+- `ndim` is the dimensions of data, for example 3.
 
 #### Attribute Constant
 
@@ -46,13 +46,13 @@ Data format，a wrapper of data content pointer.
 
 ##### Inputs & Outputs
 
-算子输入输出的数据格式为`DLTensor`，precision属性在(0, 32]范围内。
+算子输入输出的数据格式为`DLTensor`，`precision`属性在(0, 32]范围内。
 
 ##### Description Format
 
 所有的数学描述采用规范：
 $$
-Y[y_\text{indexes}] = X[x_\text{indexes}], \\
+Y[y_\text{indices}] = X[x_\text{indices}], \\
 \forall \text{given range}, \\
 \text{where } \text{condition}_1 \text{ and } \text{condition}_2 \text{ and } 
 \cdots \text{ condition}_n
@@ -61,24 +61,24 @@ $$
 
 ### Reduce Operator
 
-Reduce operator perform the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
+A reduce operator performs the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as below:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `axes` is `TShape`, it's dimension is M, $M \in [0, N+1) \and card\{i \mid i \in \text{axes}\}=M$, `keepdims` is `boolean`, `exclude` is `boolean`.
+Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has is N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select .
 $$
 T = \left\{i \mid \text{axis} \in \text{axes} \and 
 i = \begin{cases}
 \text{axis}, & \text{if axis } \geqslant 0 \\
 \text{axis} + N, & \text{otherwise}
 \end{cases} \right\}, \\
-\text{where } card \; \text{T} = M \text{ and }
+\text{where } card \; \text{\{T\}} = M \text{ and }
 j \in [0, N), \forall j \in \text{T}
 $$
 
 $$
 \text{real_axes} = \begin{cases}
-\{i \mid i \in [0, N) \and i \notin T\} , & \text{if exclude is true} \\
+\{x| 0 \leq x < N, x \in Z\} -T , & \text{if exclude is true} \\
 T, & \text{otherwise}
 \end{cases}, \\
 R = card\{\text{real_axes}\}
@@ -86,13 +86,13 @@ $$
 
 
 
-1. Case `exclude` = true and $M=N$
+1. Case `exclude` = `true` and $M=N$: nothing to be reduced.
 
 $$
 Y = X
 $$
 
-2. Case `exclude` = false and $M = 0$
+2. Case `exclude` = `false` and $M = 0$: `axes` is not assigned so the the whole input tensor is reduced by default.
 
 $$
 Y[\underbrace{0, 0, \cdots, 0}_{K}] = \begin{cases} 
@@ -177,7 +177,7 @@ Test Parameter:
 
 ### Broadcast Operator
 
-Broadcast operator perform the broadcast function to input datas, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
+Broadcast operator perform the broadcast function to input data, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as below:
 
 *Math Formalization*
 
@@ -230,7 +230,7 @@ set `BROADCAST_OP` to `sub`.
 Test Parameter:
 
 	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 
@@ -242,7 +242,7 @@ set `BROADCAST_OP` to `multiply`.
 Test Parameter:
 
 	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 
@@ -465,7 +465,7 @@ $$
 Test Parameter:
 
 	A.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	B.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 
@@ -482,7 +482,7 @@ $$
 Test Parameter:
 
 	A.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	B.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 
@@ -575,9 +575,9 @@ $$
 Test Parameter:
 
 	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	precision: 2
-
+	
 	shift_bit: 2
 
 #### 
@@ -719,7 +719,7 @@ $$
 Test Parameter:
 
 	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
-
+	
 	shape: $(r, l, j, i), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 
