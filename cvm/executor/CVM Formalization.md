@@ -4,7 +4,7 @@
 
 #### TShape
 
-struct `TShape`, a array of `uint32_t`, which is used to standing for data shape.
+struct `TShape`, a array of `uint32_t`, which stands for data shape.
 
 #### Optional\<T\>
 
@@ -16,17 +16,17 @@ Data format，a wrapper of data content pointer.
 
 *Attributes*
 
-- dtype must be INT8 or INT32.
+- `dtype` must be INT8 or INT32.
 
-- shape is `TShape` type, storing data shape, for example (1, 2, 3).
+- `shape` is `TShape` type, storing data shape, for example (1, 2, 3).
 
-- precision is the max bit of each element take up, -1 stands for non-defined; normal value betweens range (0, 32]; others is non-available, which means a error occurs, either logic error or runtime error.
+- `precision` is the max bit of each element take up, -1 stands for non-defined; a normal values' is between range (0, 32]; others is non-available, which means an error occurs, either logic error or runtime error.
 
   *Notes*: we define a `p` precision data is between range $[-\alpha, \alpha], \alpha=2^{p-1}-1$ for all elements, for example: data that precision is 8 means all value is larger than -128 and less than 128, this is strong constraint.
 
 *Public Interface*
 
-- ndim is the dimensions of data, for example 3.
+- `ndim` is the dimensions of data, for example 3.
 
 #### Attribute Constant
 
@@ -46,13 +46,13 @@ Data format，a wrapper of data content pointer.
 
 ##### Inputs & Outputs
 
-算子输入输出的数据格式为`DLTensor`，precision属性在(0, 32]范围内。
+算子输入输出的数据格式为`DLTensor`，`precision`属性在(0, 32]范围内。
 
 ##### Description Format
 
 所有的数学描述采用规范：
 $$
-Y[y_\text{indexes}] = X[x_\text{indexes}], \\
+Y[y_\text{indices}] = X[x_\text{indices}], \\
 \forall \text{given range}, \\
 \text{where } \text{condition}_1 \text{ and } \text{condition}_2 \text{ and } 
 \cdots \text{ condition}_n
@@ -61,38 +61,39 @@ $$
 
 ### Reduce Operator
 
-Reduce operator perform the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
+A reduce operator performs the reduction function to input data based on the parameters, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as below:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `axes` is `TShape`, it's dimension is M, $M \in [0, N+1) \and card\{i \mid i \in \text{axes}\}=M$, `keepdims` is `boolean`, `exclude` is `boolean`.
+Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has is N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select. $R$, with size $r$, is the set of real axes where we do the reduction.
 $$
-T = \left\{i \mid \text{axis} \in \text{axes} \and 
-i = \begin{cases}
-\text{axis}, & \text{if axis } \geqslant 0 \\
-\text{axis} + N, & \text{otherwise}
+T = \left\{x \mid i \in \text{axes} \and 
+x = \begin{cases}
+i, & \text{if } i\geqslant 0 \\
+i + N, & \text{otherwise}
 \end{cases} \right\}, \\
-\text{where } card \; \text{T} = M \text{ and }
+\text{where } card\{T\} = M \text{ and }
 j \in [0, N), \forall j \in \text{T}
 $$
 
 $$
-\text{real_axes} = \begin{cases}
-\{i \mid i \in [0, N) \and i \notin T\} , & \text{if exclude is true} \\
+\text{let }U =\{0, 1,..., N-1\}\\
+R = \begin{cases}
+U -T , & \text{if exclude is true} \\
 T, & \text{otherwise}
 \end{cases}, \\
-R = card\{\text{real_axes}\}
+r = card\{R\}
 $$
 
 
 
-1. Case `exclude` = true and $M=N$
+1. Case `exclude` = `true` and $M=N$: nothing to be reduced.
 
 $$
 Y = X
 $$
 
-2. Case `exclude` = false and $M = 0$
+2. Case `exclude` = `false` and $M = 0$: `axes` is not assigned so the the whole input tensor is reduced by default.
 
 $$
 Y[\underbrace{0, 0, \cdots, 0}_{K}] = \begin{cases} 
@@ -105,41 +106,33 @@ N, & \text{otherwise}
 \end{cases}
 $$
 
-3. Case `keepdims` is false
+3. Case `keepdims` is false, $R$ dimensions of input $X$ will be reduced and the result $Y$ will have only 
 
 $$
-Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}] = \\
+Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-r-1)}] = \\
 \begin{cases}
 \sum_{d_{J(0)}=0}^{n_{J(0)}} \cdots \sum_{d_{J(R-1)}=0}^{n_{J(R-1)}}
 X[d_0, d_1, \cdots, d_{N-1}], & \text{if op is sum} \\[1ex]
 \max \{ X[d_0, d_1, \cdots, d_{N-1}] \mid d_{J(0)} \in [0, n_{J(0)}) \and \cdots \and
 d_{J(R-1)} \in [0, n_{J(R-1)}) \}, & \text{if op is max}
 \end{cases}, \\
-\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
-d_{I(K-1)} \in [0, n_{I(K-1)}), \\
-\text{where } K = N - R \text{ and } \\
-A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
-B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
-I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
-J : \{ j \mid j \in [0, R) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R
+\text{where } 0 \leq d_i < n_i , \forall i\in[0, N),\text{ and }\\
+I: \{ 0, 1,...,N-r-1 \} \to U-R,
+\text{ s.t. } I(i) < I(j), \forall 0 \leqslant i < j < N-r \text{ and } \\
+J : \{0, 1,...,r-1 \} \to R,
+\text{ s.t. } J(i) < J(j), \forall 0 \leqslant i < j < R
 $$
 
 4. Otherwise
 
 $$
-Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(K-1)}], \\
-\forall d_{I(0)} \in [0, n_{I(0)}) \and \cdots \and 
-d_{I(K-1)} \in [0, n_{I(K-1)}) \and \\
-d_{J(0)} = 0 \and \cdots \and d_{J(R-1)} = 0, \\
-\text{where } K = N - R \text{ and } \\
-A = \{ i \mid i \in [0, N) \and i \notin \text{real_axes} \} \text{ and } \\
-B = \{ i \mid i \in [0, N) \and i \in \text{real_axes} \} \text{ and } \\
-I: \{ i \mid i \in [0, K) \} \to A,
-\text{ satisfy } I(i) < I(j), \forall 0 \leqslant i < j < K \text{ and } \\
-J : \{ j \mid j \in [0, R) \} \to B,
-\text{ satisfy } J(i) < J(j), \forall 0 \leqslant i < j < R \text{ and } \\
+Y[d_0, d_1, \cdots, d_{N-1}] = M[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-r-1)}], \\
+
+\text{where }  0 \leq d_i < n_i , \forall i \in U-R, \text{ and } d_i=0, \forall i\in R\\
+I: \{0, 1,..., N-r-1\} \to U-R,
+\text{ s.t. } I(i) < I(j), \forall 0 \leqslant i < j < N-r \text{ and } \\
+J : \{0, 1,..., r-1\} \to R,
+\text{ s.t. } J(i) < J(j), \forall 0 \leqslant i < j < R \text{ and } \\
 M = \text{reduce_op}(X, \text{axes=axes, keepdims=false, exclude=exclude})
 $$
 
@@ -177,13 +170,13 @@ Test Parameter:
 
 ### Broadcast Operator
 
-Broadcast operator perform the broadcast function to input datas, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as belows:
+Broadcast operator perform the broadcast function to input data, and the process logic over all the type-based operators is consistent. We abstract the formalization here and introduce the details as below:
 
 *Math Formalization*
 
-Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A`'s shape is $M$ dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$, `B`'s shape is $N$ dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$. 
+Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A` has $M$ dimensions, namely $(m_0, m_1, \cdots, m_{M-1})$, `B` has $N$ dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$. 
 
-1. Extends `A`'s shape and  `B`'s shape into $K = max(M, N)$ dimension by prefixing their shapes with $1$, denoted by $SA$ and  $SB$, respectively, where $$SA_i = \begin{cases}
+1. Extends `A` and  `B` to $K = max(M, N)$ dimensions by prefixing their shapes with $1$, denoted by $SA$ and  $SB$ respectively, the length of whose $i^{th}$ dimension, where $i\in [0, K)$, is $$SA_i = \begin{cases}
    m_{i-K+M}, & i \geqslant K - M \\
    1, & i < K - M
    \end{cases} \text{ and } 
@@ -192,7 +185,7 @@ Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A`'s 
    1, & i < K - N
    \end{cases}$$ 
 
-2. For $\forall i \in [0, K)$, assert $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y`'s shape is $K$ dimension, exactly $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
+2. For $\forall i \in [0, K)$, assert $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y` has $K$ dimensions, namely $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
 3. For $\forall i \in [0, K)$, $Y[d_0, d_1, \cdots, d_{K-1}] = 
    \text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{K-1}], B[b_0, b_1, \cdots, b_{K-1}])$, where $d_{i} \in [0, k_{i}), a_i = \min(d_{i}, SA_i-1)$ and $b_i = \min(d_{i}, SB_i-1)$.
 
