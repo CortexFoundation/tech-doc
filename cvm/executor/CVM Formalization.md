@@ -176,7 +176,7 @@ Broadcast operator perform the broadcast function to input data, and the process
 
 Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A` has $M$ dimensions, namely $(m_0, m_1, \cdots, m_{M-1})$, `B` has $N$ dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$. 
 
-1. Extends `A` and  `B` to $K = max(M, N)$ dimensions by prefixing their shapes with $1$, denoted by $SA$ and  $SB$ respectively, the length of whose $i^{th}$ dimension, where $i\in [0, K)$, is $$SA_i = \begin{cases}
+1. Extends `A` and  `B` to $K = max(M, N)$ dimensions by prefixing their shapes with $1$, whose shapes are denoted by $SA$ and  $SB$ respectively, the length of whose $i^{th}$ dimension, where $i\in [0, K)$, is $$SA_i = \begin{cases}
    m_{i-K+M}, & i \geqslant K - M \\
    1, & i < K - M
    \end{cases} \text{ and } 
@@ -185,7 +185,7 @@ Suppose Input `A`, `B`, Output `Y` and broadcast function `BROADCAST_OP`. `A` ha
    1, & i < K - N
    \end{cases}$$ 
 
-2. For $\forall i \in [0, K)$, assert $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y` has $K$ dimensions, namely $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
+2. For $\forall i \in [0, K)$, the shapes of input `A` and `B` should be subject to $SA_i=SB_i$ or $SA_i=1$ or $SB_i=1$.  `Y` has $K$ dimensions, namely $(k_0, k_1, \cdots k_{K-1}), k_i = \max( SA_i, SB_i )$. 
 3. For $\forall i \in [0, K)$, $Y[d_0, d_1, \cdots, d_{K-1}] = 
    \text{BROADCAST_OP}(A[a_0, a_1, \cdots, a_{K-1}], B[b_0, b_1, \cdots, b_{K-1}])$, where $d_{i} \in [0, k_{i}), a_i = \min(d_{i}, SA_i-1)$ and $b_i = \min(d_{i}, SB_i-1)$.
 
@@ -414,6 +414,8 @@ Test Parameter:
 
 #### cvm_precision
 
+Different from `precision` in *Attributes*, this precision gives how many bits the absolute value of a number takes. 1 takes 1 bit. 2, 3 take 2 bits. A special case is that 0 always takes at least 1 bit.
+
 *Math Formalization*
 
 Suppose Input `X`, Output `Y`.
@@ -421,7 +423,7 @@ Suppose Input `X`, Output `Y`.
 Math:
 $$
 y = \begin{cases}
-\lceil log_2(abs(x+1)) \rceil, & x \neq 0\\
+\lceil log_2(abs(x)+1) \rceil, & x \neq 0\\
 1, & x = 0 
 \end{cases}, 
 \forall x \in X
@@ -431,7 +433,7 @@ $$
 
 *Math Formalization*
 
-Suppose Input `A`, `B`, Output `Y`. Where `A` and `B` have the same shape, $(n_0, n_1, \cdots, n_{N-1})$.
+Suppose Input `A`, `B`, Output `Y`. `A` and `B` must have the same shape, $(n_0, n_1, \cdots, n_{N-1})$.
 $$
 Y = A + B
 $$
@@ -518,6 +520,8 @@ Test Parameter:
 
 #### cvm_right_shift
 
+This operator is slightly different from C right shift so that the result can be rounded to nearest integer. A special case is that negative half number will be rounded up, -1.5 rounded to -1 for example.
+
 *Math Formalization*
 
 Suppose Input `X`, Output `Y`, attribute `precision`, `shift_bit`, where `precision` is in range $[1, 33)$, and `shift_bit` is in range $[1, 33)$.
@@ -560,9 +564,11 @@ Test Parameter:
 
 #### repeat
 
+This operator repeats the input data by `repeats` times along the given `axis`. Each element is repeated right after itself.
+
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attribute `axis`, `repeats`. Where `X`'s shape is N dimension, exactly  $(n_0, n_1, \cdots, n_{\text{axis}}, \cdots, n_{N-1})$, `Y`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{\text{axis}} \cdot repeats, \cdots, n_{N-1})$. Obviously, axis is in range $[0, N)$, repeats is in range $[1, +\infty)$.
+Suppose Input `X`, Output `Y`, attribute `axis`, `repeats`. Where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{\text{axis}}, \cdots, n_{N-1})$, `Y` has N dimensions, namely $(n_0, n_1, \cdots, n_{\text{axis}} \cdot repeats, \cdots, n_{N-1})$. Obviously, axis is in range $[0, N)$, repeats is in range $[1, +\infty)$.
 $$
 Y[d_0, d_1, \cdots, d_\text{axis}, \cdots, d_{N-1}] = 
 X[d_0, d_1, \cdots, \left\lfloor{d_\text{axis} \over \text{repeats}}\right\rfloor, \cdots, d_{N-1}], \\
@@ -581,7 +587,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attribute `reps`. Where `X`'s shape is N dimension, exactly  $(n_0, n_1, \cdots, n_{N-1})$, `reps` is M dimension, exactly $(m_0, m_1, \cdots, m_{M-1})$.
+Suppose Input `X`, Output `Y`, attribute `reps`, where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `reps` has M dimensions, namely $(m_0, m_1, \cdots, m_{M-1})$.
 $$
 r \in [1, max\_attr), \forall r \in \text{reps}
 $$
@@ -608,6 +614,8 @@ Test Parameter:
 ​	reps: $(2, 2, 3)$
 
 #### flatten
+
+This operator flattens the input tensor data to an array in a row-major order.
 
 *Math Formalization*
 
@@ -636,7 +644,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Where all inputs' shape is N dimension, exactly $I^i$'s shape is $(n^i_0, n^i_1, \cdots, n^i_{N-1})$, and `axis` is in range $[0, N)$.
+Suppose there are `M` Inputs $I^0, I^1, \cdots, I^{M-1}$, Output `Y`, attribute `axis`. Where all inputs have `N` dimensions, namely $I^i$'s shape is $(n^i_0, n^i_1, \cdots, n^i_{N-1})$, and `axis` is in range $[0, N)$.
 $$
 n^i_j = n^0_j, \forall i \in [1, M) \and j \in [0, N) \and j \neq \text{axis}
 $$
@@ -650,7 +658,7 @@ $$
 
 Test Parameter:
 
-​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}
+​	X.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
 ​	Y.shape: $(i, j, l, r), \\ i=\{1\}, j=\{1, 14, 27, 40, 53, 66, 79, 92\}, l=\{1, 18, 35, 52, 69, 86\}, r=\{1, 24, 47, 70, 93\}$
 
@@ -683,7 +691,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `target_shape`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `target_shape` is M dimension, exactly $(m_0, m_1, \cdots,  m_{M-1})$ , and satisfy constraint : $m_0 * m_1 * \cdots * m_{M-1} = n_0 * n_1 * \cdots * n_{N-1}$.
+Suppose Input `X`, Output `Y`, attributes `target_shape`, where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, and `target_shape` is of `TShape` type of length `M`,  namely $(m_0, m_1, \cdots,  m_{M-1})$ , s.t. $m_0 * m_1 * \cdots * m_{M-1} = n_0 * n_1 * \cdots * n_{N-1}$.
 $$
 Y[d_0, d_1, \cdots, d_{M-1}] = T[\text{flatten_index}(d_0, d_1, \cdots, d_{M-1}, m_0, m_1, \cdots, m_{N-1})], \\
 \forall d_0 \in [0, m_0) \and \cdots \and d_{N-1} \in [0, m_{N-1}), \\
@@ -704,7 +712,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is TShape and dimension is M.
+Suppose Input `X`, Output `Y`, attributes `axes`. Where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is a `TShape`  with length M.
 $$
 \text{axis} \in [-N, N), \forall \text{axis} \in \text{axes}
 $$
@@ -743,7 +751,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is TShape and dimension is M, where M is in $\{0, N\}$.
+Suppose input `X`, Output `Y`, attributes `axes`. `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$ and `axes` is TShape with dimension M, $M \in \{0, N\}$, which means `axes` is either empty or a permutation of $\{0, 1, \cdots, N-1\}$
 $$
 \text{axis} \in [-N, N), \forall \text{axis} \in \text{axes}
 $$
@@ -865,24 +873,24 @@ $$
 Y=take(X, \text{indices}, \text{axis}=\text{None})
 $$
 
-
 #### slice_like
+
+This operator slices the input `X` to a shape that looks like the other given input `shape_like`.
 
 *Math Formalization*
 
-Suppose Input `X`, `shape_like`, Output `Y`, attributes `axes`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `shape_like`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1 })$, and `axes` is `TShape`, `axes`'s shape is K dimension.
+Suppose Input `X`, `shape_like`, Output `Y`, attributes `axes`, where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `shape_like` has M dimensions, namely $(m_0, m_1, \cdots, m_{M- 1 })$, and `axes` is `TShape` with length K. If `axes` is not empty, only those axes mentioned will be sliced on and others in `shape_like` will also be ignored. $M \ne N$ is allowed only if non-empty `axes` are given. If $M>N$, those dimensions higher than $N$ will be ignored and if $M<N$, only the first $M$ dimensions are sliced while those dimensions higher than $M$ will stay the same. 
 $$
-\forall axis \in \text{axes}: axis \in [-N, M)\\
-\text{real_axes} = \begin{cases} 
+\text{sliced_axes} = \begin{cases} 
 \{j \mid j \in axes \and j \geqslant 0\} \bigcup
 \{j + N \mid j \in axes \and j < 0\}, & K > 0\\
 \{0, 1, \cdots, M-1\}, & K = 0
 \end{cases} \\
-\forall j \in \text{real_axes}: m_j \leqslant n_j\\
+\forall j \in \text{sliced_axes}: j < \min(M, N) \text{ and } m_j \leqslant n_j\\
 Y[d_0, d_1, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
 \text{where } j \in [0, N) \and d_j \in \begin{cases}
-[0, m_j), & j \in \text{real_axes} \\
-[0, n_j), & j \notin \text{real_axes}
+[0, m_j), & j \in \text{sliced_axes} \\
+[0, n_j), & j \notin \text{sliced_axes}
 \end{cases}
 $$
 
@@ -900,7 +908,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `valid_count`, `Y`, attributes `score_threshold`, where `X`'s shape is $(B, N, K), K \geqslant 2$,  `score_threshold` is `int`.
+Suppose Input `X`, Output `valid_count`, `Y`, attributes `score_threshold`, where `X`'s shape is $(B, N, K), 2 \leqslant K \leqslant 32$,  `score_threshold` is `int`.
 $$
 \text{valid_count}[b] = card\{ q \mid q \in [0, N) \and
 X[b, q, 1] > \text{score_threshold} \}, \\
