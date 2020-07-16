@@ -147,7 +147,7 @@ $h_{i,j} = \sum_{\tau=0}^{\lfloor{log\ q}\rfloor}h_{i,j,\tau}2^{\tau}$（因为�
 
     先考虑多项式
     $$
-    \phi(\textbf{x}) = \phi_{(w, \textbf{v}), (w^{'}, \textbf{v}^{'})}(\textbf{x}) \triangleq (w-\lang \textbf{v}, \textbf{x} \rang) \cdot (w^{'} - \lang \textbf{v}^{'}, \textbf{x} \rang)
+    \phi(\textbf{x}) = \phi_{(w, \textbf{v}), (w^{'}, \textbf{v}^{'})}(\textbf{x}) \triangleq (w-\langle \textbf{v}, \textbf{x} \rangle) \cdot (w^{'} - \langle \textbf{v}^{'}, \textbf{x} \rangle)
     $$
     打开括号合并同类项后得到新表达式，其中令 $\textbf{x}[0]=1$，因此该表达式可以表示常数项和一次项
     $$
@@ -157,7 +157,7 @@ $h_{i,j} = \sum_{\tau=0}^{\lfloor{log\ q}\rfloor}h_{i,j,\tau}2^{\tau}$（因为�
     $$
     \phi(\textbf{x}) = \sum_{\substack{0 \leq i \leq j \leq n \\ \tau \in \{0,...,\lfloor \log q \rfloor\}}}h_{i,j,\tau} \cdot (2^\tau \cdot \textbf{x}[i] \cdot \textbf{x}[j])
     $$
-    利用计算密钥中 $\Psi$ 包含的  $\psi_{\ell, i, j, \tau} := (\textbf{a}_{\ell, i, j, \tau}, b_{\ell, i, j, \tau})$ 满足 $2^{\tau} \cdot \textbf{s}_{\ell}[i] \cdot \textbf{s}_{\ell}[j] \approx b_{\ell, i, j, \tau} - \lang \textbf{a}_{\ell+1, i, j, \tau}, \textbf{s}_{\ell + 1} \rang$
+    利用计算密钥中 $\Psi$ 包含的  $\psi_{\ell, i, j, \tau} := (\textbf{a}_{\ell, i, j, \tau}, b_{\ell, i, j, \tau})$ 满足 $2^{\tau} \cdot \textbf{s}_{\ell}[i] \cdot \textbf{s}_{\ell}[j] \approx b_{\ell, i, j, \tau} - \langle \textbf{a}_{\ell+1, i, j, \tau}, \textbf{s}_{\ell + 1} \rangle$
 
     因此令乘积密文为 $c_{mult} = ((\textbf{v}_{mult}, w_{mult}), \ell + 1)$
 
@@ -178,7 +178,7 @@ $$
    首先考虑如下函数，将数值从 $\mathbb{Z}_q$ 转为模 $p$ 的有理数
 
 $$
-\phi(\textbf{x}) \triangleq \phi_{\textbf{v},w}(\textbf{x}) \triangleq \frac{p}{q} \cdot \left(\frac{q+1}{2} \cdot (w - \lang \textbf{v}, \textbf{x} \rang) \right) \mod p
+\phi(\textbf{x}) \triangleq \phi_{\textbf{v},w}(\textbf{x}) \triangleq \frac{p}{q} \cdot \left(\frac{q+1}{2} \cdot (w - \langle \textbf{v}, \textbf{x} \rangle) \right) \mod p
 $$
 
 ​		除了 $\frac{p}{q}$ 以外的系数仍在 $\mathbb{Z}_q$ 中，可以找到 $h_0, ...,h_n \in \mathbb{Z}_q$ 使得
