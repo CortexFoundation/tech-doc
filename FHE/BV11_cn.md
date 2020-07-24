@@ -74,9 +74,9 @@ $h_{i,j} = \sum_{\tau=0}^{\lfloor{log\ q}\rfloor}h_{i,j,\tau}2^{\tau}$（因为�
 
 **Bootstrapping**：该技术本身并不复杂，通过对噪音较大的密文进行解密，然后重新用初始噪音进行加密的方法来控制噪音的规模，保障后续计算的正确性。假设噪音规模为 $E$，那么经过一次乘法运算后噪音规模为 $E^2$， $L$ 层乘法之后，噪音规模变为 $E^{2^L}$。而前面我们讲到噪音不能超过模数 $q$，而LWE电路解密的深度是$max(n, \log q)$，不能直接解密。
 
-**维数-模数简化（Dimension-Modulus reduction）**：如上文所说，解密电路深度是由维数 $n$ 和模数 $q$ 决定的，因此如果能减小这两个数值，即可得到可计算的解密电路。我们希望将$(n, \log q)$减小到$(k, \log p)$，使得该方案能执行Bootstrapping。
+**维数-模数压缩（Dimension-Modulus reduction）**：如上文所说，解密电路深度是由维数 $n$ 和模数 $q$ 决定的，因此如果能减小这两个数值，即可得到可计算的解密电路。我们希望将$(n, \log q)$减小到$(k, \log p)$，使得该方案能执行Bootstrapping。
 
-技术的主要思路为：假设当前已经完成 $L$ 层计算，采用的密钥为 $S_L$。重新采样维数和维数较小的短密钥 $\widehat{\textbf{s}}$，对当前的长密钥 $S_L$ 进行重制，利用 $\widehat{\textbf{s}}$ 完成密文的维数-模数简化，最后对短密文解密得到明文。
+技术的主要思路为：假设当前已经完成 $L$ 层计算，采用的密钥为 $S_L$。重新采样维数和维数较小的短密钥 $\widehat{\textbf{s}}$，对当前的长密钥 $S_L$ 进行重制，利用 $\widehat{\textbf{s}}$ 完成密文的维数-模数压缩，最后对短密文解密得到明文。
 
 ## 具体方案实现
 
@@ -126,7 +126,7 @@ $h_{i,j} = \sum_{\tau=0}^{\lfloor{log\ q}\rfloor}h_{i,j,\tau}2^{\tau}$（因为�
 
 **输入**：计算函数 $f$，参数密文 $(c_1, ..., c_t)$，计算密钥 $evk = (\Psi, \widehat{\Psi})$
 
-**输出**：计算 $L$ 层后输出简化密文 $\widehat{c} := (\widehat{\textbf{v}}, \widehat{w})$
+**输出**：计算 $L$ 层后输出压缩密文 $\widehat{c} := (\widehat{\textbf{v}}, \widehat{w})$
 
 **过程**：函数可以拆分为加法和乘法，因此这里分别讨论加法和乘法两类运算
 
@@ -171,9 +171,9 @@ $$
 w_{mult} - \langle \textbf{v}_{mult}, \textbf{s}_{\ell + 1} \rangle = \sum_{i,j,\tau} h_{i,j,\tau} (b_{\ell+1, i, j,\tau} - \langle \textbf{a}_{\ell+1,i,j,\tau}, \textbf{s}_{\ell+1} \rangle) = \phi(\textbf{s}_{\ell}) + 2e_1 = \mu\mu^{'} + 2e_2
 $$
 
-3. 维数-模数简化
+3. 维数-模数压缩
 
-   经过 $L$ 层计算后，我们得到密文 $c := ((\textbf{v}, w), L)$，利用简化密钥 $\widehat{\Psi}$，转换为简化密文 $\widehat{c}$（从 $(n,q)$ 转为 $(k,p)$ ）
+   经过 $L$ 层计算后，我们得到密文 $c := ((\textbf{v}, w), L)$，利用压缩密钥 $\widehat{\Psi}$，转换为压缩密文 $\widehat{c}$（从 $(n,q)$ 转为 $(k,p)$ ）
 
    首先考虑如下函数，将数值从 $\mathbb{Z}_q$ 转为模 $p$ 的有理数
 
@@ -189,16 +189,16 @@ $$
 $$
 \phi(\textbf{x}) = \sum_{i=0}^n \sum_{\tau=0}^{\lfloor \log q \rfloor} h_{i,\tau} \cdot (\frac{p}{q} \cdot 2^\tau \cdot \textbf{x}[i]) \mod p
 $$
-​		利用简化密钥 $\widehat{\Psi}$，计算简化密文 $\widehat{c} = (\widehat{\textbf{v}}, \widehat{w}) \in \mathbb{Z}_p^k \times \mathbb{Z}_p$
+​		利用压缩密钥 $\widehat{\Psi}$，计算压缩密文 $\widehat{c} = (\widehat{\textbf{v}}, \widehat{w}) \in \mathbb{Z}_p^k \times \mathbb{Z}_p$
 $$
 \widehat{\textbf{v}} := 2 \cdot \sum_{i=0}^n \sum_{\tau=0}^{\lfloor \log q \rfloor} h_{i,\tau} \cdot \widehat{\textbf{a}}_{i,\tau} \mod p \in \mathbb{Z}_p^k
 \\ \widehat{w} := 2 \cdot \sum_{i=0}^n \sum_{\tau=0}^{\lfloor \log q \rfloor} h_{i,\tau} \cdot \widehat{b}_{i,\tau} \mod p \in \mathbb{Z}_p
 $$
-​		同样可以验证简化密文和原密文同样满足与明文模2同余
+​		同样可以验证压缩密文和原密文同样满足与明文模2同余
 
 ## 解密算法
 
-**输入**：简化密文  $\widehat{c} := (\widehat{\textbf{v}}, \widehat{w}) \in \mathbb{Z}_p^k \times \mathbb{Z}_p$ 
+**输入**：压缩密文  $\widehat{c} := (\widehat{\textbf{v}}, \widehat{w}) \in \mathbb{Z}_p^k \times \mathbb{Z}_p$ 
 
 **输出**：明文 $\mu$
 
