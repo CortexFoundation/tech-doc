@@ -339,7 +339,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is 2-D `TShape`, exactly $(PSH, PSW)$, `padding` is 2-D `TShape`, exactly $(PH, PW) \in [min\_attr, max\_attr)$, if `padding` is  1-D, which means $PH = PW$, `strides` is 2-D `TShape`, exactly $(SH, SW)$, `ceil_mode` is `boolean`.
+Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is a `TShape` of length 2, namely $(PSH, PSW)$, `padding` is a `TShape` of length 2, namely $(PH, PW) \in [min\_attr, max\_attr)$ while a `padding` of length is 1 means $PH = PW$, `strides` is a `TShape` of length 2, namely $(SH, SW)$, `ceil_mode` is `boolean`.
 $$
 PSH \in [0, H + 2PH + 1), \\
 PSW \in [0, W + 2PW + 1), \\
@@ -837,7 +837,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, `indices`, output `Y`, attributes `axis` where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$, and `axis` is `Optional<int>` .
+Suppose Input `X`, `indices`, output `Y`, attributes `axis` where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `indices` has M dimensions, namely $(m_0, m_1, \cdots, m_{M- 1})$, and `axis` is `Optional<int>` .
 
 1. Case axis is `None` :
 
@@ -985,5 +985,5 @@ $$
 $$
 Y[b, n, k] = -1, \\
 \forall b \in [0, B) \and k \in [0, K) \and 
-n \in [min\{T, \text{MOS},card\{U\}\}, N)
+n \in [min\{T, \text{MOS},card\{U\}\}, N)de
 $$
