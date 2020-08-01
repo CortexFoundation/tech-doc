@@ -274,16 +274,16 @@ We only supported 2-D convolution operator. Also alias *Group-wise Convolution*.
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`' shape is $(OC, IC, KH, KW)$, and $IC = C \div \text{groups} \and OC \text{ mod } \text{groups} = 0$, `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is  2-D `TShape`, exactly $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is 2-D `TShape`, exactly $(SH, SW) \in [1, max\_attr)$, `dilation` is 2-D `TShape`, exactly $(DH, DW) \in [1, max\_attr)$, `grous` is `int`, the value is in $\{1, C\}$.
+Suppose input `X`, `W`, `B`, standing for input data, convolution kernel weight and bias respectively, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`'s  shape is $(OC, IC, KH, KW)$, $C = IC \cdot \text{groups} \and OC \text{ mod } \text{groups} = 0$, and `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is a `TShape` of length 2, namely $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is a `TShape` of length 2, namely $(SH, SW) \in [1, max\_attr)$, `dilation` is a `TShape` of length 2, namely $(DH, DW) \in [1, max\_attr)$ and `grous` is `int`, indicating group  number whose value is in $[1, C]$.
 $$
 OC = \text{groups} * OPG, \text{where } OPG \in \mathbb N^+ \\
 C = IC * \text{groups}
 $$
 
 $$
-Y[n,oc,p,q]= \sum_{ic = 0}^{IC} \text{kernel}(n,(oc \div OPG) * IC + ic, p, q, oc,ic) + \begin{cases}
+Y[n,oc,p,q]= \sum_{ic = 0}^{IC-1} \text{kernel}(n,(oc \div OPG) * IC + ic, p, q, oc,ic) + \begin{cases}
 0, & \text{if B is None}\\
-B[i], & \text{otherwise}
+B[oc], & \text{otherwise}
 \end{cases}, \\
 \forall n \in [0, N) \and oc\in [0, OC) \and\\
 p \in \left[0, \left\lfloor{H+2 \cdot \text{PH}-\text{DH} \cdot (\text{KH}-1)-1\over\text{SH}}\right\rfloor+1 \right) \and \\
@@ -306,7 +306,7 @@ Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769d
 
 *Math Formalization*
 
-Suppose Input `X`, `W`, `B`, where `X` shape is $(M * K)$, `W` shape is $(N * K)$, `B` is `Optional<DLTensor>`, if `B` is not `NONE`, it's shape is $(N,)$.
+Suppose Input `X`, `W`, `B`, where `X` shape is $(M, K)$, `W` shape is $(N, K)$, `B` is `Optional<DLTensor>`, if `B` is not `NONE`, it's shape is $(N,)$.
 
 Math:
 $$
@@ -339,7 +339,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is 2-D `TShape`, exactly $(PSH, PSW)$, `padding` is 2-D `TShape`, exactly $(PH, PW) \in [min\_attr, max\_attr)$, if `padding` is  1-D, which means $PH = PW$, `strides` is 2-D `TShape`, exactly $(SH, SW)$, `ceil_mode` is `boolean`.
+Suppose Input `X`, Output `Y` and attributes `pool_size`,  `	padding`, `strides`, `ceil_mode`, where `X`'s shape is $(N, C, H, W)$, `pool_size` is a `TShape` of length 2, namely $(PSH, PSW)$, `padding` is a `TShape` of length 2, namely $(PH, PW) \in [min\_attr, max\_attr)$ while a `padding` of length is 1 means $PH = PW$, `strides` is a `TShape` of length 2, namely $(SH, SW)$, `ceil_mode` is `boolean`.
 $$
 PSH \in [0, H + 2PH + 1), \\
 PSW \in [0, W + 2PW + 1), \\
@@ -668,7 +668,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axis`, `num_newaxis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$,  `axis` is in range $[-N-1, N+1)$,  and `num_newaxis` is in range $[min\_attr, max\_attr)$.
+Suppose Input `X`, Output `Y`, attributes `axis`, `num_newaxis` where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$,  `axis` is in range $[-N-1, N+1)$,  and `num_newaxis` is in range $[min\_attr, max\_attr)$.
 $$
 Y[d_0,d_1, \cdots, d_{\text{real_axis}-1}, 
 \underbrace{0, 0, \cdots, 0}_{\text{num_newaxis}}, 
@@ -710,9 +710,11 @@ Test Parameter:
 
 #### squeeze
 
+This operator removes dimensions of length 1.
+
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`. Where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is a `TShape`  with length M.
+Suppose Input `X`, Output `Y`, attributes `axes`, where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, and `axes` is a `TShape`  of length M.
 $$
 \text{axis} \in [-N, N), \forall \text{axis} \in \text{axes}
 $$
@@ -735,10 +737,10 @@ $$
 Y[d_{I(0)}, d_{I(1)}, \cdots, d_{I(N-K-1)}] = X[d_0, d_1, \cdots, d_{N-1}], \\
 \forall d_0 \in [0, n_0) \and d_1 \in [0, n_1) 
 \and \cdots \and d_{N-1} \in [0, n_{N-1}), \\
-\text{where } K = card \; \text{real_axes} \text{ and } \\
+\text{where } K = card \; \text{\{real_axes\}} \text{ and } \\
 I: \{i \mid i \in [0, N-K) \} \to 
 \{i \mid i \in [0, N) \and i \notin \text{real_axes} \}, \\
-\text{satisfy } I(i) < I(j), \forall 0 \leqslant i < j < N-K
+\text{s.t. } I(i) < I(j), \forall 0 \leqslant i < j < N-K
 $$
 
 Test Parameter:
@@ -776,9 +778,11 @@ Test Parameter:
 
 #### slice | strided_slice
 
+These operators slice an input array with given attribute.
+
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `begin`, `end`, `strides`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, and `begin`'s shape is B dimension, `end`'s shape is E dimension, `stride`'s shape is S dimension.
+Suppose Input `X`, Output `Y`, attributes  `begin`, `end` and `strides` where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$ and `begin`, `end` and`stride` has B, E and S dimensions respectively.
 $$
 \text{b_arr}[b] = \begin{cases}
 \text{begin}[b] + n_i, & b \in [0, N) \and b < B \and begin[b] < 0 \\
@@ -833,7 +837,7 @@ Test Parameter:
 
 *Math Formalization*
 
-Suppose Input `X`, `indices`, Output `Y`, attributes `axis`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$, and `axis` is `Optional<int>` .
+Suppose Input `X`, `indices`, output `Y`, attributes `axis` where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `indices` has M dimensions, namely $(m_0, m_1, \cdots, m_{M- 1})$, and `axis` is `Optional<int>` .
 
 1. Case axis is `None` :
 
@@ -841,7 +845,7 @@ $$
 T = flatten(X) \\
 Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1],\\
 \forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) \text{ and }\\
-\text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}] 
+\text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}]
 $$
 
 2. Case axis is `int`:
@@ -852,12 +856,12 @@ $$
 \text{axis}, & \text{axis} \geqslant 0 \\
 \text{axis} + N, & \text{axis} < 0
 \end{cases} \\
-Y[d_0, d_1, \cdots, d_{M+N-1}] = X[d_0, \cdots, d_{\text{real_axis}-1}, \text{xdix}, d_{\text{real_axis}+M}, \cdots, d_{M+N-1}], \\
-\forall (d_0, d_1, \cdots, d_{M+N-1}), \text{where } d_j \in \begin{cases} 
+Y[d_0, d_1, \cdots, d_{M+N-2}] = X[d_0, \cdots, d_{\text{real_axis}-1}, \text{xdix}, d_{\text{real_axis}+M}, \cdots, d_{M+N-2}], \\
+\forall (d_0, d_1, \cdots, d_{M+N-2}), \text{where } d_j \in \begin{cases} 
 [0, n_j), & j < \text{real_axis} \\
 [0, m_{j-\text{real_axis}}), & j \in [\text{real_axis}, \text{real_axis}+M) \\
-[0, n_{j-M+1}), & j \in [\text{real_axis} + M, M+N)
-\end{cases} \and j \in [0, M+N) : \\
+[0, n_{j-M+1}), & j \in [\text{real_axis} + M, M+N-1)
+\end{cases}\\
 
 \text{where } \text{xidx}{} = clip(\text{indices}[d_{\text{real_axis}}, d_{\text{real_axis}+1}, \cdots, d_{\text{real_axis}+M-1}], \text{a_min}=0, \text{a_max}=n_{\text{real_axis}}-1)
 $$
@@ -933,16 +937,18 @@ $$
 
 #### non_max_suppression
 
+There are `B` batches and each contains `N` vectors of a fixed length `K`. For each batch, this operator will find several vectors whose scores (stored in the second place in the vector) are high enough and whose overlap with each other (calculated by the last 4 places in the vector) are small enough.
+
 *Math Formalization*
 
-Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k`, where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, the value is in range $(0, +\infty)$,  101 stands for bounding box full-overlap specifically, and larger integer is equivalent to that. `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
+Suppose Input `X`, `valid_count`, Output `Y`, attributes `iou_threshold`, `max_output_size`, `force_suppress`, `top_k` where `X`'s shape is $(B, N, K), K = 6$,  `iou_threshold` is `int`, representing the percentage of intersection over union with value in range $(0, +\infty)$ where 101 stands for bounding box full-overlap specifically and larger integer is equivalent to that. `max_output_size` is `int`, `force_suppress` is `boolean`, `top_k` is `int`. 
 $$
 R[b, i, k] = X[b, I(i), k], \\
 \forall b \in [0, B) \and i \in [0, T) \and k \in [0, K), \\
 \text{where } T = \text{max}\{
 \text{min}(N, \text{valid_count}[b]), 0\} \text{ and } \\
 I: \{ i \mid i \in [0, T) \} \to \{ i \mid i \in [0, T) \}, \\
-\text {satisfy } X[b, I(i), 1] > X[b, I(j), 1] \or \\
+\text {s.t. } X[b, I(i), 1] > X[b, I(j), 1] \or \\
 (X[b, I(i), 1] = X[b, I(j), 1] \and I(i) < I(j)), 
 \forall 0 \leqslant i < j < T
 $$
@@ -972,12 +978,12 @@ k \in [0, K), \\
 R[b,p,0] >= 0 \and \text{iou}(p, q) < \text{iou_threshold}, 
 \forall q \in U \and q < p\}
  \text{ and } \\
-\text{IDX}: \{i \mid i \in [0, card\{U\})\} \to U, \text{satisfy }
+\text{IDX}: \{i \mid i \in [0, card\{U\})\} \to U, \text{s.t. }
 \text{IDX}(i) < \text{IDX}(j), \forall 0 \leqslant i < j < card\{U\}
 $$
 
 $$
 Y[b, n, k] = -1, \\
 \forall b \in [0, B) \and k \in [0, K) \and 
-n \in [min\{T, \text{MOS},card\{U\}\}, N)
+n \in [min\{T, \text{MOS},card\{U\}\}, N)de
 $$
