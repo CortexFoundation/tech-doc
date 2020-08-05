@@ -65,7 +65,7 @@ A reduce operator performs the reduction function to input data based on the par
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has is N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select. $R$, with size $r$, is the set of real axes where we do the reduction.
+Suppose Input `X`, Output `Y`, attributes `axes`, `keepdims`, `exclude`, where `X` has N dimensions, exactly $(n_0, n_1, \cdots, n_{N-1})$, elements in `axes` should be different from each other and within range $[-N, N)$, indicating on which axes the reduction is done. It is of `TShape` type and will be treated as a set with M values, formally $M=card\{i \mid i \in \text{axes}\}, M \in [0,N]$, `keepdims` is a `boolean` indicating if dimension kept, `exclude` is a `boolean` giving users ability to inverse select. $R$, with size $r$, is the set of real axes where we do the reduction.
 $$
 T = \left\{x \mid i \in \text{axes} \and 
 x = \begin{cases}
@@ -274,7 +274,7 @@ We only supported 2-D convolution operator. Also alias *Group-wise Convolution*.
 
 *Math Formalization*
 
-Suppose input `X`, `W`, `B`, standing for input data, convolution kernel weight and bias respectively, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`'s  shape is $(OC, IC, KH, KW)$, $C = IC \cdot \text{groups} \and OC \text{ mod } \text{groups} = 0$, and `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is a `TShape` of length 2, namely $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is a `TShape` of length 2, namely $(SH, SW) \in [1, max\_attr)$, `dilation` is a `TShape` of length 2, namely $(DH, DW) \in [1, max\_attr)$ and `grous` is `int`, indicating group  number whose value is in $[1, C]$.
+Suppose input `X`, `W`, `B`, standing for input data, convolution kernel weight and bias respectively, and output `Y`, attributes `padding`, `stride`, `dilation`, `groups`, where `X`'s shape is $(N, C, H, W)$, `W`'s  shape is $(OC, IC, KH, KW)$, $C = IC \cdot \text{groups} \and OC \text{ mod } \text{groups} = 0$, and `B` is `Optional<DLTensor>`, if `B` is not None, it's shape is $(\text{OC},)$. `padding` is a `TShape` of length 2, namely $(PH, PW), PH,PW \in [min\_attr, max\_attr)$, `stride` is a `TShape` of length 2, namely $(SH, SW) \in [1, max\_attr)$, `dilation` is a `TShape` of length 2, namely $(DH, DW) \in [1, max\_attr)$ and `groups` is `int`, indicating group  number whose value is in $[1, C]$.
 $$
 OC = \text{groups} * OPG, \text{where } OPG \in \mathbb N^+ \\
 C = IC * \text{groups}
@@ -558,7 +558,7 @@ Test Parameter:
 	
 	shift_bit: 2
 
-#### 
+
 
 ### Transform Operator
 
@@ -619,7 +619,7 @@ This operator flattens the input tensor data to an array in a row-major order.
 
 *Math Formalization*
 
-Suppose Input `X`, Output `Y`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$.
+Suppose Input `X`, Output `Y`. Where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$.
 $$
 Y[\text{flatten_index}(d_0, d_1, \cdots, d_{N-1}, n_0, n_1, \cdots, n_{N-1})]  =  \\
 X[d_0, d_1, \cdots, d_{N-1}], \\
@@ -677,7 +677,7 @@ d_\text{real_axis}, \cdots, d_{N-1}] = X[d_0, d_1, \cdots, d_{N-1}], \\
 \text{where real_axis} = 
 \begin{cases}
 \text{axis},& \text{axis} \geqslant 0 \\
-\text{axis} + N,& \text{axis} < 0
+\text{axis} + N + 1,& \text{axis} < 0
 \end{cases}
 $$
 
@@ -872,7 +872,7 @@ $$
 
 *Math Formalization*
 
-Suppose Input `indices`,`X`, Output `Y`. Where `X`'s shape is N dimension, exactly $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$ .
+Suppose Input `indices`,`X`, Output `Y`. Where `X` has N dimensions, namely $(n_0, n_1, \cdots, n_{N-1})$, `indices`'s shape is M dimension, exactly $(m_0, m_1, \cdots, m_{M- 1})$ .
 $$
 Y=take(X, \text{indices}, \text{axis}=\text{None})
 $$
@@ -985,5 +985,5 @@ $$
 $$
 Y[b, n, k] = -1, \\
 \forall b \in [0, B) \and k \in [0, K) \and 
-n \in [min\{T, \text{MOS},card\{U\}\}, N)de
+n \in [min\{T, \text{MOS},card\{U\}\}, N)
 $$
