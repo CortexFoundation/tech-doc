@@ -166,7 +166,9 @@ If you're training a custom model with your custom dataset, keep in mind that yo
 
 Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params` are your quantized models, stored under `~/mrt_model` (assuming you have not altered the path in the `python/mrt/conf.py` file). Create a separate folder named `data` and rename your `mnist_.json` to `symbol` and your `mnist_.params` to `params`. Run `ls -l` to check your operating system is not hiding the file name extension, as the full file names need to be correct for successful upload.
 
-We're now ready to upload them! Let's go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/). (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
+We're now ready to upload them! Like most PoW blockchains, transaction data are broadcast out, received by different full nodes and relayed to propagate the entire network; miners then include these transactions in a block later mined into the blockchain. In our case, model file (which is mostly matrices of weights) is the transaction data; to upload this model file, we broadcast it out by seeding a torrent (which is a file including metadata about the model file that enables its reception and relay by other full nodes).
+
+Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file. (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
 
 In the menu bar at the top, find "upload" under "AI Contract"
 
@@ -184,9 +186,13 @@ Now select your two model files at the same time.
 
 Change the input shape in the grey box `shape`. (Note: even if your input is of shape 1,28,28 you need to re-type it anyway. We will do this here if you've been following this tutorial, setting the input to 1,28,28 for our model)
 
-Now make sure you're signed in to your TestNet wallet. (Important!)
+Now make sure you've signed in to your TestNet wallet and don't have any other transaction confirmation windows open (or the new transaction confirmation window wouldn't pop out).
 
-Type in the model description, click `save` and then hit `upload`!
+Type in the model description, click `save` and then hit `upload`. A new transaction confirmation window will pop out. (If it doesn't, it's probably due to the two reasons above. Close your browser and try again). Click confirm.
+
+We're not done yet - all the upload button does is to generate a torrent file which then you will need in order to broadcast out by seeding it along with your model file.
+
+cerebro 那里点击上传 --> 生成模型文件种子 --> 做种（广播 torrent 文件）--> 全节点收到 torrent 文件 --> miners 把文件数据弄到区块里--> 上链完成
 
 # Conclusion
 
