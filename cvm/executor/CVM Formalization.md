@@ -264,8 +264,6 @@ Test Parameter:
 
 
 
-#### 
-
 ### NN Operator
 
 #### Convolution
@@ -359,7 +357,7 @@ q \in \left[0, \text{ceil_func}\left({W+2 \cdot \text{PW}- \text{PSW} \over \tex
 \end{cases} \text{ and } \\
 \text{pad}(n, i, p, q) = \begin{cases} 
 X[n, i, p, q], & \text{ if } p \in [0, H) \and q \in [0, W) \\
-0, & \text{otherwise}
+INT32_MIN, & \text{otherwise}
 \end{cases}
 $$
 Reference: https://github.com/CortexFoundation/CortexTheseus/blob/76320455f0769dbf22115d82181b7ba876c5f942/infernet/src/cvm/ops/cpu/ops.cc#L692
@@ -843,7 +841,7 @@ Suppose Input `X`, `indices`, output `Y`, attributes `axis` where `X` has N dime
 
 $$
 T = flatten(X) \\
-Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1],\\
+Y[d_0, d_1, \cdots, d_{M-1}] = T[clip(\text{xidx}, \text{a_min}=0, \text{a_max}=|T|-1)],\\
 \forall (d_0, d_1, \cdots, d_{M-1}), \text{where } d_j \in [0, m_j) \and j \in [0, M) \text{ and }\\
 \text{xidx} = \text{indices}[d_0, d_1, \cdots, d_{M-1}]
 $$
