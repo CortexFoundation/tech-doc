@@ -904,6 +904,46 @@ Test Parameter:
 
 
 
+#### where
+
+This operator selects data from 2 inputs with condition given.
+
+*Math Formalization*
+
+Suppose Input `Cond`, `A`, `B`, Output `Y`, where `A`, `B` and `Y` share the same shape, `N` dimensions namely $(n_0, n_1, \cdots, n_{N-1})$. `Cond` is either a  tensor with `N` dimensions, same shape as `A`, `B` and `Y`, or a 1d tensor, whose length is $n_0$.
+
+1. Case the shape of `Cond` is same as others:
+
+$$
+Y[d_0, d_1, \cdots, d_{N-1}] = 
+\begin{cases} 
+A[d_0, d_1, \cdots, d_{N-1}], & Cond[d_0, d_1, \cdots, d_{N-1}] 
+\neq 0\\
+B[d_0, d_1, \cdots, d_{N-1}], & Cond[d_0, d_1, \cdots, d_{N-1}] = 0
+\end{cases},\\
+
+\forall d_i \in [0, n_i),\\
+\text{where } i \in [0, N)
+$$
+
+
+
+2. Case `Cond` is a 1d tensor with length $n_0$:
+   $$
+   Y[d_0, d_1, \cdots, d_{N-1}] = 
+   \begin{cases} 
+   A[d_0, d_1, \cdots, d_{N-1}], & Cond[d_0] 
+   \neq 0\\
+   B[d_0, d_1, \cdots, d_{N-1}], & Cond[d_0] = 0
+   \end{cases},\\
+   
+   \forall d_i \in [0, n_i),\\
+   \text{where } i \in [0, N)
+   $$
+   
+
+
+
 ### NMS Operator
 
 #### get_valid_count
