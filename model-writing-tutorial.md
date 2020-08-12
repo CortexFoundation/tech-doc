@@ -166,9 +166,9 @@ If you're training a custom model with your custom dataset, keep in mind that yo
 
 Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params` are your quantized models, stored under `~/mrt_model` (assuming you have not altered the path in the `python/mrt/conf.py` file). Create a separate folder named `data` and rename your `mnist_.json` to `symbol` and your `mnist_.params` to `params`. Run `ls -l` to check your operating system is not hiding the file name extension, as the full file names need to be correct for successful upload.
 
-We're now ready to upload them! Like most PoW blockchains, transaction data are broadcast out, received by different full nodes and relayed to propagate the entire network; miners then include these transactions in a block later mined into the blockchain. In our case, model file (which is mostly matrices of weights) is the transaction data; to upload this model file, we broadcast it out by seeding a torrent (which is a file including metadata about the model file that enables its reception and relay by other full nodes).
+We're now ready to upload them! Like most PoW blockchains, transaction data are broadcast out, received by different full nodes and relayed to propagate the entire network; miners then include these transactions in a block later mined into the blockchain. In our case, model file (which is mostly matrices of weights) is the transaction data; to upload this model file, we broadcast it out by seeding it with a torrent file (which is a file including metadata about the model file that enables its reception and relay by other full nodes).
 
-Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file. (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
+Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file, which we will later use to broadcast (upload) the model file to the network. (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
 
 In the menu bar at the top, find "upload" under "AI Contract"
 
@@ -190,7 +190,21 @@ Now make sure you've signed in to your TestNet wallet and don't have any other t
 
 Type in the model description, click `save` and then hit `upload`. A new transaction confirmation window will pop out. (If it doesn't, it's probably due to the two reasons above. Close your browser and try again). Click confirm.
 
-We're not done yet - all the upload button does is to generate a torrent file which then you will need in order to broadcast out by seeding it along with your model file.
+We're not done yet - recall that we're only generating a torrent file here, which includes metadata about the model file that enables its broadcast to other full nodes.
+
+To finish the upload, we now need to seed(upload/broadcast) the model file along with the torrent file (model file's metadata). In this example, we will use qBittorrent to do the seeding, but feel free to use whichever BitTorrent client you prefer.
+
+After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. We rename it as "torrent". We create a new folder named "test" in which we put the "torrent" file alongside the "data" folder containing the model files that we created above. The resulting directory should have this structure:
+
+![seed](imgs/seed.png)
+
+Next, we open qBittorrent and drag this "test" folder to the window.
+
+![torrent](imgs/torrentSetting.png)
+
+Configure as above (usually by default) and click "Create Torrent" and let it broadcast for ~6 hours to ensure the file propagate to the entire network.
+
+To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed instead of relaying it.
 
 cerebro 那里点击上传 --> 生成模型文件种子 --> 做种（广播 torrent 文件）--> 全节点收到 torrent 文件 --> miners 把文件数据弄到区块里--> 上链完成
 
