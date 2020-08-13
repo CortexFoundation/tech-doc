@@ -204,9 +204,11 @@ Next, we open qBittorrent and drag this "test" folder to the window.
 
 Configure as above (usually by default) and click "Create Torrent" and let it broadcast for ~6 hours to ensure the file propagate to the entire network.
 
-To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed instead of relaying it.
+To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of relaying it.
 
-cerebro 那里点击上传 --> 生成模型文件种子 --> 做种（广播 torrent 文件）--> 全节点收到 torrent 文件 --> miners 把文件数据弄到区块里--> 上链完成
+We go to the transaction page for the model upload to push the progress.
+
+Now we're done! We just need to keep waiting the ~6 hours for our model to propagate throughout the entire network.
 
 # Conclusion
 
