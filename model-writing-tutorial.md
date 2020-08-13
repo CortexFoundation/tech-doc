@@ -206,9 +206,23 @@ Configure as above (usually by default) and click "Create Torrent" and let it br
 
 To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of relaying it.
 
-We go to the transaction page for the model upload to push the progress.
+To do this, let's go to the transaction page of the uploaded model. Open your wallet and find the transaction in which you uploaded the model.
 
-Now we're done! We just need to keep waiting the ~6 hours for our model to propagate throughout the entire network.
+![wallet-transaction](imgs/wallet-transaction.png)
+
+Click on it to go to the transaction page.
+
+![model-transaction](imgs/model-transaction.png)
+
+On the row "To", you will see "Model XXXXXXXX Created". Click on the XXXXXXXX which will take you to a new page where you can see:
+
+![push-progress](imgs/push-progress.png)
+
+Click on "send" to push the progress. Keep sending transactions until the upload is complete (when full nodes will stop ignoring your model files as spam), at which point you should see:
+
+![push-progress-success](imgs/push-progress-success.png)
+
+Now we're done! We just need to keep the qBittorrent client open and wait the rest of the ~6 hours for our model to propagate throughout the entire network.
 
 # Conclusion
 
