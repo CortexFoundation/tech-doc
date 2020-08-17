@@ -120,11 +120,26 @@ python3 tests/mrt/train_mnist.py
 
 This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (you can alter this path in the `python/mrt/conf.py` file).
 
-If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and feel free to modify the model training file as you see fit.
+If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and
 
-Go ahead and open the `train_mnist.py` file. There are a few steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training
+Go ahead and open the `train_mnist.py` file. There are mostly 5 steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training (5) export the model
 
-## Step 1
+### Step 1: Load the Data
+
+```python
+# load training and validation data
+train_data = mx.gluon.data.vision.MNIST(
+        train=True).transform_first(data_xform)
+val_data = mx.gluon.data.vision.MNIST(
+        train=False).transform_first(data_xform)
+
+batch_size = 4
+train_loader = mx.gluon.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
+val_loader = mx.gluon.data.DataLoader(val_data, shuffle=False, batch_size=batch_size)
+
+```
+
+### Step 2: Define the Model
 
 Our main interest here is the `train_mnist()` function. Notice by default, we offered 3 architectures that you can choose from (`dapp`, `lenet`, `mlp`). If you do not specify the architecture, the default is `dapp`.
 
@@ -145,6 +160,66 @@ if version == 'dapp':
                 nn.Dense(10, activation=None),
         )
 ```
+
+### Step 3: Randomly Initialize the Parameters & Set the Hyperparameters
+
+```python
+# Random initialize all the mnist model parameters
+net.initialize(mx.init.Xavier(), ctx=ctx)
+net.summary(nd.zeros((1, 1, 28, 28), ctx=ctx))
+# Set hyperparameters
+trainer = gluon.Trainer(
+        params=net.collect_params(),
+	optimizer='adam',
+	optimizer_params={'learning_rate': 1e-3},
+        )
+metric = mx.metric.Accuracy()
+loss_function = gluon.loss.SoftmaxCrossEntropyLoss()
+num_epochs = 5
+```
+
+### Step 4: Start Training
+
+```python
+for epoch in range(num_epochs):
+        for inputs, labels in train_loader:
+            inputs = inputs.as_in_context(ctx)
+            labels = labels.as_in_context(ctx)
+
+            with autograd.record():
+                outputs = net(inputs)
+                loss = loss_function(outputs, labels)
+
+            loss.backward()
+            metric.update(labels, outputs)
+            trainer.step(batch_size=inputs.shape[0])
+
+        name, acc = metric.get()
+        print('After epoch {}: {} = {:5.2%}'.format(epoch + 1, name, acc))
+        metric.reset()
+
+for inputs, labels in val_loader:
+        inputs = inputs.as_in_context(ctx)
+        labels = labels.as_in_context(ctx)
+        metric.update(labels, net(inputs))
+print('Validaton: {} = {}'.format(*metric.get()))
+assert metric.get()[1] > 0.96
+```
+
+### Step 5: Export the Model
+
+```python
+sym = net(mx.sym.var('data'))
+sym_file, param_file = load_fname(version)
+print ("Dump model into ", sym_file, " & ", param_file)
+
+# dump the mxnet model
+with open(sym_file, "w") as fout:
+        fout.write(sym.tojson())
+net.collect_params().save(param_file)
+```
+
+Again, here we only show the general structure of writing a program that trains AI models - refer to the original file under `tests/mrt/train_mnist.py` for the complete code and modify as you see fit!
 
 # Stage III: Quantize Your Model
 
