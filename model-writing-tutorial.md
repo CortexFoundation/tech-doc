@@ -120,9 +120,9 @@ python3 tests/mrt/train_mnist.py
 
 This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (you can alter this path in the `python/mrt/conf.py` file).
 
-If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and
+If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and always refer back to the source code `tests/mrt/train_mnist.py` when you're confused.
 
-Go ahead and open the `train_mnist.py` file. There are mostly 5 steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training (5) export the model
+Now go ahead and open the `train_mnist.py` file. There are mostly 5 steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training (5) export the model
 
 ### Step 1: Load the Data
 
@@ -318,7 +318,7 @@ CVM is the virtual machine that executes code on the Cortex blockchain. CVM-Runt
 
 # Footnotes
 
-[1] If you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and use google if you get stuck. You're always welcomed to ask questions in our Telegram group.
+[1] If you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and google around if you get stuck. You're always welcomed to ask questions in our Telegram group too!
 
 > (1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
 
