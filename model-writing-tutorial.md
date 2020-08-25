@@ -267,17 +267,21 @@ Type in the model description, click `save` and then hit `upload`. A new transac
 
 We're not done yet - recall that we're only generating a torrent file here, which includes metadata about the model file that enables its broadcast to other full nodes.
 
-To finish the upload, we now need to seed(upload/broadcast) the model file along with the torrent file (model file's metadata). In this example, we will use qBittorrent to do the seeding, but feel free to use whichever BitTorrent client you prefer.
+To finish the upload, we now need to seed(upload/broadcast) the model file along with the torrent file (model file's metadata). In this example, we will use [torrentf](https://github.com/CortexFoundation/torrentfs), a client based on the Anacrolix BitTorrent client.
 
-After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. We rename it as "torrent". We create a new folder named "test" in which we put the "torrent" file alongside the "data" folder containing the model files that we created above. The resulting directory should have this structure:
+After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. The file name should be something like `3145ad19228c1cd2d051314e72f26c1ce77b7f02.torrent`, the number is called `infohash`, make sure you save it and then rename this file to just `torrent` (make sure your operating system is not hiding the file name extension; i.e. make sure the file name is not `torrent.torrent`)
+
+Next, we create a new folder named `3145ad19228c1cd2d051314e72f26c1ce77b7f02` (the infohash) in which we put the `torrent` file alongside the `data` folder containing the model files that we created above. Once that is done, create a new directory called `test` and put the entire folder into it.
+
+The resulting directory should have this structure:
 
 ![seed](imgs/seed.png)
 
-Next, we open qBittorrent and drag this "test" folder to the window.
+Install Go with this guide:
 
-![torrent](imgs/torrentSetting.png)
+https://www.linode.com/docs/development/go/install-go-on-ubuntu/
 
-Configure as above (usually by default) and click "Create Torrent" and let it broadcast for ~6 hours to ensure the file propagate to the entire network.
+let it broadcast for ~6 hours to ensure the file propagate to the entire network.
 
 To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of relaying it.
 
