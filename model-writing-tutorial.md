@@ -1,4 +1,4 @@
-# Write & Upload AI Models to Cortex
+# Train & Upload AI Models to Cortex
 
 # Introduction
 
@@ -6,9 +6,9 @@ Cortex is currently the _only_ public blockchain that allows on-chain execution 
 
 **Why should I upload my model to Cortex?**
 
-You will get paid a small amount in CTXC each time your model is called in a smart contract. This award comes from part of miner's award and its aim is to incentivize ML developers to upload their models to the blockchain for the world to use.
+You will get paid a small amount in CTXC each time your model is called in a smart contract. This award comes from part of the miner's reward and its aim is to incentivize machine learning developers to upload their models to the blockchain for the world to use.
 
-A few vocabulary essential for the rest of the tutorial:
+A few essential vocabulary for the rest of the tutorial:
 
 **CVM**:
 
@@ -16,21 +16,21 @@ CVM, short for Cortex Virtual Machine, is the core of the Cortex blockchain. It 
 
 **CVM-Runtime**:
 
-An open-source deterministic machine learning framework written in C++. During runtime, the CVM (Cortex Virtual Machine) executes your models via CVM-Runtime. It is comparable to other frameworks such as MXNet, TensorFlow etc. with the important distinction that it is deterministic.
+An open-source deterministic machine learning framework written in C++. During runtime, the CVM (Cortex Virtual Machine) executes your models via CVM-Runtime. It is comparable to other frameworks such as MXNet, PyTorch, TensorFlow etc. with the important distinction that it is deterministic across different computing environments.
 
 **MRT**:
 
-MRT (written in Python) is one of the most important parts of CVM-Runtime. It quantizes and prepares your model for on-chain execution by CVM-Runtime. At the risk of oversimplification, MRT compresses and converts your model from floating point to integer only so that its execution is efficient and deterministic across different devices. The original research was endorsed by the official team of Amazon MXNet and the details can be read [here](https://medium.com/apache-mxnet/quantizing-neural-network-models-in-mxnet-for-strict-consistency-on-blockchain-b5c950674866).
+MRT (written in Python), short for Model Representation Tool, is one of the most important parts of CVM-Runtime. It quantizes and prepares your model for on-chain execution by CVM-Runtime. At the risk of oversimplification, MRT basically compresses and converts your model from floating point to integer-only so that its execution is efficient and deterministic across different devices. The original research was endorsed by the official team of Amazon MXNet and the details can be read [here](https://medium.com/apache-mxnet/quantizing-neural-network-models-in-mxnet-for-strict-consistency-on-blockchain-b5c950674866).
 
 In this tutorial, we will write a simple handwritten digit recognition model, convert it via MRT, and upload it to the Cortex blockchain so that it can be executed on-chain.
 
-We will work through be 4 main stages
+We will walk through 4 main stages:
 
-(1) Install CVM-Runtime (including MRT) and other dependencies.
+(1) Install CVM-Runtime and other dependencies.
 
 (2) Train a model using the MXNet framework.
 
-(3) Quantize the model trained in stage (2) using MRT.
+(3) Quantize the model trained in stage 2 using MRT.
 
 (4) Upload the model
 
@@ -40,9 +40,9 @@ We will work through be 4 main stages
 
 - A machine with GPU and CUDA installed properly for your Linux version.
 
-- Working knowledge of Linux/Unix programming.
+- Working knowledge of Linux programming.
 
-- Willingness to debug for yourself. While we seek to be as comprehensive as possible in this tutorial, we cannot cover all the idiosyncrasies of different machines and environments.
+- Willingness to debug for yourself. While we seek to be as comprehensive as possible in this tutorial, we cannot cover all the idiosyncrasies of different machines and environments. If you notice an issue in the documentation, feel free to open Github issues or pull requests.
 
 If you encounter any problems during the course, feel free to reach out to our core dev team via our [Telegram](https://t.me/CortexOfficialEN) or [Twitter](https://twitter.com/CTXCBlockchain/). We seek to constantly improve our documentation.
 
@@ -104,7 +104,7 @@ Run `$nvcc --version` to find out your CUDA version; make sure that it matches t
 
 Now run the commands below to install other dependencies needed for our model training and quantization later.
 
-```
+```bash
 pip3 install gluoncv
 
 make dep
@@ -120,7 +120,7 @@ python3 tests/mrt/train_mnist.py
 
 This Python program will train a handwritten digit model using MXNet. It will take a few minutes to run. Upon completion, the trained model is stored under `~/mrt_model` (you can alter this path in the `python/mrt/conf.py` file).
 
-If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here and always refer back to the source code `tests/mrt/train_mnist.py` when you're confused.
+If you don't care about the training process, proceed to the next stage. Otherwise, let's dig a bit into the model training process here. We only sketch the main ideas here - always refer back to the source code `tests/mrt/train_mnist.py` when you're confused.
 
 Now go ahead and open the `train_mnist.py` file. There are mostly 5 steps: (1) load the data (2) define the model architecture (3) randomly initialize the parameters & set the hyperparameters (4) start training (5) export the model
 
@@ -136,12 +136,11 @@ val_data = mx.gluon.data.vision.MNIST(
 batch_size = 4
 train_loader = mx.gluon.data.DataLoader(train_data, shuffle=True, batch_size=batch_size)
 val_loader = mx.gluon.data.DataLoader(val_data, shuffle=False, batch_size=batch_size)
-
 ```
 
 ### Step 2: Define the Model
 
-Our main interest here is the `train_mnist()` function. Notice by default, we offered 3 architectures that you can choose from (`dapp`, `lenet`, `mlp`). If you do not specify the architecture, the default is `dapp`.
+Our main interest here is the `train_mnist()` function. Notice by default, our code provides 3 architectures that you can choose from (`dapp`, `lenet`, `mlp`). If you do not specify the architecture, the default is `dapp`.
 
 ```python
 if version == 'dapp':
@@ -223,7 +222,7 @@ Again, here we only show the general structure of writing a program that trains 
 
 # Stage III: Quantize Your Model
 
-To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from Introduction that MRT is a tool originating from Cortex's research in on-chain inference of ML models - it helps us quantize ML models for deterministic inference on the blockchain.
+To prepare the model for the Cortex blockchain, we need to quantize it with MRT. Recall from **Introduction** that MRT is a tool originating from Cortex's research in on-chain inference of ML models - it helps us quantize ML models for deterministic inference on the blockchain.
 
 Execute the following command:
 
@@ -239,18 +238,18 @@ If you're training a custom model with your custom dataset, keep in mind that yo
 
 # Stage IV: Upload Your Model
 
-Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params` are your quantized models, stored under `~/mrt_model` (assuming you have not altered the path in the `python/mrt/conf.py` file). Create a separate folder named `data` and rename your `mnist_.json` to `symbol` and your `mnist_.params` to `params`. Run `ls -l` to check your operating system is not hiding the file name extension, as the full file names need to be correct for successful upload.
+Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params` are your quantized models, stored under `~/mrt_model` (assuming you have not altered the path in the `python/mrt/conf.py` file). Create a separate folder named `data` and rename your `mnist_.json` to `symbol` and your `mnist_.params` to `params`. Run `ls -l` to check your operating system is not hiding the file name extension, because the full file names need to be correct for successful upload.
 
 We're now ready to upload them! Like most PoW blockchains, transaction data are broadcast out, received by different full nodes and relayed to propagate the entire network; miners then include these transactions in a block later mined into the blockchain. In our case, model file (which is mostly matrices of weights) is the transaction data; to upload this model file, we broadcast it out by seeding it with a torrent file (which is a file including metadata about the model file that enables its reception and relay by other full nodes).
 
 In this final stage, we will have three main steps:
-(1) Notify on Cerebro the Cortex network about the model and generate a torrent.
+(1) Notify the Cortex network about the model and generate a torrent file on Cerebro.
 (2) Seed/broadcast this torrent
 (3) Push the upload progress on Cerebro.
 
 ### Step 1: Notify the Network & Generate Torrent
 
-Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file, which we will later use to broadcast (upload) the model file to the network. (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
+Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file, which we will later use to broadcast (upload) the model file to the network. (When you deploy to MainNet, you need to go to the MainNet [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
 
 In the menu bar at the top, find "upload" under "AI Contract"
 
@@ -338,7 +337,6 @@ If you want to learn how to call your model from a smart contract, we have a [tu
 
 Happy building!
 <br />
-<br/>
 <br/>
 
 # FAQ
