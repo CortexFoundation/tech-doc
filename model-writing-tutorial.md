@@ -286,11 +286,27 @@ The resulting directory should have this structure:
 
 ![seed](imgs/seed.png)
 
-Install Go with this guide:
+Now, if you don't have Go installed already, you can install Go with this [guide](https://www.linode.com/docs/development/go/install-go-on-ubuntu/).
 
-https://www.linode.com/docs/development/go/install-go-on-ubuntu/
+Now run
 
-let it broadcast for ~6 hours to ensure the file propagate to the entire network.
+```bash
+git clone https://github.com/CortexFoundation/torrentfs.git
+cd torrentfs
+make
+```
+
+Once you finish running the commands above, torrentfs should be compiled. Now we will go back to our root directory and run
+
+```bash
+torrentfs/build/bin/seeding -dataDir=test
+```
+
+Note that this command above is assuming that you have both `torrentfs` and `test` folders in the root directory. If you have a directory structure, make sure to adjust the command accordingly.
+
+Once you run this command, the seeding should start and there will be a message telling you that it is seeding.
+
+Let it seed/broadcast for ~6 hours to ensure the file propagate to the entire network.
 
 ### Step 3: Push the upload progress on Cerebro.
 
