@@ -243,13 +243,20 @@ Now the model is fully quantized. Specifically, `mnist_.json` and `mnist_.params
 
 We're now ready to upload them! Like most PoW blockchains, transaction data are broadcast out, received by different full nodes and relayed to propagate the entire network; miners then include these transactions in a block later mined into the blockchain. In our case, model file (which is mostly matrices of weights) is the transaction data; to upload this model file, we broadcast it out by seeding it with a torrent file (which is a file including metadata about the model file that enables its reception and relay by other full nodes).
 
+In this final stage, we will have three main steps:
+(1) Notify on Cerebro the Cortex network about the model and generate a torrent.
+(2) Seed/broadcast this torrent
+(3) Push the upload progress on Cerebro.
+
+### Step 1: Notify the Network & Generate Torrent
+
 Let's first go the [TestNet Cerebro Explorer](https://cerebro.test.cortexlabs.ai/) to generate a torrent file for our model file, which we will later use to broadcast (upload) the model file to the network. (When you deploy to MainNet, you need to go to the MainNet Cerebro Explorer [Cerebro Explorer](https://cerebro.cortexlabs.ai/))
 
 In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-Then choose `Fixed Point Model Data`. Recall our MRT has converted our ML model from float-point to (integer-only) fix-point for deterministic on-chain inference.
+Then choose `Fixed Point Model Data` - recall that our MRT has converted our ML model from float-point to (integer-only) fix-point for deterministic on-chain inference.
 
 ![fixedPoint](imgs/fixedPoint.png)
 
@@ -267,6 +274,8 @@ Type in the model description, click `save` and then hit `upload`. A new transac
 
 We're not done yet - recall that we're only generating a torrent file here, which includes metadata about the model file that enables its broadcast to other full nodes.
 
+### Step 2: Seed/broadcast this torrent
+
 To finish the upload, we now need to seed(upload/broadcast) the model file along with the torrent file (model file's metadata). In this example, we will use [torrentf](https://github.com/CortexFoundation/torrentfs), a client based on the Anacrolix BitTorrent client.
 
 After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. The file name should be something like `3145ad19228c1cd2d051314e72f26c1ce77b7f02.torrent`, the number is called `infohash`, make sure you save it and then rename this file to just `torrent` (make sure your operating system is not hiding the file name extension; i.e. make sure the file name is not `torrent.torrent`)
@@ -282,6 +291,8 @@ Install Go with this guide:
 https://www.linode.com/docs/development/go/install-go-on-ubuntu/
 
 let it broadcast for ~6 hours to ensure the file propagate to the entire network.
+
+### Step 3: Push the upload progress on Cerebro.
 
 To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of relaying it.
 
