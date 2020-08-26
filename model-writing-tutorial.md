@@ -255,37 +255,37 @@ In the menu bar at the top, find "upload" under "AI Contract"
 
 ![cerebroMenu](imgs/cerebroMenu.png)
 
-Then choose `Fixed Point Model Data` - recall that our MRT has converted our ML model from float-point to (integer-only) fix-point for deterministic on-chain inference.
+Then choose `Fixed Point Model Data` - recall that our MRT has converted our ML model from float-point to (integer-only) fixed-point for deterministic on-chain inference.
 
 ![fixedPoint](imgs/fixedPoint.png)
 
-Now select your two model files at the same time.
+Now select the two model files simultaneously.
 
 ![select](imgs/select.png)
 
 ![upload](imgs/upload.png)
 
-Change the input shape in the grey box `shape`. (Note: even if your input is of shape 1,28,28 you need to re-type it anyway. We will do this here if you've been following this tutorial, setting the input to 1,28,28 for our model)
+Change the input shape in the grey box `Shape`. (Note: even if your input is of shape 1,28,28 you need to re-type it anyway, and that's what you should do here if you've been following this tutorial.)
 
-Now make sure you've signed in to your TestNet wallet and don't have any other transaction confirmation windows open (or the new transaction confirmation window wouldn't pop out).
+Now make sure that you have signed into your TestNet wallet and don't have any other transaction confirmation windows open (otherwise the new transaction confirmation window will not pop out).
 
-Type in the model description, click `save` and then hit `upload`. A new transaction confirmation window will pop out. (If it doesn't, it's probably due to the two reasons above. Close your browser and try again). Click confirm.
+Type in the model description (any texts you wish), click `save` and then hit `upload`. A new transaction confirmation window will pop out. Click `confirm`.
 
-We're not done yet - recall that we're only generating a torrent file here, which includes metadata about the model file that enables its broadcast to other full nodes.
+We're not done yet - recall that we're only generating a torrent file here, which includes metadata about the model files that enable their broadcast to other full nodes.
 
-### Step 2: Seed/broadcast this torrent
+### Step 2: Seed/Broadcast This Torrent
 
-To finish the upload, we now need to seed(upload/broadcast) the model file along with the torrent file (model file's metadata). In this example, we will use [torrentf](https://github.com/CortexFoundation/torrentfs), a client based on the Anacrolix BitTorrent client.
+To finish the upload, we now proceed to seed (upload/broadcast) the model files along with the torrent file (the model files' metadata). In this example, we will use [torrentf](https://github.com/CortexFoundation/torrentfs), a client based on the Anacrolix BitTorrent client.
 
-After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. The file name should be something like `3145ad19228c1cd2d051314e72f26c1ce77b7f02.torrent`, the number is called `infohash`, make sure you save it and then rename this file to just `torrent` (make sure your operating system is not hiding the file name extension; i.e. make sure the file name is not `torrent.torrent`)
+After confirming the upload transaction on Cerebro above, a torrent file is generated and downloaded. The file name should be something like `3145ad19228c1cd2d051314e72f26c1ce77b7f02.torrent`. The alphanumeric string is called `infohash` - make sure you save this `infohash` and then rename the file to just `torrent` (make sure your operating system is not hiding the file name extension; i.e. make sure the file name is not `torrent.torrent`)
 
-Next, we create a new folder named `3145ad19228c1cd2d051314e72f26c1ce77b7f02` (the infohash) in which we put the `torrent` file alongside the `data` folder containing the model files that we created above. Once that is done, create a new directory called `test` and put the entire folder into it.
+Next, we create a new folder named `3145ad19228c1cd2d051314e72f26c1ce77b7f02` (same as the infohash) in which we put the `torrent` file alongside the `data` folder containing the two model files. Once that is done, create a new directory called `test` and put everything into it.
 
 The resulting directory should have this structure:
 
 ![seed](imgs/seed.png)
 
-Now, if you don't have Go installed already, you can install Go with this [guide](https://www.linode.com/docs/development/go/install-go-on-ubuntu/).
+Now, if you don't have Go installed already, install Go first. We recommend this [guide](https://www.linode.com/docs/development/go/install-go-on-ubuntu/), but make sure to install the latest stable version.
 
 Now run
 
@@ -301,15 +301,15 @@ Once you finish running the commands above, torrentfs should be compiled. Now we
 torrentfs/build/bin/seeding -dataDir=test
 ```
 
-Note that this command above is assuming that you have both `torrentfs` and `test` folders in the root directory. If you have a directory structure, make sure to adjust the command accordingly.
+Note that this command above is assuming that you have both `torrentfs` and `test` folders in the root directory. If you have a different directory structure, make sure to adjust the command accordingly.
 
 Once you run this command, the seeding should start and there will be a message telling you that it is seeding.
 
 Let it seed/broadcast for ~6 hours to ensure the file propagate to the entire network.
 
-### Step 3: Push the upload progress on Cerebro.
+### Step 3: Push the Upload Progress on Cerebro.
 
-To prevent spams, the Cortex protocol requires large model file uploaders to manually push the progress by consuming gas. We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of relaying it.
+To prevent spams, the Cortex protocol requires uploaders of large model files to manually push the upload progress by consuming Endorphin (similar to Gas on Ethereum). We need to go to the transaction page to manually send a few more transactions - otherwise, the full nodes will ignore our seed as spam instead of receiving or relaying it.
 
 To do this, let's go to the transaction page of the uploaded model. Open your wallet and find the transaction in which you uploaded the model.
 
@@ -319,19 +319,21 @@ Click on it to go to the transaction page.
 
 ![model-transaction](imgs/model-transaction.png)
 
-On the row "To", you will see "Model XXXXXXXX Created". Click on the XXXXXXXX which will take you to a new page where you can see:
+On the row "To", you will see "Model XXXXXXXX Created". Click on the XXXXXXXX, which will take you to a new page where you can see:
 
 ![push-progress](imgs/push-progress.png)
 
-Click on "send" to push the progress. Keep sending transactions until the upload is complete (when full nodes will stop ignoring your model files as spam), at which point you should see:
+Click on `send` to push the progress. Keep sending transactions until the upload is complete, at which point you should see:
 
 ![push-progress-success](imgs/push-progress-success.png)
 
-Now we're done! We just need to keep the qBittorrent client open and wait the rest of the ~6 hours for our model to propagate throughout the entire network.
+Only then, will the full nodes stop ignoring your model files as spam and start receiving or relaying your files.
+
+Now we're done! It's strongly recommended that you keep seeding for ~6 hours for the model to successfully propagate throughout the entire network.
 
 # Conclusion
 
-Voila! You have successfully trained a handwritten digit recognition model and uploaded it to the Cortex blockchain. Now anyone, anywhere in the world can see and use your model. Each time your model is called, you will get a small reward in CTXC (this amount comes from a share of the miner's award). Note that this amount will be added to the balance of the address from which you deployed the model, but reward of one single call to your model is small so you need to adjust the unit to Turing to be able to see it.
+Voila! You have successfully trained a handwritten digit recognition model and uploaded it to the Cortex blockchain. Now anyone, anywhere in the world can see and use your model. Each time your model is called, you will get a small reward in CTXC (this amount comes from a share of the miner's award). Note that this amount will be added to the balance of the address from which you deployed the model, but usually the reward for one single call to your model is small, so you will need to adjust the unit to Turing to be able to see it.
 
 If you want to learn how to call your model from a smart contract, we have a [tutorial](https://github.com/CortexFoundation/tech-doc/blob/master/hello-world-tutorial-contract.md) for that too.
 
@@ -343,18 +345,18 @@ Happy building!
 
 1. Relationship between CVM-Runtime, CVM and MRT?
 
-CVM is the virtual machine that executes code on the Cortex blockchain. CVM-Runtime, if you recall from earlier, is a machine learning framework responsible for on-chain execution of _ML models_. You can consider CVM-Runtime part of the CVM; in fact, it is perhaps the biggest innovation of CVM - before CVM, there was no known way to execute ML models on-chain. MRT is the part of CVM-Runtime that prepares regular float-point ML models (via quantization) for execution on-chain. You can learn more details from this tree graph [here](https://github.com/CortexFoundation/tech-doc/blob/master/cortex-guide.md).
+CVM is the virtual machine that executes code on the Cortex blockchain. CVM-Runtime, if you recall from earlier, is a machine learning framework responsible for on-chain execution of _ML models_. You can consider CVM-Runtime part of the CVM; in fact, it is perhaps the biggest innovation of CVM - before CVM, there was no known way to execute ML models on-chain. MRT is the part of CVM-Runtime that prepares regular float-point ML models for on-chain execution via quantization. You can learn more details from this tree graph [here](https://github.com/CortexFoundation/tech-doc/blob/master/cortex-guide.md).
 
 # Footnotes
 
-[1] If you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and google around if you get stuck. You're always welcomed to ask questions in our Telegram group too!
+[1] If you don't have access to a Linux system locally, you can open a Linux EC2 Instance on AWS and connect it to your editor via ssh. There will be a more detailed bonus tutorial on how to set this up - for now, here are the general steps to setting up a Linux system on AWS. Play around with it and use Google if you get stuck. You're always welcomed to ask questions in our Telegram group too!
 
 > (1) Go to AWS console, set up an EC20 Ubuntu (Ubuntu is one of the most user-friendly Linux systems) Instance.
 
 > (2) Start a folder named `.ssh`, put in your key pair and start a text file named `config`
 
 > (3) Open the command palette in Visual Studio code (`command + P` in Mac), type in
-> `> Remote-SSH: Connect to Host`
+> `> Remote-SSH: Connect to Host`.
 > Then choose `Add New SSH Host`.
 
 > Type in your address `ubuntu@your-aws-instance-public-ip`
