@@ -10,7 +10,7 @@ Secp256k1特指一条椭圆曲线：$y^2 = x^3 + 7$，这条椭圆曲线最早�
 
 椭圆曲线里面的基本元素不是数而是点（$x,y$），因此加法和乘法也需要重新定义。形象来说，两个点的加法，就是两个点的连线，与椭圆曲线的交点关于x轴的对称点。如下图所示，因为整个曲线关于x轴对称，所以结果也在椭圆曲线上。每个点加自己就是关于该点的切线与椭圆曲线的交点关于x轴的对称点。
 
-![Secp256k1](/Users/hunter/Projects/tech-doc/imgs/Secp256k1.png)
+![Secp256k1](imgs/Secp256k1.png)
 
 从一个点出发，不断加自己，可以遍历整个有限域，这个域就是循环域。出发点就是生成元 $G$。
 
@@ -40,7 +40,7 @@ zk-SNARK 通过对链下计算提供零知识证明能提升以太坊性能，�
 
 Baby jubjub 属于一类特殊的椭圆曲线，扭曲爱德华滋曲线：$ax^2 + y^2 = 1 + dx^2y^2$，如下图所示，这个曲线关于 x 轴和 y 轴都对称。
 
-![twistedEdwardsCurve](/Users/hunter/Projects/tech-doc/imgs/twistedEdwardsCurve.png)
+![twistedEdwardsCurve](imgs/twistedEdwardsCurve.png)
 
 参数如下：
 
