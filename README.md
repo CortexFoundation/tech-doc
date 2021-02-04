@@ -25,7 +25,7 @@ Cortex has built a blockchain whose virtual machine (CVM) utilizes the GPU, whic
 - [AI DApp](ai-dapps.md) - Instruction and tools for AI DApp development
 - [Endorphin](endorphin.md) - Explanation on the fee structure and mechanism
 - [Storage Layer](storage-layer.md) - Explanation on storage stack and how models/data are uploaded
-- [Wiki](http://ec2-18-191-10-249.us-east-2.compute.amazonaws.com:5000/) You can find json-rpc here
+- [Wiki](https://github.com/ghlai9665/cortex-wiki) You can find json-rpc here
 - [Cuckoo](https://github.com/CortexFoundation/PoolMiner/blob/dev/README.md) cuckoo cycle by cortex
 - [Resource list](https://github.com/chainrg/reading) some sources of blockchain
 
