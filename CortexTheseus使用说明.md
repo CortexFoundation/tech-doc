@@ -1,6 +1,6 @@
 # **Ubuntu**
 
-## 基础环境
+## 基础环境 (NVIDIA GeForce GTX 1080 Ti needed)
 
 #### `cmake 3.11.0+`
 
