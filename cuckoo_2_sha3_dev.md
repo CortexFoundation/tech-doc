@@ -16,14 +16,14 @@ and should be plugable.
 ## SHA3 Origin:
 > Zero-ahead nonce counting hashing is a classic mechanism for Crypto-Currency Mining, also a realization of Pow (power of work), which supports BlockChain Technique developing.
 Partly refer to [bitcoin-algorithm-explained](https://www.mycryptopedia.com/bitcoin-algorithm-explained/), SHA3 requires header hash, nonce, difficulty and timestamp to do next hashing.
-```
-Version – The version number of the Bitcoin software.
-Previous block hash – A reference to the hash of the previous block that was included on the blockchain.
-Merkle Root – A representative hash of all transactions that are included in the candidate block.
-Timestamp – A piece of information that references the time that the block was created.
-Target – The target hash threshold, this block’s header hash must be less than or equal to the target hash that has been set by the network.
-Nonce – The variable that is used in the proof of work mining process.
-```
+
+
+- Version – The version number of the Bitcoin software.
+- Previous block hash – A reference to the hash of the previous block that was included on the blockchain.
+- Merkle Root – A representative hash of all transactions that are included in the candidate block.
+- Timestamp – A piece of information that references the time that the block was created.
+- Target – The target hash threshold, this block’s header hash must be less than or equal to the target hash that has been set by the network.
+- Nonce – The variable that is used in the proof of work mining process.
 
 ## Difficulty Adjustment Algorithm
 > https://github.com/cortex/EIPs/issues/100.
@@ -50,16 +50,15 @@ Function Definition2:
 
 
 ## Difficulty Adjustment
-```
  calcDifficultySHA3 the difficulty adjustment algorithm. It returns
  the difficulty that a new block should have when created at time given the
  parent block's time and difficulty. The calculation uses the Byzantium rules,
  tuning x growing faster when difficulty growing positively
  The estimated interval is (interval + 2*interval)/2
-```
-1. replace cuckoo CalcDifficulty with calcDifficultySHA3.
-2. implement calcDifficultySHA3 as:
 
+1. replace cuckoo CalcDifficulty with calcDifficultySHA3.
+
+2. implement calcDifficultySHA3 as: 
 Function Deifinition:
 `func calcDifficultySHA3(time uint64, parent *types.Header, interval *big.Int) *big.Int`
 
@@ -99,7 +98,7 @@ a flag embedded into miner config, and infect the worker to only commit work wit
 ```
 #### send tx with js console attach
 ```bash
-./build/bin/cortex attach --dolores --datadir .cortex4/
+./build/bin/cortex attach --dolores --datadir .cortex2/
 ```
 ```js
 ctxc.sendTransaction({
