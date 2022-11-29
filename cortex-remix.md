@@ -15,3 +15,6 @@ The compilation module supports compilation and optimization of AI smart contrac
 ## Deployment
 
 The deployment module can help deploy AI smart contracts to the Cortex network with the support of Cortex Wallet, allowing for on-chain inference.
+
+## Recent Updates： 2022/11/29
+soljson has been updated to 0.8.15  .
